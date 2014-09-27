@@ -33,6 +33,15 @@
 #include "nm-connection.h"
 #include "nm-setting-private.h"
 
+struct _NMUtilsIPv6IfaceId {
+ 	union {
+ 		guint64 id;
+ 		guint8  id_u8[8];
+ 	};
+};
+
+#define NM_UTILS_IPV6_IFACE_ID_INIT { .id = 0 }
+
 gboolean nm_ethernet_address_is_valid (const struct ether_addr *test_addr);
 
 in_addr_t nm_utils_ip4_address_clear_host_address (in_addr_t addr, guint8 plen);
