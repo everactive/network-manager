@@ -1,6 +1,7 @@
 name: network-manager
 vendor: Loïc Minier <loic.minier@ubuntu.com>
 version: 1.0
+type: framework
 architecture:
  - amd64
 services:
