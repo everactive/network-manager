@@ -1,17 +1,17 @@
 name: network-manager
 vendor: Loïc Minier <loic.minier@ubuntu.com>
 version: 1.0
-architectures:
+architecture:
  - amd64
 services:
   networkmanager-service:
-    start: bin/network-manager
+    description: Network manager
+    start: bin/networkmanager
     security-template: unconfined
-    #bus-name: org.freedesktop.NetworkManager
-#binaries:
-#  nm-cli:
-#    exec: usr/bin/nmcli
-#    security-template: unconfined
+    bus-name: org.freedesktop.NetworkManager
+binaries:
+  nmcli:
+    exec: usr/bin/nmcli
 summary: Network management based on NeworkManager and ModemManager
 description: Network management of wired ethernet, WiFi and mobile data connection based on NetworkManager and ModemManager
 icon: icon.svg
@@ -30,4 +30,4 @@ parts:
   wrapper:
     type: copy
     files:
-      network-manager: bin/network-manager
+      networkmanager: bin/networkmanager
