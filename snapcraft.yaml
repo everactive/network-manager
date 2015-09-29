@@ -13,6 +13,7 @@ services:
 binaries:
   nmcli:
     exec: usr/bin/nmcli
+    security-template: unconfined
 summary: Network management based on NeworkManager and ModemManager
 description: Network management of wired ethernet, WiFi and mobile data connection based on NetworkManager and ModemManager
 icon: icon.svg
