@@ -4,7 +4,7 @@ set -e
 set -x
 
 # XXX hardcoded architecture
-export LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/NetworkManager${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export PATH="$SNAP_APP_PATH/usr/sbin${PATH:+:$PATH}"
 
 # TODO drop DEBUG
