@@ -19,17 +19,50 @@ description: Network management of wired ethernet, WiFi and mobile data connecti
 icon: icon.svg
 
 parts:
+  network-manager:
+    type: x-custom
+    after: [ubuntu-deps]
+    source: lp:~phablet-team/network-manager/nm-snap-vivid
+    source-type: bzr
+    custom-cmds:
+      - bzr bd
   ubuntu-deps:
     # noop to pull packages
     type: copy
     files: []
     stage-packages:
-      - network-manager
-  symlink-hacks:
-    type: make-project
-    source: .
-    after: [ubuntu-deps]
-  wrapper:
-    type: copy
-    files:
-      networkmanager: bin/networkmanager
+      - pkg-config
+      - intltool
+      - libdbus-glib-1-dev
+      - libdbus-1-dev
+      - libiw-dev
+      - libglib2.0-dev
+      - libnl-3-dev
+      - libnl-route-3-dev
+      - libnl-genl-3-dev
+      - ppp-dev
+      - libpolkit-gobject-1-dev
+      - libpolkit-agent-1-dev
+      - libgnutls-dev
+      - libgcrypt20-dev
+      - uuid-dev
+      - systemd
+      - libsystemd-dev
+      - libudev-dev
+      - libgudev-1.0-dev
+      - libgirepository1.0-dev
+      - libsoup2.4-dev
+      - gobject-introspection
+      - gtk-doc-tools
+      - perl
+      - libyaml-perl
+      - libglib2.0-doc
+      - libmm-glib-dev
+      - libndp-dev
+      - libreadline-dev
+      - valac
+      - dbus-test-runner
+      - libnewt-dev
+      - libbluetooth-dev
+      - python-dbus
+      - python-gi
