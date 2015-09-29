@@ -5,7 +5,7 @@ type: framework
 architecture:
  - amd64
 services:
-  networkmanager-service:
+  networkmanager:
     description: Network manager
     start: bin/networkmanager
     security-template: unconfined
@@ -21,48 +21,47 @@ icon: icon.svg
 parts:
   network-manager:
     type: x-custom
-    after: [ubuntu-deps]
-    source: lp:~phablet-team/network-manager/nm-snap-vivid
-    source-type: bzr
+    after: [dependencies]
     custom-cmds:
-      - bzr bd
-  ubuntu-deps:
+      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/network-manager_1.0.4-0ubuntu4~awe9_amd64.deb
+      - dpkg-deb -x network-manager*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
+  libnm-util:
+    type: x-custom
+    after: [dependencies]
+    custom-cmds:
+      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/libnm-util2_1.0.4-0ubuntu4~awe9_amd64.deb
+      - dpkg-deb -x libnm-util*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
+  dependencies:
     # noop to pull packages
     type: copy
     files: []
     stage-packages:
-      - pkg-config
-      - intltool
-      - libdbus-glib-1-dev
-      - libdbus-1-dev
-      - libiw-dev
-      - libglib2.0-dev
-      - libnl-3-dev
-      - libnl-route-3-dev
-      - libnl-genl-3-dev
-      - ppp-dev
-      - libpolkit-gobject-1-dev
-      - libpolkit-agent-1-dev
-      - libgnutls-dev
-      - libgcrypt20-dev
-      - uuid-dev
-      - systemd
-      - libsystemd-dev
-      - libudev-dev
-      - libgudev-1.0-dev
-      - libgirepository1.0-dev
-      - libsoup2.4-dev
-      - gobject-introspection
-      - gtk-doc-tools
-      - perl
-      - libyaml-perl
-      - libglib2.0-doc
-      - libmm-glib-dev
-      - libndp-dev
-      - libreadline-dev
-      - valac
-      - dbus-test-runner
-      - libnewt-dev
-      - libbluetooth-dev
-      - python-dbus
-      - python-gi
+      # package list generated manually by looking at the output of:
+      # $ apt-cache showpkg network-manager
+      - adduser
+      - libc6
+      - libdbus-1-3
+      - libdbus-glib-1-2
+      - libgcrypt20
+      - libglib2.0-0
+      - libgnutls-deb0-28
+      - libgudev-1.0-0
+      - libmm-glib0
+      - libndp0
+      - libnewt0.52
+      - libnl-3-200
+      - libnl-genl-3-200
+      - libnl-route-3-200
+      - libpolkit-agent-1-0
+      - libpolkit-gobject-1-0
+      - libreadline6
+      - libsoup2.4-1
+      - libsystemd0
+      - libuuid1
+      - init-system-helpers
+      - lsb-base
+      - dnsmasq-base
+      - udev
+      - isc-dhcp-client
+      - libpam-systemd
+      - policykit-1
