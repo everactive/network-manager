@@ -11,4 +11,11 @@ Build Instructions
 
 To build this project just use snapcraft::
 
-    $ snapcraft
+ $ snapcraft
+
+If you want to get the snap install for first tests in a KVM
+based environment you can just run
+
+ $ snapcraft run
+
+after the snap is successfully built.
