@@ -70,25 +70,8 @@ static GMainLoop *main_loop = NULL;
 static gboolean quit_early = FALSE;
 static sigset_t signal_set;
 
-const char* get_snap_app_data_path()
-{
-	static char *path = NULL;
-
-	if (!path)
-		path = getenv("SNAP_APP_DATA_PATH");
-
-	return path;
-}
-
-const char* get_snap_app_path()
-{
-	static char *path = NULL;
-
-	if (!path)
-		path = getenv("SNAP_APP_PATH");
-
-	return path;
-}
+extern const char* get_snap_app_path();
+extern const char* get_snap_app_data_path();
 
 void *signal_handling_thread (void *arg);
 /*

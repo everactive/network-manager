@@ -56,6 +56,8 @@ NetworkManager_LDADD = libNetworkManager.la $(top_builddir)/libgsystem.la $(LIBN
 noinst_LTLIBRARIES = libNetworkManager.la
 
 nm_sources = \
+	snappy.c \
+	\
 	config/nm-config.c \
 	config/nm-config.h \
 	config/nm-config-device.c \

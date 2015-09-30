@@ -45,9 +45,6 @@
 
 G_DEFINE_TYPE (NMDHCPDhclient, nm_dhcp_dhclient, NM_TYPE_DHCP_CLIENT)
 
-extern const char* get_snap_app_path();
-extern const char* get_snap_app_data_path();
-
 #define NM_DHCP_DHCLIENT_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DHCP_DHCLIENT, NMDHCPDhclientPrivate))
 
 typedef struct {
@@ -102,14 +99,9 @@ get_dhclient_leasefile (const char *iface,
                         char **out_preferred_path)
 {
 	char *path;
-	char *base_path = NMSTATEDIR;
-
-	if (get_snap_app_data_path())
-		base_path = get_snap_app_data_path();
 
 	/* /var/lib/NetworkManager is the preferred leasefile path */
-	path = g_strdup_printf ("%s/dhclient%s-%s-%s.lease",
-	                        base_path,
+	path = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s-%s.lease",
 	                        ipv6 ? "6" : "",
 	                        uuid,
 	                        iface);
@@ -284,16 +276,12 @@ create_dhclient_config (const char *iface,
                         const char *hostname)
 {
 	char *orig = NULL, *new = NULL;
-	char *base_path = NMSTATEDIR;
 	GError *error = NULL;
 	gboolean success = FALSE;
 
 	g_return_val_if_fail (iface != NULL, NULL);
 
-	if (get_snap_app_data_path())
-		base_path = get_snap_app_data_path();
-
-	new = g_strdup_printf ("%s/dhclient%s-%s.conf", base_path, is_ip6 ? "6" : "", iface);
+	new = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s.conf", is_ip6 ? "6" : "", iface);
 	nm_log_dbg (is_ip6 ? LOGD_DHCP6 : LOGD_DHCP4,
 	            "(%s): creating composite dhclient config %s",
 	            iface, new);
@@ -617,15 +605,8 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *self)
 {
 	NMDHCPDhclientPrivate *priv = NM_DHCP_DHCLIENT_GET_PRIVATE (self);
 	const char **iter = &def_leasefiles[0];
-	char *dhclient_path = DHCLIENT_PATH;
-
-	if (get_snap_app_path())
-		dhclient_path = g_strdup_printf("%s/sbin/dhclient", get_snap_app_path());
 
 	priv->path = nm_dhcp_dhclient_get_path (DHCLIENT_PATH);
-
-	if (get_snap_app_data_path())
-		g_free(dhclient_path);
 
 	while (iter && *iter) {
 		if (g_file_test (*iter, G_FILE_TEST_EXISTS)) {
