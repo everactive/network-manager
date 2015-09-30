@@ -327,7 +327,7 @@ Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
  	nm_log_dbg (is_ip6 ? LOGD_DHCP6 : LOGD_DHCP4,
  	            "(%s): creating composite dhclient config %s",
  	            iface, new);
-@@ -605,9 +617,16 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *s
+@@ -605,8 +617,15 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *s
  {
  	NMDHCPDhclientPrivate *priv = NM_DHCP_DHCLIENT_GET_PRIVATE (self);
  	const char **iter = &def_leasefiles[0];
@@ -335,12 +335,12 @@ Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
 +
 +	if (get_snap_app_path())
 +		dhclient_path = g_strdup_printf("%s/sbin/dhclient", get_snap_app_path());
++
++	priv->path = nm_dhcp_dhclient_get_path (dhclient_path);
  
- 	priv->path = nm_dhcp_dhclient_get_path (DHCLIENT_PATH);
- 
+-	priv->path = nm_dhcp_dhclient_get_path (DHCLIENT_PATH);
 +	if (get_snap_app_data_path())
 +		g_free(dhclient_path);
-+
+ 
  	while (iter && *iter) {
  		if (g_file_test (*iter, G_FILE_TEST_EXISTS)) {
- 			priv->def_leasefile = *iter;

@@ -622,7 +622,7 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *self)
 	if (get_snap_app_path())
 		dhclient_path = g_strdup_printf("%s/sbin/dhclient", get_snap_app_path());
 
-	priv->path = nm_dhcp_dhclient_get_path (DHCLIENT_PATH);
+	priv->path = nm_dhcp_dhclient_get_path (dhclient_path);
 
 	if (get_snap_app_data_path())
 		g_free(dhclient_path);
