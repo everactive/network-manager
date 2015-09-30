@@ -1,5 +1,5 @@
 name: network-manager
-vendor: Loïc Minier <loic.minier@ubuntu.com>
+vendor: Loïc Minier <loic.minier@ubuntu.com>, Tony Espy <tony.espy@canonical.com>, Simon Fels <simon.fels@canonical.com>
 version: 0.2
 type: framework
 architecture:
@@ -13,6 +13,21 @@ binaries:
   nmcli:
     exec: usr/bin/nmcli
     security-template: unconfined
+  nm-online:
+    exec: usr/bin/nm-online
+    security-template: unconfined
+  nmtui:
+    exec: usr/bin/nmtui
+    security-template: unconfined
+  nmtui-connect:
+    exec: usr/bin/nmtui-connect
+    security-template: unconfined
+  nmtui-hostname:
+    exec: usr/bin/nmtui-hostname
+    security-template: unconfined
+  nmtui-edit:
+    exec: usr/bin/nmtui-edit
+    security-template: unconfined
 summary: Network management based on NeworkManager and ModemManager
 description: Network management of wired ethernet, WiFi and mobile data connection based on NetworkManager and ModemManager
 icon: icon.svg
@@ -22,19 +37,86 @@ parts:
     type: copy
     files:
       networkmanager: bin/networkmanager
+
   network-manager:
     type: x-custom
-    after: [dependencies]
+
+    # NOTE: The branch below is a unpacked debian source package
+    # generated from lp:~phablet-team/network-manager/enable-snappy-15.04
+    # which helps to improve turn around times during development.
+    source: https://git.launchpad.net/~morphis/+git/nm-enable-snappy-15.04
+    source-type: git
+
+    # We're using the debian packaging infrastructure here to build
+    # the binaries instead of doing every step manually here.
     custom-cmds:
-      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/network-manager_0.9.10.0-4ubuntu15.1.7%7Esnap1_amd64.deb
-      - dpkg-deb -x network-manager*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
-  libnm-util:
-    type: x-custom
-    after: [dependencies]
-    custom-cmds:
-      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/libnm-util2_0.9.10.0-4ubuntu15.1.7%7Esnap1_amd64.deb
-      - dpkg-deb -x libnm-util*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
-  dependencies:
+      - debian/rules build
+      - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
+
+    # We only stage build time dependencies here. All runtime ones
+    # are staged with the rdepends part
+    stage-packages:
+      - pkg-config
+      - intltool
+      - libdbus-glib-1-dev
+      - libdbus-1-dev
+      - libiw-dev
+      - libglib2.0-dev
+      - libnl-3-dev
+      - libnl-route-3-dev
+      - libnl-genl-3-dev
+      - ppp-dev
+      - libpolkit-gobject-1-dev
+      - libgnutls28-dev
+      - libgcrypt11-dev
+      - uuid-dev
+      - libsystemd-dev
+      - libudev-dev
+      - libgudev-1.0-dev
+      - libgirepository1.0-dev
+      - gobject-introspection
+      - libsoup2.4-dev
+      - gtk-doc-tools
+      - libglib2.0-doc
+      - libmm-glib-dev
+      - libndp-dev
+      - libreadline-dev
+      - libnewt-dev
+      - valac
+      - dbus-test-runner
+      - isc-dhcp-client
+      - python-dbus
+      - python-gi
+
+    # We don't want that anything from our staged packages ends
+    # up in the resulting snap. We only need them to build
+    # NetworkManager. All runtime dependencies are pulled in with
+    # the rdepends part below. The only left items specified
+    # here are the results of the network manager build.
+    filesets:
+      binaries:
+        - usr/bin/nm-online
+        - usr/bin/nmcli
+        - usr/bin/nmtui
+        - usr/bin/nmtui-connect
+        - usr/bin/nmtui-hostname
+        - usr/bin/nmtui-edit
+        - usr/lib/x86_64-linux-gnu/NetworkManager
+        - usr/lib/pppd/2.4.6/nm-pppd-plugin.so
+        - usr/lib/NetworkManager
+        - usr/sbin/NetworkManager
+      configs:
+        - usr/share/dbus-1/system-services/org.freedesktop.nm_dispatcher.service
+        - usr/share/polkit-1/rules.d/60-network-manager.rules
+        - usr/share/polkit-1/actions/org.freedesktop.NetworkManager.policy
+        - etc/dnsmasq.d/network-manager
+        - etc/NetworkManager
+        - var/lib/polkit-1/localauthority/10-vendor.d/org.freedesktop.NetworkManager.pkla
+    snap:
+      - $binaries
+      - $configs
+
+  rdepends:
     # noop to pull packages
     type: copy
     files: []
