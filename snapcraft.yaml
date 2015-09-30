@@ -32,6 +32,12 @@ binaries:
   iw:
     exec: sbin/iw
     security-template: unconfined
+  iwlist:
+    exec: sbin/iwlist
+    security-template: unconfined
+  iwlist:
+    exec: sbin/iwlist
+    security-template: unconfined
   iwconfig:
     exec: sbin/iwconfig
     security-template: unconfined
@@ -61,6 +67,12 @@ parts:
     custom-cmds:
       - debian/rules build
       - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
+      - mkdir -p $SNAPCRAFT_PART_INSTALL_DIR/etc/NetworkManager/dispatcher.d
+      - install -m 755 debian/network-manager-dispatcher.script $SNAPCRAFT_PART_INSTALL_DIR/etc/NetworkManager/dispatcher.d/01ifupdown
+      - mkdir -p $SNAPCRAFT_PART_INSTALL_DIR/usr/lib/NetworkManager
+      - install -m 755 debian/ifblacklist_migrate.sh $SNAPCRAFT_PART_INSTALL_DIR/usr/lib/NetworkManager
+      - mkdir -p $SNAPCRAFT_PART_INSTALL_DIR/etc/dnsmasq.d/network-manager
+      - install -m 644 debian/network-manager.dnsmasq $SNAPCRAFT_PART_INSTALL_DIR/etc/dnsmasq.d/network-manager
 
     # We only stage build time dependencies here. All runtime ones
     # are staged with the rdepends part
