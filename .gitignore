@@ -1,0 +1,6 @@
+image/
+*.snap
+parts/
+plugins/__pycache__/
+snap/
+stage
