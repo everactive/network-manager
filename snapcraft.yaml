@@ -37,7 +37,7 @@ parts:
   common:
     type: copy
     files:
-      networkmanager: bin/networkmanager
+      bin/networkmanager: bin/networkmanager
       config/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
 
   network-manager:
