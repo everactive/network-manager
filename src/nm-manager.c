@@ -157,6 +157,8 @@ static gboolean find_master (NMManager *self,
 
 static void nm_manager_update_state (NMManager *manager);
 
+extern const char* get_snap_app_path();
+
 #define SSD_POKE_INTERVAL 120
 #define ORIGDEV_TAG "originating-device"
 
@@ -2023,12 +2025,12 @@ load_device_factories (NMManager *self)
 	const char *item;
 	char *path;
 	GSList *iter;
-	const char *snap_data_path;
 	char *plugin_dir;
 
 	/* FIXME: hard-coded arch path... */
-	if (snap_data_path = getenv ("SNAP_APP_DATA_PATH"))
-		plugin_dir = g_strconcat (snap_data_path, "/var/lib/x86_64-linux-gnu/NetworkManager/", NULL);
+	if (get_snap_app_path())
+		plugin_dir = g_strdup_printf("%s/usr/lib/x86_64-linux-gnu/NetworkManager/",
+					     get_snap_app_path());
 	else
 		plugin_dir = g_strdup (NMPLUGINDIR);
 
@@ -2058,7 +2060,11 @@ load_device_factories (NMManager *self)
 		if (g_str_has_suffix (item, ".la"))
 			continue;
 
-		path = g_module_build_path (NMPLUGINDIR, item);
+		if (get_snap_app_path())
+			path = g_module_build_path(plugin_dir, item);
+		else
+			path = g_module_build_path (NMPLUGINDIR, item);
+
 		g_assert (path);
 		plugin = g_module_open (path, G_MODULE_BIND_LOCAL);
 		g_free (path);
