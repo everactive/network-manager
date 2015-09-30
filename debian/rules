@@ -41,6 +41,7 @@ override_dh_auto_configure:
 		--enable-vala \
 		--enable-bluez4 \
 		--with-tests \
+		--enable-qt=no
 
 # Disabled for snappy:
 # --enable-polkit
