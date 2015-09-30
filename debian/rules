@@ -31,7 +31,7 @@ override_dh_auto_configure:
 		--with-nmtui \
 		--disable-more-warnings \
 		--disable-modify-system \
-		--enable-polkit \
+		--disable-polkit \
 		--enable-ppp \
 		--enable-ifupdown \
 		--enable-introspection \
@@ -41,6 +41,9 @@ override_dh_auto_configure:
 		--enable-vala \
 		--enable-bluez4 \
 		--with-tests \
+
+# Disabled for snappy:
+# --enable-polkit
 
 override_dh_install:
 	rm -vf $(CURDIR)/debian/tmp/etc/init.d/NetworkManager
