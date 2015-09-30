@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+set -x
+
+# XXX hardcoded architecture
+LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/ModemManager" \
+$SNAP_APP_PATH/usr/sbin/ModemManager \
+    --log-level=DEBUG \
+    --no-daemon \
+    "$@"

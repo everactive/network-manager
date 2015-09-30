@@ -10,6 +10,11 @@ services:
     start: bin/networkmanager
     security-template: unconfined
     bus-name: org.freedesktop.NetworkManager
+  modemmanager:
+    description: Modem manager
+    start: bin/modemmanager
+    security-template: unconfined
+    bus-name: org.freedesktop.ModemManager
 binaries:
   nmcli:
     exec: usr/bin/nmcli
@@ -50,6 +55,7 @@ parts:
     type: copy
     files:
       bin/networkmanager: bin/networkmanager
+      bin/modemmanager: bin/modemmanager
       config/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
 
   network-manager:
