@@ -43,6 +43,7 @@
 #include "nm-dbus-glib-types.h"
 #include "nm-glib-compat.h"
 #include "NetworkManagerUtils.h"
+#include "snappy.h"
 
 GQuark
 nm_dhcp_manager_error_quark (void)
@@ -63,7 +64,7 @@ nm_dhcp_manager_error_quark (void)
 #define PRIV_SOCK_TAG  "dhcp"
 
 /* default to installed helper, but can be modified for testing */
-const char *nm_dhcp_helper_path = LIBEXECDIR "/nm-dhcp-helper";
+char *nm_dhcp_helper_path = NULL;
 
 typedef GSList * (*GetLeaseConfigFunc) (const char *iface, const char *uuid, gboolean ipv6);
 
@@ -287,7 +288,7 @@ dis_connection_cb (NMDBusManager *mgr,
 static GType
 get_client_type (const char *client, GError **error)
 {
-	const char *dhclient_path = NULL;
+	char *dhclient_path = NULL;
 	const char *dhcpcd_path = NULL;
 
 	/* If a client was disabled at build-time, its *_PATH define will be
@@ -301,8 +302,10 @@ get_client_type (const char *client, GError **error)
 		dhcpcd_path = nm_dhcp_dhcpcd_get_path (DHCPCD_PATH);
 
 	if (!client) {
-		if (dhclient_path)
+		if (dhclient_path) {
+			g_free (dhclient_path);
 			return NM_TYPE_DHCP_DHCLIENT;
+		}
 		else if (dhcpcd_path)
 			return NM_TYPE_DHCP_DHCPCD;
 		else {
@@ -320,6 +323,8 @@ get_client_type (const char *client, GError **error)
 			                     _("'dhclient' could be found."));
 			return G_TYPE_INVALID;
 		}
+
+		g_free (dhclient_path);
 		return NM_TYPE_DHCP_DHCLIENT;
 	}
 
@@ -585,6 +590,11 @@ nm_dhcp_manager_init (NMDHCPManager *self)
 	DBusGConnection *g_connection;
 #endif
 
+	if (get_snap_app_path ())
+		nm_dhcp_helper_path = g_strdup_printf ("%s%s/nm-dhcp-helper", get_snap_app_path(), LIBEXECDIR);
+	else
+		nm_dhcp_helper_path = g_strdup_printf ("%s/nm-dhcp-helper", LIBEXECDIR);
+
 	/* Maps DBusGConnection :: DBusGProxy */
 	priv->proxies = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
 
@@ -662,6 +672,9 @@ dispose (GObject *object)
 	}
 	if (priv->proxy)
 		g_object_unref (priv->proxy);
+
+	if (nm_dhcp_helper_path)
+		g_free (nm_dhcp_helper_path);
 
 	G_OBJECT_CLASS (nm_dhcp_manager_parent_class)->dispose (object);
 }

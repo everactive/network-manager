@@ -49,14 +49,14 @@ G_DEFINE_TYPE (NMDHCPDhclient, nm_dhcp_dhclient, NM_TYPE_DHCP_CLIENT)
 #define NM_DHCP_DHCLIENT_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DHCP_DHCLIENT, NMDHCPDhclientPrivate))
 
 typedef struct {
-	const char *path;
+	char *path;
 	char *conf_file;
 	const char *def_leasefile;
 	char *lease_file;
 	char *pid_file;
 } NMDHCPDhclientPrivate;
 
-const char *
+char *
 nm_dhcp_dhclient_get_path (const char *try_first)
 {
 	static const char *dhclient_paths[] = {
@@ -69,7 +69,7 @@ nm_dhcp_dhclient_get_path (const char *try_first)
 	const char **path = dhclient_paths;
 
 	if (strlen (try_first) && g_file_test (try_first, G_FILE_TEST_EXISTS))
-		return try_first;
+		return g_strdup (try_first);
 
 	while (*path != NULL) {
 		if (g_file_test (*path, G_FILE_TEST_EXISTS))
@@ -77,7 +77,7 @@ nm_dhcp_dhclient_get_path (const char *try_first)
 		path++;
 	}
 
-	return *path;
+	return g_strdup(*path);
 }
 
 /**
@@ -103,7 +103,7 @@ get_dhclient_leasefile (const char *iface,
 	char *base_path = NMSTATEDIR;
 
 	if (get_snap_app_data_path())
-		base_path = get_snap_app_data_path();
+		base_path = (char *) get_snap_app_data_path();
 
 	/* /var/lib/NetworkManager is the preferred leasefile path */
 	path = g_strdup_printf ("%s/dhclient%s-%s-%s.lease",
@@ -289,7 +289,7 @@ create_dhclient_config (const char *iface,
 	g_return_val_if_fail (iface != NULL, NULL);
 
 	if (get_snap_app_data_path())
-		base_path = get_snap_app_data_path();
+		base_path = (char *) get_snap_app_data_path();
 
 	new = g_strdup_printf ("%s/dhclient%s-%s.conf", base_path, is_ip6 ? "6" : "", iface);
 	nm_log_dbg (is_ip6 ? LOGD_DHCP6 : LOGD_DHCP4,
@@ -363,9 +363,15 @@ dhclient_start (NMDHCPClient *client,
 		return -1;
 	}
 
-	pid_file = g_strdup_printf ("/run/sendsigs.omit.d/network-manager.dhclient%s-%s.pid",
-		                        ipv6 ? "6" : "",
-		                        iface);
+	if (get_snap_app_data_path())
+		pid_file = g_strdup_printf ("%s/run/sendsigs.omit.d/network-manager.dhclient%s-%s.pid",
+		                            get_snap_app_data_path(),
+		                            ipv6 ? "6" : "",
+		                            iface);
+	else
+		pid_file = g_strdup_printf ("/run/sendsigs.omit.d/network-manager.dhclient%s-%s.pid",
+		                            ipv6 ? "6" : "",
+		                            iface);
 
 	/* Kill any existing dhclient from the pidfile */
 	binary_name = g_path_get_basename (priv->path);
@@ -418,6 +424,8 @@ dhclient_start (NMDHCPClient *client,
 		}
 	}
 
+	nm_log_warn (log_domain, "dhclient: building argv array; binary path is: %s", priv->path);
+
 	argv = g_ptr_array_new ();
 	g_ptr_array_add (argv, (gpointer) priv->path);
 
@@ -439,17 +447,22 @@ dhclient_start (NMDHCPClient *client,
 	g_ptr_array_add (argv, (gpointer) "-sf");	/* Set script file */
 	g_ptr_array_add (argv, (gpointer) nm_dhcp_helper_path);
 
+	nm_log_warn (log_domain, "dhclient: building argv array; -sf <helper_path> is: %s", nm_dhcp_helper_path);
+
 	if (pid_file) {
 		g_ptr_array_add (argv, (gpointer) "-pf");	/* Set pid file */
 		g_ptr_array_add (argv, (gpointer) pid_file);
+		nm_log_warn (log_domain, "dhclient: building argv array; -pf <pid_file> is: %s", pid_file);
 	}
 
 	g_ptr_array_add (argv, (gpointer) "-lf");	/* Set lease file */
 	g_ptr_array_add (argv, (gpointer) priv->lease_file);
+	nm_log_warn (log_domain, "dhclient: building argv array; -lf <lease_file> is: %s", priv->lease_file);
 
 	if (priv->conf_file) {
 		g_ptr_array_add (argv, (gpointer) "-cf");	/* Set interface config file */
 		g_ptr_array_add (argv, (gpointer) priv->conf_file);
+		nm_log_warn (log_domain, "dhclient: building argv array; -cf <config_file> is: %s", priv->conf_file);
 	}
 
 	/* Usually the system bus address is well-known; but if it's supposed
@@ -622,8 +635,8 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *self)
 
 	priv->path = nm_dhcp_dhclient_get_path (dhclient_path);
 
-	if (get_snap_app_data_path())
-		g_free(dhclient_path);
+	if (get_snap_app_path ())
+		g_free (dhclient_path);
 
 	while (iter && *iter) {
 		if (g_file_test (*iter, G_FILE_TEST_EXISTS)) {
@@ -646,6 +659,7 @@ dispose (GObject *object)
 	g_free (priv->pid_file);
 	g_free (priv->conf_file);
 	g_free (priv->lease_file);
+	g_free (priv->path);
 
 	G_OBJECT_CLASS (nm_dhcp_dhclient_parent_class)->dispose (object);
 }
