@@ -68,3 +68,7 @@ class CustomPlugin(snapcraft.BasePlugin):
             return True
 
         return dispatch_cmd_list(make_cmd_list(self.options.custom_cmds))
+
+    def pull(self):
+        """Pull the source of a custom snap part."""
+        return self.handle_source_options()
