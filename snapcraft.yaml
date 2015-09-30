@@ -1,6 +1,6 @@
 name: network-manager
 vendor: Loïc Minier <loic.minier@ubuntu.com>
-version: 1.0
+version: 0.2
 type: framework
 architecture:
  - amd64
@@ -26,13 +26,15 @@ parts:
     type: x-custom
     after: [dependencies]
     custom-cmds:
-      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/network-manager_1.0.4-0ubuntu4~awe9_amd64.deb
+#     - wget https://launchpad.net/~citrain-ppa-service/+archive/ubuntu/stable-phone-overlay/+files/network-manager_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb .
+      - cp /home/espy/Downloads/network-manager_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb .
       - dpkg-deb -x network-manager*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
   libnm-util:
     type: x-custom
     after: [dependencies]
     custom-cmds:
-      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/libnm-util2_1.0.4-0ubuntu4~awe9_amd64.deb
+#     - wget --waitretry=30 https://launchpad.net/~citrain-ppa-service/+archive/ubuntu/stable-phone-overlay/+files/libnm-util2_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb
+      - cp /home/espy/Downloads/libnm-util2_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb .
       - dpkg-deb -x libnm-util*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
   dependencies:
     # noop to pull packages
@@ -63,8 +65,10 @@ parts:
       - libuuid1
       - init-system-helpers
       - lsb-base
+      - modemmanager
       - dnsmasq-base
       - udev
       - isc-dhcp-client
+      - iputils-arping
       - libpam-systemd
       - policykit-1
