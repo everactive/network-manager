@@ -26,15 +26,13 @@ parts:
     type: x-custom
     after: [dependencies]
     custom-cmds:
-#     - wget https://launchpad.net/~citrain-ppa-service/+archive/ubuntu/stable-phone-overlay/+files/network-manager_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb .
-      - cp /home/espy/Downloads/network-manager_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb .
+      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/network-manager_0.9.10.0-4ubuntu15.1.7%7Esnap1_amd64.deb
       - dpkg-deb -x network-manager*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
   libnm-util:
     type: x-custom
     after: [dependencies]
     custom-cmds:
-#     - wget --waitretry=30 https://launchpad.net/~citrain-ppa-service/+archive/ubuntu/stable-phone-overlay/+files/libnm-util2_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb
-      - cp /home/espy/Downloads/libnm-util2_0.9.10.0-4ubuntu15.1.7~snap1_amd64.deb .
+      - wget https://launchpad.net/~awe/+archive/ubuntu/ppa/+files/libnm-util2_0.9.10.0-4ubuntu15.1.7%7Esnap1_amd64.deb
       - dpkg-deb -x libnm-util*_amd64.deb $SNAPCRAFT_PART_INSTALL_DIR
   dependencies:
     # noop to pull packages
