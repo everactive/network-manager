@@ -106,6 +106,7 @@ parts:
         - usr/lib/pppd/2.4.6/nm-pppd-plugin.so
         - usr/lib/NetworkManager
         - usr/sbin/NetworkManager
+        - usr/lib/x86_64-linux-gnu/libnm-*
       configs:
         - usr/share/dbus-1/system-services/org.freedesktop.nm_dispatcher.service
         - usr/share/polkit-1/actions/org.freedesktop.NetworkManager.policy
