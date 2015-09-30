@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+	<interface name="com.canonical.NMOfono">
+		<annotation name="org.freedesktop.DBus.GLib.CSymbol" value="nm_ofono"/>
+		<method name="ReadImsiContexts">
+			<tp:docstring>
+			Read new context for a modem device.
+			</tp:docstring>
+			<arg name="imsi" type="s" direction="in">
+				<tp:docstring>
+				IMSI of the active modem for new context.
+				</tp:docstring>
+			</arg>
+		</method>
+	</interface>
+</node>

@@ -1,0 +1,643 @@
+Index: network-manager-0.9.10.0/src/settings/plugins/ofono/plugin.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/settings/plugins/ofono/plugin.c
++++ network-manager-0.9.10.0/src/settings/plugins/ofono/plugin.c
+@@ -110,63 +110,93 @@ ignore_cb ()
+ {
+ }
+ 
+-static
+-SCPluginOfono_parse_contexts (SCPluginOfono *self, GSList *contexts)
++static void
++SCPluginOfono_parse_contexts (SCPluginOfono *self, GSList *contexts, const char *imsi)
+ {
+ 	SCPluginOfonoPrivate *priv = SC_PLUGIN_OFONO_GET_PRIVATE (self);
+ 	GSList *list;
++	GList *keys;
+ 	NMOfonoConnection *exported;
+-	NMSettingConnection *setting;
++	gboolean found = FALSE;
++	char *uuid;
++	GHashTable *uuids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+ 
+-	list = contexts;
+-	while (list) {
++	for (list = contexts; list; list = list->next) {
+ 		GHashTable *context = (GHashTable *) list->data;
+-		const char *id, *type, *name, *imsi;
+-		char *idstr, *uuid;
++		const char *id, *name;
++		char *idstr;
+ 
+ 		id = g_hash_table_lookup (context, "ID");
+-		imsi = g_hash_table_lookup (context, "IMSI");
+-		type = g_hash_table_lookup (context, "Type");
+ 		name = g_hash_table_lookup (context, "Name");
+ 
+ 		idstr = g_strconcat ("/", imsi, "/", id, NULL);
+ 		uuid = nm_utils_uuid_generate_from_string (idstr);
+ 		g_free (idstr);
+ 
+-		if(!strcmp ("internet", type)) {
+-			nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: found %s context '%s' (%s)",
+-			             type, name, id);
++		g_hash_table_insert (uuids, g_strdup (uuid), NULL);
+ 
+-			/* Ignore any connection for this block that was previously found */
++		nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: found internet context '%s' (%s)",
++		             name, id);
++
++		/* Ignore any connection for this block that was previously found */
++		exported = g_hash_table_lookup (priv->connections, uuid);
++		if (exported) {
++			nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: context '%s' (%s) already exported",
++			             name, id);
++			continue;
++		}
++
++		/* add the new connection */
++		exported = nm_ofono_connection_new (context);
++		nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: adding %s (%s) to connections", name, uuid);
++
++		/* FIXME: investigate if it's possible to set directly via g_object_* method...  */
++		/* Lower disabled timer to 30s */
++		nm_settings_connection_set_reset_retries_timeout (NM_SETTINGS_CONNECTION (exported), 30);
++
++		g_hash_table_insert (priv->connections, g_strdup (uuid), exported);
++		g_signal_emit_by_name (self, NM_SYSTEM_CONFIG_INTERFACE_CONNECTION_ADDED, exported);
++	}
++
++	/*
++	 * Remove any connections that have the same IMSI
++	 * as our current list of contexts *and* are not
++	 * present in our current list ( ie. the context
++	 * has been deleted ).
++	 *
++	 * TODO: note, could this be handled directly by
++	 * the imsi_monitor???  If so, it gets rid of
++	 * this loop.  Doing so would require caching
++	 * the preferred contexts for each IMSI
++	 */
++
++	for (keys = g_hash_table_get_keys (priv->connections); keys; keys = keys->next) {
++		char **context_id;
++		const char *idstr;
++
++		uuid = (char *) keys->data;
++
++		found = g_hash_table_lookup_extended (uuids, uuid, NULL, NULL);
++		if (!found) {
+ 			exported = g_hash_table_lookup (priv->connections, uuid);
+-			if (exported) {
+-				/*
+-				PLUGIN_PRINT("SCPlugin-Ofono", "deleting %s from connections", id);
+-				nm_settings_connection_delete (NM_SETTINGS_CONNECTION (exported), ignore_cb, NULL);
+-				g_hash_table_remove (priv->connections, id);
+-				*/
+-				goto next;
+-			}
++			idstr = nm_connection_get_id (NM_CONNECTION (exported));
++			context_id = g_strsplit (idstr, "/", 0);
++			g_assert (context_id[2]);
+ 
+-			/* add the new connection */
+-			exported = nm_ofono_connection_new (context);
++			if (g_strcmp0(imsi, context_id[1]) == 0) {
+ 
+-			/* Lower disabled timer to 30s */
+-			nm_settings_connection_set_reset_retries_timeout (NM_SETTINGS_CONNECTION (exported), 30);
++				nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: removing (%s) from connections", idstr);
+ 
+-			setting = nm_connection_get_setting_connection (NM_CONNECTION (exported));
+-			g_object_set (setting, NM_SETTING_CONNECTION_AUTOCONNECT, TRUE, NULL);
+-			if (exported) {
+-				nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: adding %s (%s) to connections",
+-				             name, uuid);
+-				g_hash_table_insert (priv->connections, g_strdup (uuid), exported);
+-				g_signal_emit_by_name (self, NM_SYSTEM_CONFIG_INTERFACE_CONNECTION_ADDED, exported);
++				nm_settings_connection_signal_remove (NM_SETTINGS_CONNECTION (exported));
++				g_hash_table_remove (priv->connections, uuid);
+ 			}
++
++			g_strfreev(context_id);
+ 		}
+-	next:
+-		list = list->next;
+-		g_free (uuid);
+ 	}
++
++	if (uuids)
++		g_hash_table_destroy (uuids);
+ }
+ 
+ static gboolean
+@@ -174,6 +204,7 @@ nm_ofono_read_imsi_contexts (SCPluginOfo
+ {
+ 	SCPluginOfonoPrivate *priv = SC_PLUGIN_OFONO_GET_PRIVATE (self);
+ 	GHashTable *context;
++	GHashTable *pref_context = NULL;
+ 	GSList *contexts = NULL;
+ 	GDir *imsi_dir;
+ 	const char *file;
+@@ -223,20 +254,61 @@ nm_ofono_read_imsi_contexts (SCPluginOfo
+ 				continue;
+ 			}
+ 
+-			nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: add context for %s", imsi);
+ 			context = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+ 			g_hash_table_insert (context, "ID", g_strdup (groups[i]));
+ 			g_hash_table_insert (context, "IMSI", g_strdup (imsi));
+ 
+ 			for (j = 0; keys[j]; j++) {
+-				g_hash_table_insert (context, keys[j],
+-			       	                     g_key_file_get_string (keyfile, groups[i], keys[j], NULL));
+-				nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: add property '%s': %s",
+-				             keys[j],
+-				             (char *) g_hash_table_lookup (context, keys[j]));
++				gchar *prop_value;
++
++				prop_value = g_key_file_get_string (keyfile, groups[i], keys[j], NULL);
++
++				/*
++				 * FIXME: if file notify fires multiple times when 'pref' is updated,
++				 * need someway to cache the new 'Pref' value, so subequent file changes
++				 * are just ignored if 'Pref' hasn't changed...
++				 *
++				 * Note, when 'Preferred' gets set to 'true', this also causes the
++				 * 'Settings' and 'Active' properties to be updated, which triggers
++				 * the imsi_monitor and causes this function to be called also.
++				 */
++
++				if (!strcmp (keys[j], "Type") && strcmp (prop_value, "internet")) {
++
++					g_hash_table_destroy (context);
++					g_free (prop_value);
++
++					goto next_context;
++				}
++
++				/* If more than one context is 'Preferred', first one wins... */
++				if (!strcmp (keys[j], "Preferred") && !strcmp (prop_value, "true")) {
++					nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: '%s' - Preferred = 'true'", groups[i]);
++
++					pref_context = context;
++				}
++
++				if (!strcmp (keys[j], "Name"))
++					g_hash_table_insert (context, "Name", prop_value);
+ 			}
+ 
+-			contexts = g_slist_append (contexts, context);
++			if (pref_context != NULL) {
++				/*
++				 * Preferred context found, free any contexts created
++				 * before the preferred context was found.
++				 */
++
++				if (contexts) {
++					g_slist_free_full (contexts, (GDestroyNotify) g_hash_table_destroy);
++					contexts = NULL;
++				}
++
++				contexts = g_slist_append (contexts, pref_context);
++				break;
++			} else
++				contexts = g_slist_append (contexts, context);
++next_context:
++			;
+ 		}
+ 
+ 		g_key_file_free (keyfile);
+@@ -244,7 +316,7 @@ nm_ofono_read_imsi_contexts (SCPluginOfo
+ 
+ 	g_free (imsi_path);
+ 
+-	SCPluginOfono_parse_contexts (self, contexts);
++	SCPluginOfono_parse_contexts (self, contexts, imsi);
+ 
+ 	if (contexts) {
+ 		g_slist_free_full (contexts, (GDestroyNotify) g_hash_table_destroy);
+@@ -282,7 +354,7 @@ SCPluginOfono_should_ignore_imsi (const
+ 	return FALSE;
+ }
+ 
+-static
++static void
+ ofono_imsi_changed (GFileMonitor *monitor,
+                    GFile *file,
+                    GFile *other_file,
+@@ -298,8 +370,8 @@ ofono_imsi_changed (GFileMonitor *monito
+ 	path = g_file_get_path (file);
+ 
+ 	/* If this isn't about a "gprs" file we don't want to know */
+-        if (g_strrstr (path, "gprs") == NULL)
+-                goto out_imsi;
++	if (g_strrstr (path, "gprs") == NULL)
++		goto out_imsi;
+ 
+ 	switch (event_type) {
+ 		case G_FILE_MONITOR_EVENT_DELETED:
+@@ -320,6 +392,7 @@ ofono_imsi_changed (GFileMonitor *monito
+ 			g_free (imsi);
+ 			break;
+ 		default:
++			nm_log_warn (LOGD_SETTINGS, "SCPluginOfono: unexpected event type '%d'", (int) event_type);
+ 			break;
+ 	}
+ 
+@@ -329,7 +402,64 @@ out_imsi:
+ 	return;
+ }
+ 
+-static
++static gboolean
++add_gprs_file_watch(SCPluginOfono *self, const char *imsi)
++{
++
++	SCPluginOfonoPrivate *priv = SC_PLUGIN_OFONO_GET_PRIVATE (self);
++	gchar *path;
++	GFile *config_path;
++	GFileMonitor *imsi_monitor;
++	gulong id;
++	const char *id_str;
++	gboolean result = FALSE;
++
++	id_str = g_hash_table_lookup (priv->ofono_imsi_monitor_ids, imsi);
++	if (id_str != NULL) {
++		nm_log_warn (LOGD_SETTINGS, "SCPluginOfono: file_monitor already exists for %s", imsi);
++		goto done;
++	}
++
++	path = g_strdup_printf (OFONO_CONFIG_DIR "/%s", imsi);
++
++	/*
++	 * TODO: an optimiztion woudld be to add only monitor the directory
++	 * if /<IMSI>/gprs doesn't yet exist.  Otherwise, a regular file
++	 * monitor could be used, cutting down the times NM gets notified
++	 * for changes to other ofono settings files...
++	 */
++
++	config_path = g_file_new_for_path (path);
++	imsi_monitor = g_file_monitor_directory (config_path,
++	                                         G_FILE_MONITOR_NONE,
++	                                         NULL, NULL);
++
++	g_object_unref (config_path);
++	g_free (path);
++
++	if (imsi_monitor) {
++		nm_log_info (LOGD_SETTINGS, "SCPluginOfono: watching file changes for %s", imsi);
++		id = g_signal_connect (imsi_monitor, "changed",
++		                       G_CALLBACK (ofono_imsi_changed),
++		                       self);
++		g_hash_table_insert (priv->ofono_imsi_monitors,
++		                     g_strdup (imsi),
++		                     g_object_ref (imsi_monitor));
++		g_hash_table_insert (priv->ofono_imsi_monitor_ids,
++		                     g_strdup (imsi),
++		                     (gpointer) id);
++		g_object_unref (imsi_monitor);
++
++		result = TRUE;
++	} else {
++		nm_log_warn (LOGD_SETTINGS, "SCPluginOfono: couldn't create file monitor for %s.", imsi);
++	}
++
++done:
++	return result;
++}
++
++static void
+ ofono_dir_changed (GFileMonitor *monitor,
+                    GFile *file,
+                    GFile *other_file,
+@@ -346,7 +476,8 @@ ofono_dir_changed (GFileMonitor *monitor
+ 	GError *error = NULL;
+ 
+ 	imsi = g_file_get_basename (file);
+-        if (SCPluginOfono_should_ignore_imsi (imsi))
++
++	if (SCPluginOfono_should_ignore_imsi (imsi))
+ 		goto out_ofono;
+ 
+ 	switch (event_type) {
+@@ -369,38 +500,22 @@ ofono_dir_changed (GFileMonitor *monitor
+ 		case G_FILE_MONITOR_EVENT_CREATED:
+ 		case G_FILE_MONITOR_EVENT_CHANGED:
+ 		case G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
+-			/* Add watches for the IMSI directories too */
+-			if (g_strrstr (imsi, "gprs") == NULL) {
+-				path = g_strdup_printf (OFONO_CONFIG_DIR "/%s", imsi);
+-				config_path = g_file_new_for_path (path);
+-				imsi_monitor = g_file_monitor_directory (config_path,
+-				                                         G_FILE_MONITOR_NONE,
+-				                                         NULL, NULL);
+-				g_object_unref (config_path);
+-				g_free (path);
+-
+-				if (imsi_monitor) {
+-					nm_log_warn (LOGD_SETTINGS, "SCPluginOfono: watching file changes for %s", imsi);
+-					id = g_signal_connect (monitor, "changed",
+-					                       G_CALLBACK (ofono_imsi_changed),
+-					                       self);
+-					g_hash_table_insert (priv->ofono_imsi_monitors,
+-					                     g_strdup (imsi),
+-					                     g_object_ref (imsi_monitor));
+-					g_hash_table_insert (priv->ofono_imsi_monitor_ids,
+-					                     g_strdup (imsi),
+-					                     (gpointer) id);
+-					g_object_unref (imsi_monitor);
+-				}
+-			}
+ 
+-			res = nm_ofono_read_imsi_contexts (self, imsi, &error);
++			/* TODO: is this a valid test?  If only new dirs and/or files created in
++			 * the config dir ( /var/lib/ofono ), and not it's sub-dirs, then if
++			 * there's no trailing slash, then it's a new IMSI directory.  Also
++			 * determine if writes to gprs files cause CHANGE events in the top-level
++			 * dir.... */
+ 
+-			if (!res) {
+-				nm_log_warn (LOGD_SETTINGS, "SCPluginOfono: an error occured while reading "
+-				             "contexts for IMSI %s", imsi);
++			/* Add watches for the IMSI directories too */
++			if ((g_strrstr (imsi, "gprs") == NULL) && add_gprs_file_watch (self, imsi)) {
++
++					res = nm_ofono_read_imsi_contexts (self, imsi, &error);
++					if (!res)
++						nm_log_warn (LOGD_SETTINGS, "SCPluginOfono: an error occured while reading "
++				        		     "contexts for IMSI %s", imsi);
+ 			}
+-			break;
++
+ 		default:
+ 			break;
+ 	}
+@@ -411,7 +526,7 @@ out_ofono:
+ 	return;
+ }
+ 
+-static
++static void
+ SCPluginOfono_read_context_files (SCPluginOfono *self)
+ {
+ 	SCPluginOfonoPrivate *priv = SC_PLUGIN_OFONO_GET_PRIVATE (self);
+@@ -422,33 +537,46 @@ SCPluginOfono_read_context_files (SCPlug
+ 	gboolean res = FALSE;
+ 	GError *error = NULL;
+ 
+-	config = g_dir_open (OFONO_CONFIG_DIR, 0, NULL);
+-	while ((imsi = g_dir_read_name (config)) != NULL) {
+-
+-		if (SCPluginOfono_should_ignore_imsi (imsi))
+-			continue;
+-
+-		res = nm_ofono_read_imsi_contexts (self, imsi, &error);
+-
+-		if (error && error->message)
+-			nm_log_warn (LOGD_SETTINGS, "SCPlugin-Ofono: %s", error->message);
+-	}
+-
+ 	/* Hook up a GFileMonitor to watch for new context directories being created.
+ 	 * This is in case ofono's provisioning plugin hasn't run when NM and the
+ 	 * ofono settings plugin are started, and to pick up new created contexts.
+ 	 */
+ 	config_path = g_file_new_for_path (OFONO_CONFIG_DIR);
+ 	if (g_file_query_exists (config_path, NULL)) {
++
+ 		monitor = g_file_monitor_directory (config_path, G_FILE_MONITOR_NONE,
+ 		                                    NULL, NULL);
+ 
+ 		if (monitor) {
+-			priv->ofono_dir_monitor_id = g_signal_connect (monitor, "changed",
+-			                                               G_CALLBACK (ofono_dir_changed), self);
+ 			priv->ofono_dir_monitor = monitor;
++		} else {
++			nm_log_warn (LOGD_SETTINGS, "SCPlugin-Ofono: couldn't create dir monitor");
++			goto done;
+ 		}
++	} else {
++		nm_log_warn (LOGD_SETTINGS, "SCPlugin-Ofono: file doesn't exist: /var/lib/ofono");
++		goto done;
++		return;
++ 	}
++
++	config = g_dir_open (OFONO_CONFIG_DIR, 0, NULL);
++	while ((imsi = g_dir_read_name (config)) != NULL) {
++
++		if (SCPluginOfono_should_ignore_imsi (imsi))
++			continue;
++
++		res = nm_ofono_read_imsi_contexts (self, imsi, &error);
++
++		if (error && error->message)
++			nm_log_warn (LOGD_SETTINGS, "SCPlugin-Ofono: %s", error->message);
++
++		/* TODO: could go into read_imsi_contexts? */
++		add_gprs_file_watch(self, imsi);
+ 	}
++
++	priv->ofono_dir_monitor_id = g_signal_connect (monitor, "changed",
++	                                               G_CALLBACK (ofono_dir_changed), self);
++done:
+ 	g_object_unref (config_path);
+ }
+ 
+Index: network-manager-0.9.10.0/src/devices/wwan/nm-modem-ofono.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/devices/wwan/nm-modem-ofono.c
++++ network-manager-0.9.10.0/src/devices/wwan/nm-modem-ofono.c
+@@ -88,8 +88,6 @@ ip_string_to_network_address (const gcha
+ 	return TRUE;
+ }
+ 
+-static void ofono_read_contexts (NMModemOfono *self);
+-
+ static void
+ update_modem_state (NMModemOfono *self)
+ {
+@@ -156,9 +154,9 @@ disconnect_done (DBusGProxy *proxy, DBus
+ 		g_clear_error (&error);
+ 	}
+ 
+-	simple_disconnect_context_free (ctx);
+-
+ 	update_modem_state (self);
++
++	simple_disconnect_context_free (ctx);
+ }
+ 
+ static void
+@@ -253,7 +251,7 @@ get_ofono_conn_manager_properties_done (
+ 		nm_log_warn (LOGD_MB, "failed get connection manager properties: (%d) %s",
+ 		             error ? error->code : -1,
+ 		             error && error->message ? error->message : "(unknown)");
+-		return;
++		goto done;
+ 	}
+ 
+ 	value = g_hash_table_lookup (properties, "Attached");
+@@ -264,6 +262,9 @@ get_ofono_conn_manager_properties_done (
+ 		nm_log_warn (LOGD_MB, "(%s): %s: no 'Attached' property found",
+ 		             nm_modem_get_path (NM_MODEM (self)),
+ 		             __func__);
++
++done:
++	g_object_unref (self);
+ }
+ 
+ static void
+@@ -281,7 +282,7 @@ ofono_conn_properties_changed (DBusGProx
+ }
+ 
+ static void
+-handle_subscriber_identity(NMModemOfono *self, GValue *value)
++handle_subscriber_identity (NMModemOfono *self, GValue *value)
+ {
+ 	NMModemOfonoPrivate *priv = NM_MODEM_OFONO_GET_PRIVATE (self);
+ 	const gchar *value_str = g_value_get_string (value);
+@@ -299,7 +300,6 @@ handle_subscriber_identity(NMModemOfono
+ 			nm_log_info (LOGD_MB, "GetPropsDone: 'SubscriberIdentity': %s", priv->imsi);
+ 
+ 			priv->imsi = g_strdup (value_str);
+-			ofono_read_contexts (self);
+ 			update_modem_state (self);
+ 		}
+ 	}
+@@ -325,7 +325,7 @@ get_ofono_sim_properties_done (DBusGProx
+ 		nm_log_warn (LOGD_MB, "failed to get ofono SimManager properties: (%d) %s",
+ 		             error ? error->code : -1,
+ 		             error && error->message ? error->message : "(unknown)");
+-		return;
++		goto done;
+ 	}
+ 
+ 	value = g_hash_table_lookup (properties, "SubscriberIdentity");
+@@ -336,6 +336,10 @@ get_ofono_sim_properties_done (DBusGProx
+ 	} else {
+ 		nm_log_warn (LOGD_MB, "failed to get SimManager:'SubscriberIdentity'; not found");
+ 	}
++
++done:
++	g_object_unref (self);
++
+ }
+ 
+ static void
+@@ -351,55 +355,6 @@ ofono_sim_properties_changed (DBusGProxy
+ }
+ 
+ static void
+-ofono_read_imsi_contexts_done (DBusGProxy *proxy,
+-                               DBusGProxyCall *call_id,
+-                               gpointer user_data)
+-{
+-	NMModemOfono *self = NM_MODEM_OFONO (user_data);
+-	NMModemOfonoPrivate *priv = NM_MODEM_OFONO_GET_PRIVATE (self);
+-	GError *error = NULL;
+-
+-	nm_log_dbg (LOGD_MB, "in %s", __func__);
+-
+-	if (!dbus_g_proxy_end_call (proxy, call_id, &error, G_TYPE_INVALID)) {
+-		nm_log_warn (LOGD_MB, "failed notify settings plugin of a new context: (%d) %s",
+-		             error ? error->code : -1,
+-		             error && error->message ? error->message : "(unknown)");
+-		return;
+-	}
+-}
+-
+-static void
+-ofono_read_contexts (NMModemOfono *self)
+-{
+-	NMModemOfonoPrivate *priv = NM_MODEM_OFONO_GET_PRIVATE (self);
+-	DBusGConnection *bus;
+-	DBusGProxy *settings_proxy;
+-
+-	nm_log_dbg (LOGD_MB, "in %s", __func__);
+-
+-	if (priv->imsi == NULL) {
+-		nm_log_warn (LOGD_MB, "No 'SubscriberIdentity', so can't read ofono GPRS contexts");
+-		return;
+-	}
+-
+-	bus = nm_dbus_manager_get_connection (priv->dbus_mgr);
+-	settings_proxy = dbus_g_proxy_new_for_name (bus,
+-	                                            "com.canonical.NMOfono",
+-	                                            "/com/canonical/NMOfono",
+-	                                            "com.canonical.NMOfono");
+-
+-	if (settings_proxy)
+-		dbus_g_proxy_begin_call_with_timeout (settings_proxy,
+-		                                      "ReadImsiContexts", ofono_read_imsi_contexts_done,
+-		                                      self, NULL, 20000,
+-		                                      G_TYPE_STRING, priv->imsi,
+-		                                      G_TYPE_INVALID);
+-	else
+-		nm_log_warn (LOGD_MB, "could not get proxy to the oFono Settings plugin.");
+-}
+-
+-static void
+ ofono_context_added (DBusGProxy *proxy,
+                      const char *path,
+                      GValue *prop,
+@@ -408,8 +363,6 @@ ofono_context_added (DBusGProxy *proxy,
+ 	NMModemOfono *self = NM_MODEM_OFONO (user_data);
+ 
+ 	nm_log_dbg (LOGD_MB, "context %s added", path);
+-
+-	ofono_read_contexts (self);
+ }
+ 
+ static void
+@@ -479,7 +432,7 @@ ofono_properties_changed (DBusGProxy *pr
+ 				dbus_g_proxy_begin_call_with_timeout (priv->simmanager_proxy,
+ 				                                      "GetProperties",
+ 				                                      get_ofono_sim_properties_done,
+-				                                      self, NULL, 20000,
++				                                      g_object_ref (self), NULL, 20000,
+ 				                                      G_TYPE_INVALID);
+ 			}
+ 		} else if (priv->simmanager_proxy) {
+@@ -508,7 +461,7 @@ ofono_properties_changed (DBusGProxy *pr
+ 					dbus_g_proxy_begin_call_with_timeout (priv->connman_proxy,
+ 					                                      "GetProperties",
+ 					                                      get_ofono_conn_manager_properties_done,
+-					                                      self, NULL, 20000,
++					                                      g_object_ref (self), NULL, 20000,
+ 					                                      G_TYPE_INVALID);
+ 
+ 					dbus_g_proxy_add_signal (priv->connman_proxy, "PropertyChanged",
+@@ -802,7 +755,7 @@ do_context_activate (NMModemOfono *self,
+ 
+ 	dbus_g_proxy_begin_call_with_timeout (priv->context_proxy,
+ 	                                      "SetProperty", stage1_prepare_done,
+-	                                      self, NULL, 40000,
++	                                      g_object_ref (self), NULL, 40000,
+ 	                                      G_TYPE_STRING, "Active",
+ 	                                      G_TYPE_VALUE, &value,
+ 	                                      G_TYPE_INVALID);
+@@ -865,6 +818,8 @@ stage1_enable_done (DBusGProxy *proxy, D
+ 
+ 		g_error_free (error);
+ 	}
++
++	g_object_unref (self);
+ }
+ 
+ static GHashTable *
+Index: network-manager-0.9.10.0/src/settings/plugins/ofono/parser.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/settings/plugins/ofono/parser.c
++++ network-manager-0.9.10.0/src/settings/plugins/ofono/parser.c
+@@ -90,10 +90,9 @@ ofono_update_connection_from_context (NM
+ 	g_object_set (s_gsm, NM_SETTING_GSM_NUMBER, "*99#", NULL);
+ 
+ 	nm_log_info (LOGD_SETTINGS, "SCPlugin-Ofono: "
+-	             "update_connection_setting_from_context: name:%s, path:%s, type:%s, id:%s, uuid: %s",
++	             "update_connection_setting_from_context: name:%s, path:%s, id:%s, uuid: %s",
+ 	             (char *) g_hash_table_lookup (context, "Name"),
+ 	             (char *) g_hash_table_lookup (context, "ID"),
+-	             (char *) g_hash_table_lookup (context, "Type"),
+ 	             idstr, nm_setting_connection_get_uuid (s_con));
+ 
+ 	success = nm_connection_verify (connection, error);

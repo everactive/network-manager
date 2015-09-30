@@ -1,0 +1,168 @@
+Index: network-manager-0.9.10.0/src/main.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/main.c
++++ network-manager-0.9.10.0/src/main.c
+@@ -355,6 +355,8 @@ main (int argc, char *argv[])
+ 	GError *error = NULL;
+ 	gboolean wrote_pidfile = FALSE;
+ 	char *bad_domains = NULL;
++	const char *snap_data_path;
++	char *run_dir, *state_dir;
+ 
+ 	GOptionEntry options[] = {
+ 		{ "version", 'V', 0, G_OPTION_ARG_NONE, &show_version, N_("Print NetworkManager version and exit"), NULL },
+@@ -476,18 +478,37 @@ main (int argc, char *argv[])
+ 		g_free (path);
+ 	}
+ 
++	if (snap_data_path = getenv ("SNAP_APP_DATA_PATH")) {
++		run_dir = g_strconcat (snap_data_path, "/var/run/", NULL);
++		state_dir = g_strconcat (snap_data_path, "/var/lib/", NULL);
++	} else {
++		run_dir = g_strdup (NMRUNDIR);
++		state_dir = g_strdup (NMSTATEDIR);
++	}
++
++	nm_log_warn (LOGD_CORE, "run_dir: '%s", run_dir);
++	nm_log_warn (LOGD_CORE, "state_dir: '%s", state_dir);
++
+ 	/* Setup runtime directory */
+-	if (g_mkdir_with_parents (NMRUNDIR, 0755) != 0) {
+-		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", NMRUNDIR, strerror (errno));
++	if (g_mkdir_with_parents (run_dir, 0755) != 0) {
++		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", run_dir, strerror (errno));
++		g_free (run_dir);
++		g_free (state_dir);
+ 		exit (1);
+ 	}
+ 
++	g_free (run_dir);
++
+ 	/* Ensure state directory exists */
+-	if (g_mkdir_with_parents (NMSTATEDIR, 0755) != 0) {
+-		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", NMSTATEDIR, strerror (errno));
++	if (g_mkdir_with_parents (state_dir, 0755) != 0) {
++		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", state_dir, strerror (errno));
++		g_free (run_dir);
++		g_free (state_dir);
+ 		exit (1);
+ 	}
+ 
++	g_free (state_dir);
++
+ 	pidfile = pidfile ? pidfile : g_strdup (NM_DEFAULT_PID_FILE);
+ 	state_file = state_file ? state_file : g_strdup (NM_DEFAULT_SYSTEM_STATE_FILE);
+ 
+@@ -593,6 +614,7 @@ main (int argc, char *argv[])
+ 
+ 	/* Initialize our DBus service & connection */
+ 	dbus_mgr = nm_dbus_manager_get ();
++
+ 	g_assert (dbus_mgr != NULL);
+ 
+ 	vpn_manager = nm_vpn_manager_get ();
+Index: network-manager-0.9.10.0/src/settings/nm-settings.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/settings/nm-settings.c
++++ network-manager-0.9.10.0/src/settings/nm-settings.c
+@@ -615,6 +615,16 @@ load_plugins (NMSettings *self, const ch
+ 	const char **iter;
+ 	gboolean keyfile_added = FALSE;
+ 	gboolean success = TRUE;
++	const char *snap_data_path;
++	char *plugin_dir;
++
++	/* FIXME: hard-coded arch path... */
++	if (snap_data_path = getenv ("SNAP_APP_DATA_PATH"))
++		plugin_dir = g_strconcat (snap_data_path, "/var/lib/x86_64-linux-gnu/NetworkManager/", NULL);
++	else
++		plugin_dir = g_strdup (NMPLUGINDIR);
++
++   	nm_log_warn (LOGD_HW, "load_plugins: about to open plugin directory %s", plugin_dir);
+ 
+ 	for (iter = plugins; iter && *iter; iter++) {
+ 		GModule *plugin;
+@@ -645,7 +655,7 @@ load_plugins (NMSettings *self, const ch
+ 		}
+ 
+ 		full_name = g_strdup_printf ("nm-settings-plugin-%s", pname);
+-		path = g_module_build_path (NMPLUGINDIR, full_name);
++		path = g_module_build_path (plugin_dir, full_name);
+ 
+ 		plugin = g_module_open (path, G_MODULE_BIND_LOCAL);
+ 		if (!plugin) {
+@@ -690,6 +700,9 @@ load_plugins (NMSettings *self, const ch
+ 
+ 	g_slist_free_full (list, g_object_unref);
+ 
++	if (plugin_dir)
++		g_free (plugin_dir);
++
+ 	return success;
+ }
+ 
+@@ -1754,6 +1767,8 @@ nm_settings_new (GError **error)
+ 	NMSettings *self;
+ 	NMSettingsPrivate *priv;
+ 
++   	nm_log_warn (LOGD_HW, "nm_settings_new");
++
+ 	self = g_object_new (NM_TYPE_SETTINGS, NULL);
+ 
+ 	priv = NM_SETTINGS_GET_PRIVATE (self);
+@@ -1761,8 +1776,11 @@ nm_settings_new (GError **error)
+ 	priv->config = nm_config_get ();
+ 	priv->dbus_mgr = nm_dbus_manager_get ();
+ 
++   	nm_log_warn (LOGD_HW, "nm_settings_new: about to call load_plugins");
++
+ 	/* Load the plugins; fail if a plugin is not found. */
+ 	if (!load_plugins (self, nm_config_get_plugins (priv->config), error)) {
++		fprintf (stderr, "load settings plugins - FAILED!!!\n");
+ 		g_object_unref (self);
+ 		return NULL;
+ 	}
+Index: network-manager-0.9.10.0/src/nm-manager.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/nm-manager.c
++++ network-manager-0.9.10.0/src/nm-manager.c
+@@ -2023,13 +2023,25 @@ load_device_factories (NMManager *self)
+ 	const char *item;
+ 	char *path;
+ 	GSList *iter;
++	const char *snap_data_path;
++	char *plugin_dir;
++
++	/* FIXME: hard-coded arch path... */
++	if (snap_data_path = getenv ("SNAP_APP_DATA_PATH"))
++		plugin_dir = g_strconcat (snap_data_path, "/var/lib/x86_64-linux-gnu/NetworkManager/", NULL);
++	else
++		plugin_dir = g_strdup (NMPLUGINDIR);
++
++   	nm_log_warn (LOGD_HW, "load_device_factories: about to open plugin directory %s", plugin_dir);
++
++	dir = g_dir_open (plugin_dir, 0, &error);
+ 
+-	dir = g_dir_open (NMPLUGINDIR, 0, &error);
+ 	if (!dir) {
+ 		nm_log_warn (LOGD_HW, "Failed to open plugin directory %s: %s",
+-		             NMPLUGINDIR,
++		             plugin_dir,
+ 		             (error && error->message) ? error->message : "(unknown)");
+ 		g_clear_error (&error);
++		g_free (plugin_dir);
+ 		return;
+ 	}
+ 
+@@ -2114,8 +2126,11 @@ load_device_factories (NMManager *self)
+ 		nm_log_info (LOGD_HW, "Loaded device plugin: %s", g_module_name (plugin));
+ 	};
+ 	g_dir_close (dir);
++	g_free (plugin_dir);
+ 
+ 	priv->factories = g_slist_reverse (priv->factories);
++
++   	nm_log_warn (LOGD_HW, "load_device_factories: all done");
+ }
+ 
+ static void

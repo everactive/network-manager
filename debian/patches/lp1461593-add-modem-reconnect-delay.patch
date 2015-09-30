@@ -1,0 +1,247 @@
+Index: network-manager-0.9.10.0/src/devices/wwan/nm-modem-ofono.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/devices/wwan/nm-modem-ofono.c
++++ network-manager-0.9.10.0/src/devices/wwan/nm-modem-ofono.c
+@@ -107,7 +107,8 @@ disconnect_done (DBusGProxy *proxy, DBus
+ {
+ 	SimpleDisconnectContext *ctx = (SimpleDisconnectContext*) user_data;
+ 	NMModemOfono *self = ctx->self;
+-	NMModemState state = nm_modem_get_state (NM_MODEM (self));
++	NMModemOfonoPrivate *priv = NM_MODEM_OFONO_GET_PRIVATE (self);
++	NMModemState state;
+ 	GError *error = NULL;
+ 
+ 	nm_log_dbg (LOGD_MB, "in %s", __func__);
+@@ -122,10 +123,15 @@ disconnect_done (DBusGProxy *proxy, DBus
+ 
+ 	simple_disconnect_context_free (ctx);
+ 
+-	if (state != NM_MODEM_STATE_SEARCHING)
+-		nm_modem_set_state (NM_MODEM (self),
+-		                    NM_MODEM_STATE_REGISTERED,
+-		                    nm_modem_state_to_string (NM_MODEM_STATE_REGISTERED));
++	/* No need to re-read contexts in this case... */
++
++	if (priv->modem_online && priv->gprs_powered && priv->gprs_attached)
++		state = NM_MODEM_STATE_REGISTERED;
++	else
++		state = NM_MODEM_STATE_SEARCHING;
++
++	nm_modem_set_state (NM_MODEM (self), state,
++	                    nm_modem_state_to_string (state));
+ }
+ 
+ static void
+@@ -142,6 +148,10 @@ disconnect (NMModem *self,
+ 	ctx->self = g_object_ref (self);
+ 	ctx->warn = warn;
+ 
++	nm_modem_set_state (NM_MODEM (self),
++						NM_MODEM_STATE_DISCONNECTING,
++						nm_modem_state_to_string (NM_MODEM_STATE_DISCONNECTING));
++
+ 	g_value_init (&value, G_TYPE_BOOLEAN);
+ 	g_value_set_boolean (&value, FALSE);
+ 
+@@ -186,18 +196,15 @@ update_ofono_enabled (NMModemOfono *self
+ {
+ 	NMModemOfonoPrivate *priv = NM_MODEM_OFONO_GET_PRIVATE (self);
+ 	NMModemState new_state;
+-	NMDeviceStateReason reason;
+ 
+ 	if (new_enabled == priv->enabled)
+ 		return;
+ 
+ 	if (new_enabled) {
+ 		new_state = NM_MODEM_STATE_REGISTERED;
+-		reason = NM_DEVICE_STATE_REASON_NONE;
+ 		ofono_read_contexts (self);
+ 	} else {
+ 		new_state = NM_MODEM_STATE_SEARCHING;
+-		reason = NM_DEVICE_STATE_REASON_MODEM_NO_CARRIER;
+ 	}
+ 
+ 	nm_modem_set_state (NM_MODEM (self),
+Index: network-manager-0.9.10.0/src/nm-policy.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/nm-policy.c
++++ network-manager-0.9.10.0/src/nm-policy.c
+@@ -1229,7 +1229,7 @@ sleeping_changed (NMManager *manager, GP
+ }
+ 
+ static void
+-schedule_activate_check (NMPolicy *policy, NMDevice *device)
++schedule_activate_check (NMPolicy *policy, NMDevice *device, guint delay)
+ {
+ 	NMPolicyPrivate *priv = NM_POLICY_GET_PRIVATE (policy);
+ 	ActivateData *data;
+@@ -1258,7 +1258,12 @@ schedule_activate_check (NMPolicy *polic
+ 	data = g_malloc0 (sizeof (ActivateData));
+ 	data->policy = policy;
+ 	data->device = g_object_ref (device);
+-	data->autoactivate_id = g_idle_add (auto_activate_device, data);
++
++	if (delay)
++		data->autoactivate_id = g_timeout_add_seconds (delay, auto_activate_device, data);
++	else
++		data->autoactivate_id = g_idle_add (auto_activate_device, data);
++
+ 	priv->pending_activation_checks = g_slist_append (priv->pending_activation_checks, data);
+ }
+ 
+@@ -1438,6 +1443,7 @@ device_state_changed (NMDevice *device,
+ 	NMIP4Config *ip4_config;
+ 	NMIP6Config *ip6_config;
+ 	NMSettingConnection *s_con = NULL;
++	guint delay = 0;
+ 
+ 	switch (new_state) {
+ 	case NM_DEVICE_STATE_FAILED:
+@@ -1455,7 +1461,7 @@ device_state_changed (NMDevice *device,
+ 
+ 				nm_settings_connection_set_autoconnect_blocked_reason (connection, NM_DEVICE_STATE_REASON_NO_SECRETS);
+ 			} else if (tries > 0) {
+-				nm_log_dbg (LOGD_DEVICE, "Connection '%s' failed to autoconnect; %d tries left",
++				nm_log_info (LOGD_DEVICE, "Connection '%s' failed to autoconnect; %d tries left",
+ 				            nm_connection_get_id (NM_CONNECTION (connection)), tries);
+ 				nm_settings_connection_set_autoconnect_retries (connection, tries - 1);
+ 			}
+@@ -1466,9 +1472,14 @@ device_state_changed (NMDevice *device,
+ 				/* Schedule a handler to reset retries count */
+ 				if (!priv->reset_retries_id) {
+ 					gint32 retry_time = nm_settings_connection_get_autoconnect_retry_time (connection);
++					gint32 actual_time = MAX (0, retry_time - nm_utils_get_monotonic_timestamp_s ());
++
++					nm_log_info (LOGD_DEVICE, "Disabling autoconnect for connection '%s'; setting retry of %d.",
++					             nm_connection_get_id (NM_CONNECTION (connection)), actual_time);
++
+ 
+ 					g_warn_if_fail (retry_time != 0);
+-					priv->reset_retries_id = g_timeout_add_seconds (MAX (0, retry_time - nm_utils_get_monotonic_timestamp_s ()), reset_connections_retries, policy);
++					priv->reset_retries_id = g_timeout_add_seconds (actual_time, reset_connections_retries, policy);
+ 				}
+ 			}
+ 			nm_connection_clear_secrets (NM_CONNECTION (connection));
+@@ -1532,7 +1543,18 @@ device_state_changed (NMDevice *device,
+ 			update_routing_and_dns (policy, FALSE);
+ 
+ 		/* Device is now available for auto-activation */
+-		schedule_activate_check (policy, device);
++
++		if (nm_device_get_device_type (device) == NM_DEVICE_TYPE_MODEM)
++			delay = 5;
++
++		if (connection)
++			nm_log_info (LOGD_DEVICE, "Connection '%s' disconnected, scheduling activate_check in %u seconds.",
++			             nm_connection_get_id (NM_CONNECTION (connection)), delay);
++		else
++			nm_log_info (LOGD_DEVICE, "Device has no connection; scheduling activate_check in %u seconds.",
++			             delay);
++
++		schedule_activate_check (policy, device, delay);
+ 		break;
+ 
+ 	case NM_DEVICE_STATE_PREPARE:
+@@ -1642,13 +1664,13 @@ device_autoconnect_changed (NMDevice *de
+                             gpointer user_data)
+ {
+ 	if (nm_device_get_autoconnect (device))
+-		schedule_activate_check ((NMPolicy *) user_data, device);
++		schedule_activate_check ((NMPolicy *) user_data, device, 0);
+ }
+ 
+ static void
+ device_recheck_auto_activate (NMDevice *device, gpointer user_data)
+ {
+-	schedule_activate_check (NM_POLICY (user_data), device);
++	schedule_activate_check (NM_POLICY (user_data), device, 0);
+ }
+ 
+ typedef struct {
+@@ -1845,7 +1867,7 @@ schedule_activate_all (NMPolicy *policy)
+ 	const GSList *iter;
+ 
+ 	for (iter = nm_manager_get_devices (priv->manager); iter; iter = g_slist_next (iter))
+-		schedule_activate_check (policy, NM_DEVICE (iter->data));
++		schedule_activate_check (policy, NM_DEVICE (iter->data), 0);
+ }
+ 
+ static void
+Index: network-manager-0.9.10.0/src/settings/nm-settings-connection.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/settings/nm-settings-connection.c
++++ network-manager-0.9.10.0/src/settings/nm-settings-connection.c
+@@ -132,6 +132,7 @@ typedef struct {
+ 
+ 	int autoconnect_retries;
+ 	gint32 autoconnect_retry_time;
++	int reset_retries_timeout;
+ 	NMDeviceStateReason autoconnect_blocked_reason;
+ 
+ } NMSettingsConnectionPrivate;
+@@ -1922,6 +1923,19 @@ nm_settings_connection_get_autoconnect_r
+ 	return NM_SETTINGS_CONNECTION_GET_PRIVATE (connection)->autoconnect_retries;
+ }
+ 
++int
++nm_settings_connection_get_reset_retries_timeout (NMSettingsConnection *connection)
++{
++	return NM_SETTINGS_CONNECTION_GET_PRIVATE (connection)->reset_retries_timeout;
++}
++
++void
++nm_settings_connection_set_reset_retries_timeout (NMSettingsConnection *connection,
++                                                  int timeout)
++{
++	NM_SETTINGS_CONNECTION_GET_PRIVATE (connection)->reset_retries_timeout = timeout;
++}
++
+ void
+ nm_settings_connection_set_autoconnect_retries (NMSettingsConnection *connection,
+                                                 int retries)
+@@ -1932,7 +1946,7 @@ nm_settings_connection_set_autoconnect_r
+ 	if (retries)
+ 		priv->autoconnect_retry_time = 0;
+ 	else
+-		priv->autoconnect_retry_time = nm_utils_get_monotonic_timestamp_s () + AUTOCONNECT_RESET_RETRIES_TIMER;
++		priv->autoconnect_retry_time = nm_utils_get_monotonic_timestamp_s () + priv->reset_retries_timeout;
+ }
+ 
+ void
+@@ -2039,6 +2053,7 @@ nm_settings_connection_init (NMSettingsC
+ 
+ 	priv->autoconnect_retries = AUTOCONNECT_RETRIES_DEFAULT;
+ 	priv->autoconnect_blocked_reason = NM_DEVICE_STATE_REASON_NONE;
++	priv->reset_retries_timeout = AUTOCONNECT_RESET_RETRIES_TIMER;
+ 
+ 	g_signal_connect (self, NM_CONNECTION_SECRETS_CLEARED, G_CALLBACK (secrets_cleared_cb), NULL);
+ 	g_signal_connect (self, NM_CONNECTION_CHANGED, G_CALLBACK (changed_cb), GUINT_TO_POINTER (TRUE));
+Index: network-manager-0.9.10.0/src/settings/nm-settings-connection.h
+===================================================================
+--- network-manager-0.9.10.0.orig/src/settings/nm-settings-connection.h
++++ network-manager-0.9.10.0/src/settings/nm-settings-connection.h
+@@ -156,6 +156,9 @@ void nm_settings_connection_reset_autoco
+ 
+ gint32 nm_settings_connection_get_autoconnect_retry_time (NMSettingsConnection *connection);
+ 
++int nm_settings_connection_get_reset_retries_timeout (NMSettingsConnection *connection);
++void nm_settings_connection_set_reset_retries_timeout (NMSettingsConnection *connection, int timeout);
++
+ NMDeviceStateReason nm_settings_connection_get_autoconnect_blocked_reason (NMSettingsConnection *connection);
+ void nm_settings_connection_set_autoconnect_blocked_reason (NMSettingsConnection *connection,
+                                                             NMDeviceStateReason reason);
+Index: network-manager-0.9.10.0/src/settings/plugins/ofono/plugin.c
+===================================================================
+--- network-manager-0.9.10.0.orig/src/settings/plugins/ofono/plugin.c
++++ network-manager-0.9.10.0/src/settings/plugins/ofono/plugin.c
+@@ -150,6 +150,10 @@ SCPluginOfono_parse_contexts (SCPluginOf
+ 
+ 			/* add the new connection */
+ 			exported = nm_ofono_connection_new (context);
++
++			/* Lower disabled timer to 30s */
++			nm_settings_connection_set_reset_retries_timeout (NM_SETTINGS_CONNECTION (exported), 30);
++
+ 			setting = nm_connection_get_setting_connection (NM_CONNECTION (exported));
+ 			g_object_set (setting, NM_SETTING_CONNECTION_AUTOCONNECT, TRUE, NULL);
+ 			if (exported) {
