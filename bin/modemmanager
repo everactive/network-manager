@@ -3,6 +3,10 @@
 set -e
 set -x
 
+# Copy in our dbus policy until snappy has support for this
+cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.ModemManager.conf \
+    /etc/dbus-1/system.d/$SNAP_APP.conf
+
 # XXX hardcoded architecture
 LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/ModemManager" \
 $SNAP_APP_PATH/usr/sbin/ModemManager \

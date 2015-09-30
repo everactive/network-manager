@@ -3,12 +3,11 @@
 set -e
 set -x
 
+# Copy in our dbus policy until snappy has support for this
+cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf \
+    /etc/dbus-1/system.d/$SNAP_APP.conf
+
 # XXX hardcoded architecture
-#export LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-#export PATH="$SNAP_APP_PATH/usr/sbin${PATH:+:$PATH}"
-
-#echo "LD_LIBARY_PATH=$LD_LIBARY_PATH"
-
 # TODO drop DEBUG
 LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/NetworkManager" \
 $SNAP_APP_PATH/usr/sbin/NetworkManager \
