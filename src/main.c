@@ -70,6 +70,26 @@ static GMainLoop *main_loop = NULL;
 static gboolean quit_early = FALSE;
 static sigset_t signal_set;
 
+const char* get_snap_app_data_path()
+{
+	static char *path = NULL;
+
+	if (!path)
+		path = getenv("SNAP_APP_DATA_PATH");
+
+	return path;
+}
+
+const char* get_snap_app_path()
+{
+	static char *path = NULL;
+
+	if (!path)
+		path = getenv("SNAP_APP_PATH");
+
+	return path;
+}
+
 void *signal_handling_thread (void *arg);
 /*
  * Thread function waiting for signals and processing them.
@@ -355,7 +375,6 @@ main (int argc, char *argv[])
 	GError *error = NULL;
 	gboolean wrote_pidfile = FALSE;
 	char *bad_domains = NULL;
-	const char *snap_data_path;
 	char *run_dir, *state_dir;
 
 	GOptionEntry options[] = {
@@ -478,9 +497,9 @@ main (int argc, char *argv[])
 		g_free (path);
 	}
 
-	if (snap_data_path = getenv ("SNAP_APP_DATA_PATH")) {
-		run_dir = g_strconcat (snap_data_path, "/var/run/", NULL);
-		state_dir = g_strconcat (snap_data_path, "/var/lib/", NULL);
+	if (get_snap_app_data_path()) {
+		run_dir = g_strdup_printf("%s/var/run/", get_snap_app_data_path());
+		state_dir = g_strdup_printf("%s/var/lib/", get_snap_app_data_path());
 	} else {
 		run_dir = g_strdup (NMRUNDIR);
 		state_dir = g_strdup (NMSTATEDIR);
@@ -582,7 +601,10 @@ main (int argc, char *argv[])
 		g_log_set_always_fatal (fatal_mask);
 	}
 
+	/* FIXME: this causes us to segfault in a snappy environment */
+#if 0
 	nm_logging_syslog_openlog (debug);
+#endif
 
 #if !GLIB_CHECK_VERSION (2, 35, 0)
 	g_type_init ();

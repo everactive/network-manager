@@ -124,6 +124,7 @@ static void connection_provider_init (NMConnectionProvider *cp_class);
 G_DEFINE_TYPE_EXTENDED (NMSettings, nm_settings, G_TYPE_OBJECT, 0,
                         G_IMPLEMENT_INTERFACE (NM_TYPE_CONNECTION_PROVIDER, connection_provider_init))
 
+extern const char* get_snap_app_path();
 
 typedef struct {
 	NMDBusManager *dbus_mgr;
@@ -615,12 +616,11 @@ load_plugins (NMSettings *self, const char **plugins, GError **error)
 	const char **iter;
 	gboolean keyfile_added = FALSE;
 	gboolean success = TRUE;
-	const char *snap_data_path;
-	char *plugin_dir;
+	char *plugin_dir = NULL;
 
-	/* FIXME: hard-coded arch path... */
-	if (snap_data_path = getenv ("SNAP_APP_DATA_PATH"))
-		plugin_dir = g_strconcat (snap_data_path, "/var/lib/x86_64-linux-gnu/NetworkManager/", NULL);
+	if (get_snap_app_path()) {
+		plugin_dir = g_strdup_printf ("%s/usr/lib/x86_64-linux-gnu/NetworkManager/", get_snap_app_path());
+	}
 	else
 		plugin_dir = g_strdup (NMPLUGINDIR);
 
