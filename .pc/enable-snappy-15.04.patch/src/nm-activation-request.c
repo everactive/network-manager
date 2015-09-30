@@ -45,8 +45,6 @@ G_DEFINE_TYPE (NMActRequest, nm_act_request, NM_TYPE_ACTIVE_CONNECTION)
                                        NM_TYPE_ACT_REQUEST, \
                                        NMActRequestPrivate))
 
-extern const char* get_snap_app_path();
-
 typedef struct {
 	char *table;
 	char *rule;
@@ -230,13 +228,8 @@ nm_act_request_set_shared (NMActRequest *req, gboolean shared)
 		char *envp[1] = { NULL };
 		gs_strfreev char **argv = NULL;
 		gs_free char *cmd = NULL;
-		char *base_path = "";
 
-		if (get_snap_app_path())
-			base_path = get_snap_app_path();
-
-		cmd = g_strdup_printf ("%s%s --table %s %s %s",
-		                       base_path,
+		cmd = g_strdup_printf ("%s --table %s %s %s",
 		                       IPTABLES_PATH,
 		                       rule->table,
 		                       shared ? "--insert" : "--delete",

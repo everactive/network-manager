@@ -232,3 +232,31 @@ Index: nm-snappy-support/src/nm-manager.c
  }
  
  static void
+Index: nm-snappy-support/src/nm-activation-request.c
+===================================================================
+--- nm-snappy-support.orig/src/nm-activation-request.c
++++ nm-snappy-support/src/nm-activation-request.c
+@@ -45,6 +45,8 @@ G_DEFINE_TYPE (NMActRequest, nm_act_requ
+                                        NM_TYPE_ACT_REQUEST, \
+                                        NMActRequestPrivate))
+ 
++extern const char* get_snap_app_path();
++
+ typedef struct {
+ 	char *table;
+ 	char *rule;
+@@ -228,8 +230,13 @@ nm_act_request_set_shared (NMActRequest
+ 		char *envp[1] = { NULL };
+ 		gs_strfreev char **argv = NULL;
+ 		gs_free char *cmd = NULL;
++		char *base_path = "";
++
++		if (get_snap_app_path())
++			base_path = get_snap_app_path();
+ 
+-		cmd = g_strdup_printf ("%s --table %s %s %s",
++		cmd = g_strdup_printf ("%s%s --table %s %s %s",
++		                       base_path,
+ 		                       IPTABLES_PATH,
+ 		                       rule->table,
+ 		                       shared ? "--insert" : "--delete",
