@@ -85,8 +85,6 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (NMDevice, nm_device, G_TYPE_OBJECT,
 
 #define NM_DEVICE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DEVICE, NMDevicePrivate))
 
-const char* get_snap_app_path();
-
 enum {
 	STATE_CHANGED,
 	AUTOCONNECT_ALLOWED,
@@ -4456,12 +4454,6 @@ send_arps (NMDevice *self, const char *mode_arg)
 	NMIP4Address *addr;
 	guint32 ipaddr;
 	GError *error = NULL;
-	char *path = NULL;
-
-	if (get_snap_app_path()) {
-		path = g_strdup_printf("%s/usr/bin/arping", get_snap_app_path());
-		argv[0] = path;
-	}
 
 	connection = nm_device_get_connection (self);
 	if (!connection)
@@ -4490,9 +4482,6 @@ send_arps (NMDevice *self, const char *mode_arg)
 			g_clear_error (&error);
 		}
 	}
-
-	if (path)
-		g_free(path);
 }
 
 static gboolean
