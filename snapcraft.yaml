@@ -4,11 +4,12 @@ version: 0.2
 type: framework
 architecture:
  - amd64
-# services:
-#   networkmanager:
-#     description: Network manager
-#     security-template: unconfined
-#     bus-name: org.freedesktop.NetworkManager
+services:
+  networkmanager:
+    description: Network manager
+    start: bin/networkmanager
+    security-template: unconfined
+    bus-name: org.freedesktop.NetworkManager
 binaries:
   nmcli:
     exec: usr/bin/nmcli
