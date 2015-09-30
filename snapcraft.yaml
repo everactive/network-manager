@@ -134,10 +134,12 @@ parts:
         - usr/sbin/NetworkManager
         - usr/lib/x86_64-linux-gnu/libnm-*
       configs:
-        - usr/share/dbus-1/system-services/org.freedesktop.nm_dispatcher.service
-        - usr/share/polkit-1/actions/org.freedesktop.NetworkManager.policy
         - etc/NetworkManager
         - etc/dbus-1/system.d/*
+
+        # Unneeded config files:
+        # - usr/share/dbus-1/system-services/org.freedesktop.nm_dispatcher.service
+        # - usr/share/polkit-1/actions/org.freedesktop.NetworkManager.policy
 
         # TODO: dpkg -L network-manager lists the following files but it
         # doesn't get installed with make install. Propably part of the
