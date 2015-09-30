@@ -29,6 +29,12 @@ binaries:
   nmtui-edit:
     exec: usr/bin/nmtui-edit
     security-template: unconfined
+  iw:
+    exec: sbin/iw
+    security-template: unconfined
+  iwconfig:
+    exec: sbin/iwconfig
+    security-template: unconfined
 summary: Network management based on NeworkManager and ModemManager
 description: Network management of wired ethernet, WiFi and mobile data connection based on NetworkManager and ModemManager
 icon: icon.svg
@@ -161,3 +167,4 @@ parts:
       - iputils-arping
       - libpam-systemd
       - policykit-1
+      - wireless-tools
