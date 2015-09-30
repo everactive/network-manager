@@ -7,6 +7,9 @@ set -x
 cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf \
     /etc/dbus-1/system.d/$SNAP_APP.conf
 
+# Make sure we have a directory to store our connections in
+mkdir -p $SNAP_APP_DATA_PATH/etc/NetworkManager/system-connections
+
 # XXX hardcoded architecture
 # TODO drop DEBUG
 LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/NetworkManager" \
