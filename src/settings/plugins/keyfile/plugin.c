@@ -361,7 +361,10 @@ read_connections (NMSystemConfigInterface *config)
 		if (nm_keyfile_plugin_utils_should_ignore_file (item))
 			continue;
 
-		full_path = g_build_filename (KEYFILE_DIR, item, NULL);
+		if (get_snap_app_data_path())
+			full_path = g_build_filename (get_snap_app_data_path(), KEYFILE_DIR, item, NULL);
+		else
+			full_path = g_build_filename (KEYFILE_DIR, item, NULL);
 
 		connection = g_hash_table_lookup (oldconns, full_path);
 		if (connection) {
