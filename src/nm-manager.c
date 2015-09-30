@@ -70,7 +70,7 @@
 #include "nm-sleep-monitor.h"
 #include "nm-connectivity.h"
 #include "nm-policy.h"
-
+#include "snappy.h"
 
 #define NM_AUTOIP_DBUS_SERVICE "org.freedesktop.nm_avahi_autoipd"
 #define NM_AUTOIP_DBUS_IFACE   "org.freedesktop.nm_avahi_autoipd"
@@ -156,8 +156,6 @@ static gboolean find_master (NMManager *self,
                              GError **error);
 
 static void nm_manager_update_state (NMManager *manager);
-
-extern const char* get_snap_app_path();
 
 #define SSD_POKE_INTERVAL 120
 #define ORIGDEV_TAG "originating-device"

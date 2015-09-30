@@ -55,6 +55,7 @@
 #include "nm-posix-signals.h"
 #include "nm-session-monitor.h"
 #include "nm-dispatcher.h"
+#include "snappy.h"
 
 #if !defined(NM_DIST_VERSION)
 # define NM_DIST_VERSION VERSION
@@ -63,15 +64,15 @@
 #define NM_DEFAULT_PID_FILE          NMRUNDIR "/NetworkManager.pid"
 #define NM_DEFAULT_SYSTEM_STATE_FILE NMSTATEDIR "/NetworkManager.state"
 
+extern const char* get_snap_app_path();
+extern const char* get_snap_app_data_path();
+
 /*
  * Globals
  */
 static GMainLoop *main_loop = NULL;
 static gboolean quit_early = FALSE;
 static sigset_t signal_set;
-
-extern const char* get_snap_app_path();
-extern const char* get_snap_app_data_path();
 
 void *signal_handling_thread (void *arg);
 /*

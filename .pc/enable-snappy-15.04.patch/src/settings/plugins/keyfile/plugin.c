@@ -44,7 +44,6 @@
 #include "writer.h"
 #include "common.h"
 #include "utils.h"
-#include "snappy.h"
 
 static char *plugin_get_hostname (SCPluginKeyfile *plugin);
 static void system_config_interface_init (NMSystemConfigInterface *system_config_interface_class);
@@ -283,17 +282,7 @@ setup_monitoring (NMSystemConfigInterface *config)
 	GFileMonitor *monitor;
 
 	if (nm_config_get_monitor_connection_files (nm_config_get ())) {
-
-		if (get_snap_app_data_path()) {
-			char *keyfile_dir = NULL;
-			keyfile_dir = g_strdup_printf("%s/%s", get_snap_app_data_path(),
-						       KEYFILE_DIR);
-			file = g_file_new_for_path (keyfile_dir);
-			g_free(keyfile_dir);
-		} else {
-			file = g_file_new_for_path (KEYFILE_DIR);
-		}
-
+		file = g_file_new_for_path (KEYFILE_DIR);
 		monitor = g_file_monitor_directory (file, G_FILE_MONITOR_NONE, NULL, NULL);
 		g_object_unref (file);
 
@@ -327,16 +316,7 @@ read_connections (NMSystemConfigInterface *config)
 	GHashTableIter iter;
 	gpointer data;
 
-	if (get_snap_app_data_path()) {
-		char *keyfile_dir = NULL;
-		keyfile_dir = g_strdup_printf("%s/%s", get_snap_app_data_path(),
-						KEYFILE_DIR);
-		dir = g_dir_open (keyfile_dir, 0, &error);
-		g_free(keyfile_dir);
-	} else {
-		dir = g_dir_open (KEYFILE_DIR, 0, &error);
-	}
-
+	dir = g_dir_open (KEYFILE_DIR, 0, &error);
 	if (!dir) {
 		nm_log_warn (LOGD_SETTINGS, "Cannot read directory '%s': (%d) %s",
 		             KEYFILE_DIR,

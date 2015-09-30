@@ -2,17 +2,25 @@ Index: nm-snappy-support/src/main.c
 ===================================================================
 --- nm-snappy-support.orig/src/main.c
 +++ nm-snappy-support/src/main.c
-@@ -70,6 +70,9 @@ static GMainLoop *main_loop = NULL;
- static gboolean quit_early = FALSE;
- static sigset_t signal_set;
+@@ -55,6 +55,7 @@
+ #include "nm-posix-signals.h"
+ #include "nm-session-monitor.h"
+ #include "nm-dispatcher.h"
++#include "snappy.h"
+ 
+ #if !defined(NM_DIST_VERSION)
+ # define NM_DIST_VERSION VERSION
+@@ -63,6 +64,9 @@
+ #define NM_DEFAULT_PID_FILE          NMRUNDIR "/NetworkManager.pid"
+ #define NM_DEFAULT_SYSTEM_STATE_FILE NMSTATEDIR "/NetworkManager.state"
  
 +extern const char* get_snap_app_path();
 +extern const char* get_snap_app_data_path();
 +
- void *signal_handling_thread (void *arg);
  /*
-  * Thread function waiting for signals and processing them.
-@@ -355,6 +358,7 @@ main (int argc, char *argv[])
+  * Globals
+  */
+@@ -355,6 +359,7 @@ main (int argc, char *argv[])
  	GError *error = NULL;
  	gboolean wrote_pidfile = FALSE;
  	char *bad_domains = NULL;
@@ -20,7 +28,7 @@ Index: nm-snappy-support/src/main.c
  
  	GOptionEntry options[] = {
  		{ "version", 'V', 0, G_OPTION_ARG_NONE, &show_version, N_("Print NetworkManager version and exit"), NULL },
-@@ -476,18 +480,37 @@ main (int argc, char *argv[])
+@@ -476,18 +481,37 @@ main (int argc, char *argv[])
  		g_free (path);
  	}
  
@@ -62,7 +70,7 @@ Index: nm-snappy-support/src/main.c
  	pidfile = pidfile ? pidfile : g_strdup (NM_DEFAULT_PID_FILE);
  	state_file = state_file ? state_file : g_strdup (NM_DEFAULT_SYSTEM_STATE_FILE);
  
-@@ -561,7 +584,10 @@ main (int argc, char *argv[])
+@@ -561,7 +585,10 @@ main (int argc, char *argv[])
  		g_log_set_always_fatal (fatal_mask);
  	}
  
@@ -73,7 +81,7 @@ Index: nm-snappy-support/src/main.c
  
  #if !GLIB_CHECK_VERSION (2, 35, 0)
  	g_type_init ();
-@@ -593,6 +619,7 @@ main (int argc, char *argv[])
+@@ -593,6 +620,7 @@ main (int argc, char *argv[])
  
  	/* Initialize our DBus service & connection */
  	dbus_mgr = nm_dbus_manager_get ();
@@ -85,15 +93,23 @@ Index: nm-snappy-support/src/settings/nm-settings.c
 ===================================================================
 --- nm-snappy-support.orig/src/settings/nm-settings.c
 +++ nm-snappy-support/src/settings/nm-settings.c
-@@ -124,6 +124,7 @@ static void connection_provider_init (NM
+@@ -68,6 +68,7 @@
+ #include "nm-connection-provider.h"
+ #include "nm-config.h"
+ #include "NetworkManagerUtils.h"
++#include "snappy.h"
+ 
+ /* LINKER CRACKROCK */
+ #define EXPORT(sym) void * __export_##sym = &sym;
+@@ -124,7 +125,6 @@ static void connection_provider_init (NM
  G_DEFINE_TYPE_EXTENDED (NMSettings, nm_settings, G_TYPE_OBJECT, 0,
                          G_IMPLEMENT_INTERFACE (NM_TYPE_CONNECTION_PROVIDER, connection_provider_init))
  
-+extern const char* get_snap_app_path();
- 
+-
  typedef struct {
  	NMDBusManager *dbus_mgr;
-@@ -615,6 +616,15 @@ load_plugins (NMSettings *self, const ch
+ 
+@@ -615,6 +615,15 @@ load_plugins (NMSettings *self, const ch
  	const char **iter;
  	gboolean keyfile_added = FALSE;
  	gboolean success = TRUE;
@@ -109,7 +125,7 @@ Index: nm-snappy-support/src/settings/nm-settings.c
  
  	for (iter = plugins; iter && *iter; iter++) {
  		GModule *plugin;
-@@ -645,7 +655,7 @@ load_plugins (NMSettings *self, const ch
+@@ -645,7 +654,7 @@ load_plugins (NMSettings *self, const ch
  		}
  
  		full_name = g_strdup_printf ("nm-settings-plugin-%s", pname);
@@ -118,7 +134,7 @@ Index: nm-snappy-support/src/settings/nm-settings.c
  
  		plugin = g_module_open (path, G_MODULE_BIND_LOCAL);
  		if (!plugin) {
-@@ -690,6 +700,9 @@ load_plugins (NMSettings *self, const ch
+@@ -690,6 +699,9 @@ load_plugins (NMSettings *self, const ch
  
  	g_slist_free_full (list, g_object_unref);
  
@@ -128,7 +144,7 @@ Index: nm-snappy-support/src/settings/nm-settings.c
  	return success;
  }
  
-@@ -1754,6 +1767,8 @@ nm_settings_new (GError **error)
+@@ -1754,6 +1766,8 @@ nm_settings_new (GError **error)
  	NMSettings *self;
  	NMSettingsPrivate *priv;
  
@@ -137,7 +153,7 @@ Index: nm-snappy-support/src/settings/nm-settings.c
  	self = g_object_new (NM_TYPE_SETTINGS, NULL);
  
  	priv = NM_SETTINGS_GET_PRIVATE (self);
-@@ -1761,8 +1776,11 @@ nm_settings_new (GError **error)
+@@ -1761,8 +1775,11 @@ nm_settings_new (GError **error)
  	priv->config = nm_config_get ();
  	priv->dbus_mgr = nm_dbus_manager_get ();
  
@@ -153,16 +169,16 @@ Index: nm-snappy-support/src/nm-manager.c
 ===================================================================
 --- nm-snappy-support.orig/src/nm-manager.c
 +++ nm-snappy-support/src/nm-manager.c
-@@ -157,6 +157,8 @@ static gboolean find_master (NMManager *
+@@ -70,7 +70,7 @@
+ #include "nm-sleep-monitor.h"
+ #include "nm-connectivity.h"
+ #include "nm-policy.h"
+-
++#include "snappy.h"
  
- static void nm_manager_update_state (NMManager *manager);
- 
-+extern const char* get_snap_app_path();
-+
- #define SSD_POKE_INTERVAL 120
- #define ORIGDEV_TAG "originating-device"
- 
-@@ -2023,13 +2025,25 @@ load_device_factories (NMManager *self)
+ #define NM_AUTOIP_DBUS_SERVICE "org.freedesktop.nm_avahi_autoipd"
+ #define NM_AUTOIP_DBUS_IFACE   "org.freedesktop.nm_avahi_autoipd"
+@@ -2023,13 +2023,25 @@ load_device_factories (NMManager *self)
  	const char *item;
  	char *path;
  	GSList *iter;
@@ -190,7 +206,7 @@ Index: nm-snappy-support/src/nm-manager.c
  		return;
  	}
  
-@@ -2046,7 +2060,11 @@ load_device_factories (NMManager *self)
+@@ -2046,7 +2058,11 @@ load_device_factories (NMManager *self)
  		if (g_str_has_suffix (item, ".la"))
  			continue;
  
@@ -203,7 +219,7 @@ Index: nm-snappy-support/src/nm-manager.c
  		g_assert (path);
  		plugin = g_module_open (path, G_MODULE_BIND_LOCAL);
  		g_free (path);
-@@ -2114,8 +2132,11 @@ load_device_factories (NMManager *self)
+@@ -2114,8 +2130,11 @@ load_device_factories (NMManager *self)
  		nm_log_info (LOGD_HW, "Loaded device plugin: %s", g_module_name (plugin));
  	};
  	g_dir_close (dir);
@@ -219,25 +235,24 @@ Index: nm-snappy-support/src/nm-activation-request.c
 ===================================================================
 --- nm-snappy-support.orig/src/nm-activation-request.c
 +++ nm-snappy-support/src/nm-activation-request.c
-@@ -45,6 +45,8 @@ G_DEFINE_TYPE (NMActRequest, nm_act_requ
-                                        NM_TYPE_ACT_REQUEST, \
-                                        NMActRequestPrivate))
+@@ -37,6 +37,7 @@
+ #include "nm-active-connection.h"
+ #include "nm-settings-connection.h"
+ #include "nm-posix-signals.h"
++#include "snappy.h"
  
-+extern const char* get_snap_app_path();
-+
- typedef struct {
- 	char *table;
- 	char *rule;
-@@ -228,8 +230,13 @@ nm_act_request_set_shared (NMActRequest
+ 
+ G_DEFINE_TYPE (NMActRequest, nm_act_request, NM_TYPE_ACTIVE_CONNECTION)
+@@ -228,8 +229,13 @@ nm_act_request_set_shared (NMActRequest
  		char *envp[1] = { NULL };
  		gs_strfreev char **argv = NULL;
  		gs_free char *cmd = NULL;
 +		char *base_path = "";
-+
-+		if (get_snap_app_path())
-+			base_path = get_snap_app_path();
  
 -		cmd = g_strdup_printf ("%s --table %s %s %s",
++		if (get_snap_app_path())
++			base_path = get_snap_app_path();
++
 +		cmd = g_strdup_printf ("%s%s --table %s %s %s",
 +		                       base_path,
  		                       IPTABLES_PATH,
@@ -247,15 +262,15 @@ Index: nm-snappy-support/src/devices/nm-device.c
 ===================================================================
 --- nm-snappy-support.orig/src/devices/nm-device.c
 +++ nm-snappy-support/src/devices/nm-device.c
-@@ -85,6 +85,8 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (NMDevi
+@@ -78,6 +78,8 @@ static void impl_device_disconnect (NMDe
  
- #define NM_DEVICE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DEVICE, NMDevicePrivate))
+ #include "nm-device-glue.h"
  
-+const char* get_snap_app_path();
++#include "snappy.h"
 +
- enum {
- 	STATE_CHANGED,
- 	AUTOCONNECT_ALLOWED,
+ static void nm_device_config_device_interface_init (NMConfigDeviceInterface *iface);
+ 
+ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (NMDevice, nm_device, G_TYPE_OBJECT,
 @@ -4454,6 +4456,12 @@ send_arps (NMDevice *self, const char *m
  	NMIP4Address *addr;
  	guint32 ipaddr;
@@ -283,17 +298,15 @@ Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
 ===================================================================
 --- nm-snappy-support.orig/src/dhcp-manager/nm-dhcp-dhclient.c
 +++ nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
-@@ -45,6 +45,9 @@
+@@ -42,6 +42,7 @@
+ #include "nm-dhcp-dhclient-utils.h"
+ #include "nm-dhcp-manager.h"
+ #include "nm-posix-signals.h"
++#include "snappy.h"
  
  G_DEFINE_TYPE (NMDHCPDhclient, nm_dhcp_dhclient, NM_TYPE_DHCP_CLIENT)
  
-+extern const char* get_snap_app_path();
-+extern const char* get_snap_app_data_path();
-+
- #define NM_DHCP_DHCLIENT_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DHCP_DHCLIENT, NMDHCPDhclientPrivate))
- 
- typedef struct {
-@@ -99,9 +102,14 @@ get_dhclient_leasefile (const char *ifac
+@@ -99,9 +100,14 @@ get_dhclient_leasefile (const char *ifac
                          char **out_preferred_path)
  {
  	char *path;
@@ -309,7 +322,7 @@ Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
  	                        ipv6 ? "6" : "",
  	                        uuid,
  	                        iface);
-@@ -276,12 +284,16 @@ create_dhclient_config (const char *ifac
+@@ -276,12 +282,16 @@ create_dhclient_config (const char *ifac
                          const char *hostname)
  {
  	char *orig = NULL, *new = NULL;
@@ -327,7 +340,7 @@ Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
  	nm_log_dbg (is_ip6 ? LOGD_DHCP6 : LOGD_DHCP4,
  	            "(%s): creating composite dhclient config %s",
  	            iface, new);
-@@ -605,8 +617,15 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *s
+@@ -605,8 +615,15 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *s
  {
  	NMDHCPDhclientPrivate *priv = NM_DHCP_DHCLIENT_GET_PRIVATE (self);
  	const char **iter = &def_leasefiles[0];
@@ -344,3 +357,115 @@ Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
  
  	while (iter && *iter) {
  		if (g_file_test (*iter, G_FILE_TEST_EXISTS)) {
+Index: nm-snappy-support/src/settings/plugins/keyfile/plugin.c
+===================================================================
+--- nm-snappy-support.orig/src/settings/plugins/keyfile/plugin.c
++++ nm-snappy-support/src/settings/plugins/keyfile/plugin.c
+@@ -44,6 +44,7 @@
+ #include "writer.h"
+ #include "common.h"
+ #include "utils.h"
++#include "snappy.h"
+ 
+ static char *plugin_get_hostname (SCPluginKeyfile *plugin);
+ static void system_config_interface_init (NMSystemConfigInterface *system_config_interface_class);
+@@ -282,7 +283,17 @@ setup_monitoring (NMSystemConfigInterfac
+ 	GFileMonitor *monitor;
+ 
+ 	if (nm_config_get_monitor_connection_files (nm_config_get ())) {
+-		file = g_file_new_for_path (KEYFILE_DIR);
++
++		if (get_snap_app_data_path()) {
++			char *keyfile_dir = NULL;
++			keyfile_dir = g_strdup_printf("%s/%s", get_snap_app_data_path(),
++						       KEYFILE_DIR);
++			file = g_file_new_for_path (keyfile_dir);
++			g_free(keyfile_dir);
++		} else {
++			file = g_file_new_for_path (KEYFILE_DIR);
++		}
++
+ 		monitor = g_file_monitor_directory (file, G_FILE_MONITOR_NONE, NULL, NULL);
+ 		g_object_unref (file);
+ 
+@@ -316,7 +327,16 @@ read_connections (NMSystemConfigInterfac
+ 	GHashTableIter iter;
+ 	gpointer data;
+ 
+-	dir = g_dir_open (KEYFILE_DIR, 0, &error);
++	if (get_snap_app_data_path()) {
++		char *keyfile_dir = NULL;
++		keyfile_dir = g_strdup_printf("%s/%s", get_snap_app_data_path(),
++						KEYFILE_DIR);
++		dir = g_dir_open (keyfile_dir, 0, &error);
++		g_free(keyfile_dir);
++	} else {
++		dir = g_dir_open (KEYFILE_DIR, 0, &error);
++	}
++
+ 	if (!dir) {
+ 		nm_log_warn (LOGD_SETTINGS, "Cannot read directory '%s': (%d) %s",
+ 		             KEYFILE_DIR,
+Index: nm-snappy-support/src/snappy.h
+===================================================================
+--- /dev/null
++++ nm-snappy-support/src/snappy.h
+@@ -0,0 +1,45 @@
++/* NetworkManager -- Network link manager
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Copyright (C) 2015 Canonical Ltd.
++ */
++
++#ifndef SNAPPY_H_
++#define SNAPPY_H_
++
++#include <stdlib.h>
++
++static const char* get_snap_app_data_path()
++{
++	static char *path = NULL;
++
++	if (!path)
++		path = getenv("SNAP_APP_DATA_PATH");
++
++	return path;
++}
++
++static const char* get_snap_app_path()
++{
++	static char *path = NULL;
++
++			if (!path)
++				path = getenv("SNAP_APP_PATH");
++
++			return path;
++}
++
++#endif
+Index: nm-snappy-support/src/Makefile.am
+===================================================================
+--- nm-snappy-support.orig/src/Makefile.am
++++ nm-snappy-support/src/Makefile.am
+@@ -56,8 +56,6 @@ NetworkManager_LDADD = libNetworkManager
+ noinst_LTLIBRARIES = libNetworkManager.la
+ 
+ nm_sources = \
+-	snappy.c \
+-	\
+ 	config/nm-config.c \
+ 	config/nm-config.h \
+ 	config/nm-config-device.c \

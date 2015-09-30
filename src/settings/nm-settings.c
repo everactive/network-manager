@@ -68,6 +68,7 @@
 #include "nm-connection-provider.h"
 #include "nm-config.h"
 #include "NetworkManagerUtils.h"
+#include "snappy.h"
 
 /* LINKER CRACKROCK */
 #define EXPORT(sym) void * __export_##sym = &sym;
@@ -123,8 +124,6 @@ static void connection_provider_init (NMConnectionProvider *cp_class);
 
 G_DEFINE_TYPE_EXTENDED (NMSettings, nm_settings, G_TYPE_OBJECT, 0,
                         G_IMPLEMENT_INTERFACE (NM_TYPE_CONNECTION_PROVIDER, connection_provider_init))
-
-extern const char* get_snap_app_path();
 
 typedef struct {
 	NMDBusManager *dbus_mgr;

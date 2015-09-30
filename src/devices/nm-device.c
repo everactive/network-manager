@@ -78,14 +78,14 @@ static void impl_device_disconnect (NMDevice *device, DBusGMethodInvocation *con
 
 #include "nm-device-glue.h"
 
+#include "snappy.h"
+
 static void nm_device_config_device_interface_init (NMConfigDeviceInterface *iface);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (NMDevice, nm_device, G_TYPE_OBJECT,
                                   G_IMPLEMENT_INTERFACE (NM_TYPE_CONFIG_DEVICE, nm_device_config_device_interface_init))
 
 #define NM_DEVICE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DEVICE, NMDevicePrivate))
-
-const char* get_snap_app_path();
 
 enum {
 	STATE_CHANGED,

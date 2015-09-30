@@ -17,9 +17,12 @@
  * Copyright (C) 2015 Canonical Ltd.
  */
 
+#ifndef SNAPPY_H_
+#define SNAPPY_H_
+
 #include <stdlib.h>
 
-const char* get_snap_app_data_path()
+static const char* get_snap_app_data_path()
 {
 	static char *path = NULL;
 
@@ -29,12 +32,14 @@ const char* get_snap_app_data_path()
 	return path;
 }
 
-const char* get_snap_app_path()
+static const char* get_snap_app_path()
 {
 	static char *path = NULL;
 
-	if (!path)
-		path = getenv("SNAP_APP_PATH");
+			if (!path)
+				path = getenv("SNAP_APP_PATH");
 
-	return path;
+			return path;
 }
+
+#endif

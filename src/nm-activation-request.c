@@ -37,6 +37,7 @@
 #include "nm-active-connection.h"
 #include "nm-settings-connection.h"
 #include "nm-posix-signals.h"
+#include "snappy.h"
 
 
 G_DEFINE_TYPE (NMActRequest, nm_act_request, NM_TYPE_ACTIVE_CONNECTION)
@@ -44,8 +45,6 @@ G_DEFINE_TYPE (NMActRequest, nm_act_request, NM_TYPE_ACTIVE_CONNECTION)
 #define NM_ACT_REQUEST_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), \
                                        NM_TYPE_ACT_REQUEST, \
                                        NMActRequestPrivate))
-
-extern const char* get_snap_app_path();
 
 typedef struct {
 	char *table;
