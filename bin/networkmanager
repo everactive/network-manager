@@ -15,7 +15,7 @@ mkdir -p $SNAP_APP_DATA_PATH/var/lib
 
 # XXX hardcoded architecture
 # TODO drop DEBUG
-LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/NetworkManager" \
+LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/NetworkManager:$SNAP_APP_PATH/lib/x86_64-linux-gnu" \
 $SNAP_APP_PATH/usr/sbin/NetworkManager \
     --state-file=$SNAP_APP_DATA_PATH/NetworkManager.state \
     --config-dir=$SNAP_APP_PATH/etc/NetworkManager \
