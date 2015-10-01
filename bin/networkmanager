@@ -7,8 +7,11 @@ set -x
 cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf \
     /etc/dbus-1/system.d/$SNAP_APP.conf
 
-# Make sure we have a directory to store our connections in
+# Create all necessary directories we need at runtime
 mkdir -p $SNAP_APP_DATA_PATH/etc/NetworkManager/system-connections
+mkdir -p $SNAP_APP_DATA_PATH/run/sendsigs.omit.d
+mkdir -p $SNAP_APP_DATA_PATH/var/run
+mkdir -p $SNAP_APP_DATA_PATH/var/lib
 
 # XXX hardcoded architecture
 # TODO drop DEBUG
