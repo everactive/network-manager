@@ -48,7 +48,6 @@
 #include "writer.h"
 #include "common.h"
 #include "utils.h"
-#include "snappy.h"
 
 /* Some setting properties also contain setting names, such as
  * NMSettingConnection's 'type' property (which specifies the base type of the
@@ -1125,26 +1124,12 @@ nm_keyfile_plugin_write_connection (NMConnection *connection,
                                     char **out_path,
                                     GError **error)
 {
-	gboolean ret;
-	char *keyfile_dir = NULL;
-
-	if (get_snap_app_data_path())
-		keyfile_dir = g_strdup_printf("%s%s",
-					      get_snap_app_data_path(),
-					      KEYFILE_DIR);
-	else
-		keyfile_dir = g_strdup(KEYFILE_DIR);
-
-	ret = _internal_write_connection (connection,
-	                                   keyfile_dir,
+	return _internal_write_connection (connection,
+	                                   KEYFILE_DIR,
 	                                   0, 0,
 	                                   existing_path,
 	                                   out_path,
 	                                   error);
-
-	g_free(keyfile_dir);
-
-	return ret;
 }
 
 gboolean

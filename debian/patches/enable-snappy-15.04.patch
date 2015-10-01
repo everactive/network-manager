@@ -1,7 +1,7 @@
-Index: nm-enable-snappy-15.04/src/main.c
+Index: nm-snappy-support/src/main.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/main.c
-+++ nm-enable-snappy-15.04/src/main.c
+--- nm-snappy-support.orig/src/main.c
++++ nm-snappy-support/src/main.c
 @@ -55,6 +55,7 @@
  #include "nm-posix-signals.h"
  #include "nm-session-monitor.h"
@@ -89,10 +89,10 @@ Index: nm-enable-snappy-15.04/src/main.c
  	g_assert (dbus_mgr != NULL);
  
  	vpn_manager = nm_vpn_manager_get ();
-Index: nm-enable-snappy-15.04/src/settings/nm-settings.c
+Index: nm-snappy-support/src/settings/nm-settings.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/settings/nm-settings.c
-+++ nm-enable-snappy-15.04/src/settings/nm-settings.c
+--- nm-snappy-support.orig/src/settings/nm-settings.c
++++ nm-snappy-support/src/settings/nm-settings.c
 @@ -68,6 +68,7 @@
  #include "nm-connection-provider.h"
  #include "nm-config.h"
@@ -165,10 +165,10 @@ Index: nm-enable-snappy-15.04/src/settings/nm-settings.c
  		g_object_unref (self);
  		return NULL;
  	}
-Index: nm-enable-snappy-15.04/src/nm-manager.c
+Index: nm-snappy-support/src/nm-manager.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/nm-manager.c
-+++ nm-enable-snappy-15.04/src/nm-manager.c
+--- nm-snappy-support.orig/src/nm-manager.c
++++ nm-snappy-support/src/nm-manager.c
 @@ -70,7 +70,7 @@
  #include "nm-sleep-monitor.h"
  #include "nm-connectivity.h"
@@ -231,10 +231,10 @@ Index: nm-enable-snappy-15.04/src/nm-manager.c
  }
  
  static void
-Index: nm-enable-snappy-15.04/src/nm-activation-request.c
+Index: nm-snappy-support/src/nm-activation-request.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/nm-activation-request.c
-+++ nm-enable-snappy-15.04/src/nm-activation-request.c
+--- nm-snappy-support.orig/src/nm-activation-request.c
++++ nm-snappy-support/src/nm-activation-request.c
 @@ -37,6 +37,7 @@
  #include "nm-active-connection.h"
  #include "nm-settings-connection.h"
@@ -258,10 +258,10 @@ Index: nm-enable-snappy-15.04/src/nm-activation-request.c
  		                       IPTABLES_PATH,
  		                       rule->table,
  		                       shared ? "--insert" : "--delete",
-Index: nm-enable-snappy-15.04/src/devices/nm-device.c
+Index: nm-snappy-support/src/devices/nm-device.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/devices/nm-device.c
-+++ nm-enable-snappy-15.04/src/devices/nm-device.c
+--- nm-snappy-support.orig/src/devices/nm-device.c
++++ nm-snappy-support/src/devices/nm-device.c
 @@ -78,6 +78,8 @@ static void impl_device_disconnect (NMDe
  
  #include "nm-device-glue.h"
@@ -294,10 +294,10 @@ Index: nm-enable-snappy-15.04/src/devices/nm-device.c
  }
  
  static gboolean
-Index: nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-dhclient.c
+Index: nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/dhcp-manager/nm-dhcp-dhclient.c
-+++ nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-dhclient.c
+--- nm-snappy-support.orig/src/dhcp-manager/nm-dhcp-dhclient.c
++++ nm-snappy-support/src/dhcp-manager/nm-dhcp-dhclient.c
 @@ -42,20 +42,21 @@
  #include "nm-dhcp-dhclient-utils.h"
  #include "nm-dhcp-manager.h"
@@ -450,10 +450,10 @@ Index: nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-dhclient.c
  
  	G_OBJECT_CLASS (nm_dhcp_dhclient_parent_class)->dispose (object);
  }
-Index: nm-enable-snappy-15.04/src/settings/plugins/keyfile/plugin.c
+Index: nm-snappy-support/src/settings/plugins/keyfile/plugin.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/settings/plugins/keyfile/plugin.c
-+++ nm-enable-snappy-15.04/src/settings/plugins/keyfile/plugin.c
+--- nm-snappy-support.orig/src/settings/plugins/keyfile/plugin.c
++++ nm-snappy-support/src/settings/plugins/keyfile/plugin.c
 @@ -44,6 +44,7 @@
  #include "writer.h"
  #include "common.h"
@@ -511,10 +511,10 @@ Index: nm-enable-snappy-15.04/src/settings/plugins/keyfile/plugin.c
  
  		connection = g_hash_table_lookup (oldconns, full_path);
  		if (connection) {
-Index: nm-enable-snappy-15.04/src/snappy.h
+Index: nm-snappy-support/src/snappy.h
 ===================================================================
 --- /dev/null
-+++ nm-enable-snappy-15.04/src/snappy.h
++++ nm-snappy-support/src/snappy.h
 @@ -0,0 +1,45 @@
 +/* NetworkManager -- Network link manager
 + *
@@ -561,10 +561,10 @@ Index: nm-enable-snappy-15.04/src/snappy.h
 +}
 +
 +#endif
-Index: nm-enable-snappy-15.04/src/Makefile.am
+Index: nm-snappy-support/src/Makefile.am
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/Makefile.am
-+++ nm-enable-snappy-15.04/src/Makefile.am
+--- nm-snappy-support.orig/src/Makefile.am
++++ nm-snappy-support/src/Makefile.am
 @@ -56,8 +56,6 @@ NetworkManager_LDADD = libNetworkManager
  noinst_LTLIBRARIES = libNetworkManager.la
  
@@ -574,197 +574,44 @@ Index: nm-enable-snappy-15.04/src/Makefile.am
  	config/nm-config.c \
  	config/nm-config.h \
  	config/nm-config-device.c \
-Index: nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-dhclient.h
+Index: nm-snappy-support/src/settings/plugins/keyfile/writer.c
 ===================================================================
---- nm-enable-snappy-15.04.orig/src/dhcp-manager/nm-dhcp-dhclient.h
-+++ nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-dhclient.h
-@@ -45,7 +45,7 @@ GSList *nm_dhcp_dhclient_get_lease_ip_co
-                                                const char *uuid,
-                                                gboolean ipv6);
- 
--const char *nm_dhcp_dhclient_get_path (const char *try_first);
-+char *nm_dhcp_dhclient_get_path (const char *try_first);
- 
- #endif /* NM_DHCP_DHCLIENT_H */
- 
-Index: nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-manager.c
-===================================================================
---- nm-enable-snappy-15.04.orig/src/dhcp-manager/nm-dhcp-manager.c
-+++ nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-manager.c
-@@ -43,6 +43,7 @@
- #include "nm-dbus-glib-types.h"
- #include "nm-glib-compat.h"
- #include "NetworkManagerUtils.h"
+--- nm-snappy-support.orig/src/settings/plugins/keyfile/writer.c
++++ nm-snappy-support/src/settings/plugins/keyfile/writer.c
+@@ -48,6 +48,7 @@
+ #include "writer.h"
+ #include "common.h"
+ #include "utils.h"
 +#include "snappy.h"
  
- GQuark
- nm_dhcp_manager_error_quark (void)
-@@ -63,7 +64,7 @@ nm_dhcp_manager_error_quark (void)
- #define PRIV_SOCK_TAG  "dhcp"
- 
- /* default to installed helper, but can be modified for testing */
--const char *nm_dhcp_helper_path = LIBEXECDIR "/nm-dhcp-helper";
-+char *nm_dhcp_helper_path = NULL;
- 
- typedef GSList * (*GetLeaseConfigFunc) (const char *iface, const char *uuid, gboolean ipv6);
- 
-@@ -287,7 +288,7 @@ dis_connection_cb (NMDBusManager *mgr,
- static GType
- get_client_type (const char *client, GError **error)
+ /* Some setting properties also contain setting names, such as
+  * NMSettingConnection's 'type' property (which specifies the base type of the
+@@ -1124,12 +1125,26 @@ nm_keyfile_plugin_write_connection (NMCo
+                                     char **out_path,
+                                     GError **error)
  {
--	const char *dhclient_path = NULL;
-+	char *dhclient_path = NULL;
- 	const char *dhcpcd_path = NULL;
- 
- 	/* If a client was disabled at build-time, its *_PATH define will be
-@@ -301,8 +302,10 @@ get_client_type (const char *client, GEr
- 		dhcpcd_path = nm_dhcp_dhcpcd_get_path (DHCPCD_PATH);
- 
- 	if (!client) {
--		if (dhclient_path)
-+		if (dhclient_path) {
-+			g_free (dhclient_path);
- 			return NM_TYPE_DHCP_DHCLIENT;
-+		}
- 		else if (dhcpcd_path)
- 			return NM_TYPE_DHCP_DHCPCD;
- 		else {
-@@ -320,6 +323,8 @@ get_client_type (const char *client, GEr
- 			                     _("'dhclient' could be found."));
- 			return G_TYPE_INVALID;
- 		}
+-	return _internal_write_connection (connection,
+-	                                   KEYFILE_DIR,
++	gboolean ret;
++	char *keyfile_dir = NULL;
 +
-+		g_free (dhclient_path);
- 		return NM_TYPE_DHCP_DHCLIENT;
- 	}
- 
-@@ -585,6 +590,11 @@ nm_dhcp_manager_init (NMDHCPManager *sel
- 	DBusGConnection *g_connection;
- #endif
- 
-+	if (get_snap_app_path ())
-+		nm_dhcp_helper_path = g_strdup_printf ("%s%s/nm-dhcp-helper", get_snap_app_path(), LIBEXECDIR);
++	if (get_snap_app_data_path())
++		keyfile_dir = g_strdup_printf("%s%s",
++					      get_snap_app_data_path(),
++					      KEYFILE_DIR);
 +	else
-+		nm_dhcp_helper_path = g_strdup_printf ("%s/nm-dhcp-helper", LIBEXECDIR);
++		keyfile_dir = g_strdup(KEYFILE_DIR);
 +
- 	/* Maps DBusGConnection :: DBusGProxy */
- 	priv->proxies = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
- 
-@@ -663,6 +673,9 @@ dispose (GObject *object)
- 	if (priv->proxy)
- 		g_object_unref (priv->proxy);
- 
-+	if (nm_dhcp_helper_path)
-+		g_free (nm_dhcp_helper_path);
++	ret = _internal_write_connection (connection,
++	                                   keyfile_dir,
+ 	                                   0, 0,
+ 	                                   existing_path,
+ 	                                   out_path,
+ 	                                   error);
 +
- 	G_OBJECT_CLASS (nm_dhcp_manager_parent_class)->dispose (object);
++	g_free(keyfile_dir);
++
++	return ret;
  }
  
-Index: nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-manager.h
-===================================================================
---- nm-enable-snappy-15.04.orig/src/dhcp-manager/nm-dhcp-manager.h
-+++ nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-manager.h
-@@ -94,6 +94,6 @@ NMIP4Config *nm_dhcp_manager_test_ip4_op
-                                                          GHashTable *options,
-                                                          const char *reason);
- 
--extern const char* nm_dhcp_helper_path;
-+extern char* nm_dhcp_helper_path;
- 
- #endif /* NM_DHCP_MANAGER_H */
-Index: nm-enable-snappy-15.04/src/dns-manager/nm-dns-dnsmasq.c
-===================================================================
---- nm-enable-snappy-15.04.orig/src/dns-manager/nm-dns-dnsmasq.c
-+++ nm-enable-snappy-15.04/src/dns-manager/nm-dns-dnsmasq.c
-@@ -40,6 +40,7 @@
- #include "nm-ip6-config.h"
- #include "nm-dns-utils.h"
- #include "nm-dbus-manager.h"
-+#include "snappy.h"
- 
- G_DEFINE_TYPE (NMDnsDnsmasq, nm_dns_dnsmasq, NM_TYPE_DNS_PLUGIN)
- 
-@@ -253,6 +254,11 @@ start_dnsmasq (NMDnsDnsmasq *self)
- 	GString *conf;
- 	GPid pid = 0;
- 	guint idx = 0;
-+	char *pid_file;
-+	char *conf_file;
-+	const char *app_data_path;
-+	char *dir_name = NULL;
-+	char *app_path = NULL;
- 
- 	/* dnsmasq is probably already started; if it's the case, don't do
- 	 * anything more.
-@@ -262,14 +268,33 @@ start_dnsmasq (NMDnsDnsmasq *self)
- 		return TRUE;
- 
- 	/* Start dnsmasq */
-+	if ((app_data_path = get_snap_app_data_path())) {
-+		pid_file = g_strdup_printf ("%s%s", app_data_path, PIDFILE);
-+		nm_log_warn (LOGD_DNS, "start_dnsmasq: pid_file: %s", pid_file);
-+
-+		conf_file = g_strdup_printf ("%s%s", app_data_path, CONFFILE);
-+		nm_log_warn (LOGD_DNS, "start_dnsmasq: conf_file: %s", conf_file);
-+
-+		dir_name = g_strdup_printf ("%s%s", app_data_path, NMRUNDIR);
-+		nm_log_warn (LOGD_DNS, "start_dnsmasq: dir_name: %s", dir_name);
-+
-+		if (!g_file_test (dir_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-+			if (!g_mkdir_with_parents (dir_name, 0755)) {
-+				nm_log_warn (LOGD_DNS, "start_dnsmasq: failed to create dnsmasq config dir: %s", dir_name);
-+			}
-+		}
-+	} else {
-+		pid_file = g_strdup_printf (PIDFILE);
-+		conf_file = g_strdup_printf (CONFFILE);
-+	}
- 
- 	/* Build up the new dnsmasq config file */
- 	conf = g_string_sized_new (150);
- 
- 	/* Write out the config file */
--	if (!g_file_set_contents (CONFFILE, conf->str, -1, &error)) {
-+	if (!g_file_set_contents (conf_file, conf->str, -1, &error)) {
- 		nm_log_warn (LOGD_DNS, "Failed to write dnsmasq config file %s: (%d) %s",
--		             CONFFILE,
-+		             conf_file,
- 		             error ? error->code : -1,
- 		             error && error->message ? error->message : "(unknown)");
- 		g_clear_error (&error);
-@@ -280,7 +305,14 @@ start_dnsmasq (NMDnsDnsmasq *self)
- 	nm_log_dbg (LOGD_DNS, "dnsmasq local caching DNS configuration:");
- 	nm_log_dbg (LOGD_DNS, "%s", conf->str);
- 
--	argv[idx++] = find_dnsmasq ();
-+	if (get_snap_app_path ())
-+		app_path = g_strdup_printf ("%s/usr/sbin/dnsmasq", get_snap_app_path ());
-+	else
-+		app_path = g_strdup (find_dnsmasq ());
-+
-+	nm_log_warn (LOGD_DNS, "dnsmasq app_path: %s", app_path);
-+
-+	argv[idx++] = app_path;
- 	argv[idx++] = "--no-resolv";  /* Use only commandline */
- 	argv[idx++] = "--keep-in-foreground";
- 	argv[idx++] = "--no-hosts"; /* don't use /etc/hosts to resolve */
-@@ -300,9 +332,18 @@ start_dnsmasq (NMDnsDnsmasq *self)
- 	g_warn_if_fail (idx <= G_N_ELEMENTS (argv));
- 
- 	/* And finally spawn dnsmasq */
--	pid = nm_dns_plugin_child_spawn (NM_DNS_PLUGIN (self), argv, PIDFILE, "bin/dnsmasq");
-+	pid = nm_dns_plugin_child_spawn (NM_DNS_PLUGIN (self), argv, pid_file, "bin/dnsmasq");
- 
- out:
-+	g_free (pid_file);
-+	g_free (conf_file);
-+
-+	if (dir_name)
-+		g_free (dir_name);
-+
-+	if (app_path)
-+		g_free (app_path);
-+
- 	g_string_free (conf, TRUE);
- 	return pid ? TRUE : FALSE;
- }
+ gboolean
