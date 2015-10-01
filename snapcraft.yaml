@@ -10,6 +10,11 @@ services:
     start: bin/networkmanager
     security-template: unconfined
     bus-name: org.freedesktop.NetworkManager
+  dnsmasq:
+    description: Dnsmasq
+    start: bin/dnsmasq
+    security-template: unconfined
+    bus-name: org.freedesktop.NetworkManager.dnsmasq
 #  modemmanager:
 #    description: Modem manager
 #    start: bin/modemmanager
@@ -56,7 +61,9 @@ parts:
     files:
       bin/networkmanager: bin/networkmanager
       bin/modemmanager: bin/modemmanager
-      config/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
+      bin/dnsmasq: bin/dnsmasq
+      conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
+      conf/dnsmasq-dbus.conf: conf/dnsmasq-dbus.conf
 
   network-manager:
     type: x-custom
