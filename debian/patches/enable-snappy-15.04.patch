@@ -672,3 +672,99 @@ Index: nm-enable-snappy-15.04/src/dhcp-manager/nm-dhcp-manager.h
 +extern char* nm_dhcp_helper_path;
  
  #endif /* NM_DHCP_MANAGER_H */
+Index: nm-enable-snappy-15.04/src/dns-manager/nm-dns-dnsmasq.c
+===================================================================
+--- nm-enable-snappy-15.04.orig/src/dns-manager/nm-dns-dnsmasq.c
++++ nm-enable-snappy-15.04/src/dns-manager/nm-dns-dnsmasq.c
+@@ -40,6 +40,7 @@
+ #include "nm-ip6-config.h"
+ #include "nm-dns-utils.h"
+ #include "nm-dbus-manager.h"
++#include "snappy.h"
+ 
+ G_DEFINE_TYPE (NMDnsDnsmasq, nm_dns_dnsmasq, NM_TYPE_DNS_PLUGIN)
+ 
+@@ -253,6 +254,11 @@ start_dnsmasq (NMDnsDnsmasq *self)
+ 	GString *conf;
+ 	GPid pid = 0;
+ 	guint idx = 0;
++	char *pid_file;
++	char *conf_file;
++	const char *app_data_path;
++	char *dir_name = NULL;
++	char *app_path = NULL;
+ 
+ 	/* dnsmasq is probably already started; if it's the case, don't do
+ 	 * anything more.
+@@ -262,14 +268,33 @@ start_dnsmasq (NMDnsDnsmasq *self)
+ 		return TRUE;
+ 
+ 	/* Start dnsmasq */
++	if ((app_data_path = get_snap_app_data_path())) {
++		pid_file = g_strdup_printf ("%s%s", app_data_path, PIDFILE);
++		nm_log_warn (LOGD_DNS, "start_dnsmasq: pid_file: %s", pid_file);
++
++		conf_file = g_strdup_printf ("%s%s", app_data_path, CONFFILE);
++		nm_log_warn (LOGD_DNS, "start_dnsmasq: conf_file: %s", conf_file);
++
++		dir_name = g_strdup_printf ("%s%s", app_data_path, NMRUNDIR);
++		nm_log_warn (LOGD_DNS, "start_dnsmasq: dir_name: %s", dir_name);
++
++		if (!g_file_test (dir_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
++			if (!g_mkdir_with_parents (dir_name, 0755)) {
++				nm_log_warn (LOGD_DNS, "start_dnsmasq: failed to create dnsmasq config dir: %s", dir_name);
++			}
++		}
++	} else {
++		pid_file = g_strdup_printf (PIDFILE);
++		conf_file = g_strdup_printf (CONFFILE);
++	}
+ 
+ 	/* Build up the new dnsmasq config file */
+ 	conf = g_string_sized_new (150);
+ 
+ 	/* Write out the config file */
+-	if (!g_file_set_contents (CONFFILE, conf->str, -1, &error)) {
++	if (!g_file_set_contents (conf_file, conf->str, -1, &error)) {
+ 		nm_log_warn (LOGD_DNS, "Failed to write dnsmasq config file %s: (%d) %s",
+-		             CONFFILE,
++		             conf_file,
+ 		             error ? error->code : -1,
+ 		             error && error->message ? error->message : "(unknown)");
+ 		g_clear_error (&error);
+@@ -280,7 +305,14 @@ start_dnsmasq (NMDnsDnsmasq *self)
+ 	nm_log_dbg (LOGD_DNS, "dnsmasq local caching DNS configuration:");
+ 	nm_log_dbg (LOGD_DNS, "%s", conf->str);
+ 
+-	argv[idx++] = find_dnsmasq ();
++	if (get_snap_app_path ())
++		app_path = g_strdup_printf ("%s/usr/sbin/dnsmasq", get_snap_app_path ());
++	else
++		app_path = g_strdup (find_dnsmasq ());
++
++	nm_log_warn (LOGD_DNS, "dnsmasq app_path: %s", app_path);
++
++	argv[idx++] = app_path;
+ 	argv[idx++] = "--no-resolv";  /* Use only commandline */
+ 	argv[idx++] = "--keep-in-foreground";
+ 	argv[idx++] = "--no-hosts"; /* don't use /etc/hosts to resolve */
+@@ -300,9 +332,18 @@ start_dnsmasq (NMDnsDnsmasq *self)
+ 	g_warn_if_fail (idx <= G_N_ELEMENTS (argv));
+ 
+ 	/* And finally spawn dnsmasq */
+-	pid = nm_dns_plugin_child_spawn (NM_DNS_PLUGIN (self), argv, PIDFILE, "bin/dnsmasq");
++	pid = nm_dns_plugin_child_spawn (NM_DNS_PLUGIN (self), argv, pid_file, "bin/dnsmasq");
+ 
+ out:
++	g_free (pid_file);
++	g_free (conf_file);
++
++	if (dir_name)
++		g_free (dir_name);
++
++	if (app_path)
++		g_free (app_path);
++
+ 	g_string_free (conf, TRUE);
+ 	return pid ? TRUE : FALSE;
+ }
