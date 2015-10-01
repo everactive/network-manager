@@ -73,7 +73,7 @@ parts:
     # which helps to improve turn around times during development.
     source: https://git.launchpad.net/~phablet-team/+git/nm-enable-snappy-15.04
     source-type: git
-    # source-branch: work
+    source-branch: unstable
 
     # We're using the debian packaging infrastructure here to build
     # the binaries instead of doing every step manually here.
