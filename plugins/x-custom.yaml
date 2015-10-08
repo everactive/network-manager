@@ -1,5 +1,7 @@
 module: x_custom
 options:
+    stage:
+    snap:
     source:
         required: true
     source-type:

@@ -4,11 +4,22 @@ set -e
 set -x
 
 # Copy in our dbus policy until snappy has support for this
-cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.ModemManager.conf \
+cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf \
     /etc/dbus-1/system.d/$SNAP_APP.conf
 
+TRIPLET=
+
+case $SNAP_ARCH in
+    amd64)
+        TRIPLET=x86_64-linux-gnu
+        ;;
+    *)
+        echo "ERROR: Architecture $SNAP_ARCH isn't supported by this snap"
+        exit 1
+esac
+
 # XXX hardcoded architecture
-LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu:$SNAP_APP_PATH/usr/lib/x86_64-linux-gnu/ModemManager" \
+LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/$TRIPLET:$SNAP_APP_PATH/usr/lib/$TRIPLET/ModemManager" \
 $SNAP_APP_PATH/usr/sbin/ModemManager \
     --log-level=DEBUG \
     --no-daemon \

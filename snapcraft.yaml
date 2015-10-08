@@ -106,13 +106,13 @@ parts:
       - uuid-dev
       - libsystemd-dev
       - libudev-dev
+      - libmm-glib-dev
       - libgudev-1.0-dev
       - libgirepository1.0-dev
       - gobject-introspection
       - libsoup2.4-dev
       - gtk-doc-tools
       - libglib2.0-doc
-      - libmm-glib-dev
       - libndp-dev
       - libreadline-dev
       - libnewt-dev
@@ -121,6 +121,17 @@ parts:
       - isc-dhcp-client
       - python-dbus
       - python-gi
+
+    # Ignore things we have in our install directory through
+    # pulling in certain dependencies
+    stage:
+      - -usr/include/libmm-glib/*
+      - -usr/bin/mmcli
+      - -etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
+      - -usr/lib/x86_64-linux-gnu/ModemManager/
+      - -usr/lib/x86_64-linux-gnu/libmm-glib.so.0.2.0
+      - -usr/sbin/ModemManager
+      - -usr/share/icons/hicolor/22x22/apps/ModemManager.png
 
     # We don't want that anything from our staged packages ends
     # up in the resulting snap. We only need them to build
@@ -159,6 +170,35 @@ parts:
       - $binaries
       - $configs
 
+  modemmanager:
+    type: x-custom
+    source: https://git.launchpad.net/~morphis/+git/modemmanager-snappy-vivid
+    source-type: git
+    custom-cmds:
+      - debian/rules build
+      - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
+    stage-packages:
+      - automake
+      - libtool
+      - intltool
+      - gtk-doc-tools
+      - gnome-common
+      - gobject-introspection
+      - libgirepository1.0-dev
+      - libglib2.0-dev
+      - libgudev-1.0-dev
+      - libqmi-glib-dev
+      - libmbim-glib-dev
+      - libglib2.0-doc
+      - valac
+    filesets:
+      binaries:
+        - usr/bin/mmcli
+        - usr/sbin/ModemManager
+        - usr/lib/x86_64-linux-gnu/ModemManager
+    snap:
+      - $binaries
+
   rdepends:
     # noop to pull packages
     type: copy
@@ -174,7 +214,6 @@ parts:
       - libglib2.0-0
       - libgnutls-deb0-28
       - libgudev-1.0-0
-      - libmm-glib0
       - libndp0
       - libnewt0.52
       - libnl-3-200
@@ -188,7 +227,6 @@ parts:
       - libuuid1
       - init-system-helpers
       - lsb-base
-      - modemmanager
       - dnsmasq-base
       - udev
       - isc-dhcp-client
@@ -196,3 +234,5 @@ parts:
       - libpam-systemd
       - policykit-1
       - wireless-tools
+      - libqmi-glib1
+      - libmbim-glib4
