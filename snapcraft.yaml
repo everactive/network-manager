@@ -51,6 +51,9 @@ binaries:
   iwconfig:
     exec: sbin/iwconfig
     security-template: unconfined
+  mmcli:
+    exec: usr/bin/mmcli
+    security-template: unconfined
 summary: Network management based on NeworkManager and ModemManager
 description: Network management of wired ethernet, WiFi and mobile data connection based on NetworkManager and ModemManager
 icon: icon.svg
