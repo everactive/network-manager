@@ -175,7 +175,7 @@ parts:
 
   modemmanager:
     type: x-custom
-    source: https://git.launchpad.net/~morphis/+git/modemmanager-snappy-vivid
+    source: https://git.launchpad.net/~phablet-team/+git/modemmanager-snappy-vivid
     source-type: git
     custom-cmds:
       - debian/rules build
