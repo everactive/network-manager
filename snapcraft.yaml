@@ -199,6 +199,7 @@ parts:
         - usr/bin/mmcli
         - usr/sbin/ModemManager
         - usr/lib/x86_64-linux-gnu/ModemManager
+        - usr/lib/x86_64-linux-gnu/libmm-glib.so*
     snap:
       - $binaries
 
