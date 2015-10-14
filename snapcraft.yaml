@@ -177,18 +177,18 @@ parts:
         - usr/bin/nmtui-connect
         - usr/bin/nmtui-hostname
         - usr/bin/nmtui-edit
-        - usr/lib/x86_64-linux-gnu/NetworkManager
+        - usr/lib/*/NetworkManager
         - usr/lib/pppd/2.4.6/nm-pppd-plugin.so
         - usr/lib/NetworkManager
         - usr/sbin/NetworkManager
-        - usr/lib/x86_64-linux-gnu/libnm-*
+        - usr/lib/*/libnm-*
       configs:
         - etc/NetworkManager
         - etc/dbus-1/system.d/*
       rdepends:
         - lib64/*
-        - lib/x86_64-linux-gnu/
-        - usr/lib/x86_64-linux-gnu/
+        - lib/*/
+        - usr/lib/*/
         - sbin/iwconfig
         - sbin/iwlist
         - sbin/dhclient-script
@@ -233,7 +233,7 @@ parts:
       binaries:
         - usr/bin/mmcli
         - usr/sbin/ModemManager
-        - usr/lib/x86_64-linux-gnu/ModemManager
-        - usr/lib/x86_64-linux-gnu/libmm-glib.so*
+        - usr/lib/*/ModemManager
+        - usr/lib/*/libmm-glib.so*
     snap:
       - $binaries
