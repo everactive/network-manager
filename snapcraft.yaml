@@ -155,6 +155,8 @@ parts:
 
     # Don't stage the following things as we would get conflicts at
     # build time otherwise
+    # NOTE: If you extend this list you also have to extend the
+    # 'unwanted' fileset below with the same new entries.
     stage:
       - -etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
       - -usr/bin/mmcli
@@ -201,10 +203,19 @@ parts:
         - usr/bin/arping
         - usr/share/dnsmasq-base/
         - etc/dhcp/
+      unwanted:
+        - -etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
+        - -usr/bin/mmcli
+        - -usr/include/libmm-glib/
+        - -usr/lib/*/libmm-glib.so*
+        - -usr/lib/*/ModemManager/
+        - -usr/sbin/ModemManager
+        - -usr/share/icons/hicolor/22x22/apps/ModemManager.png
     snap:
       - $binaries
       - $configs
       - $rdepends
+      - $unwanted
 
   modemmanager:
     plugin: x-custom
