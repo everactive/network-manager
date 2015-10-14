@@ -15,11 +15,11 @@ services:
     start: bin/dnsmasq
     security-template: unconfined
     bus-name: org.freedesktop.NetworkManager.dnsmasq
-#  modemmanager:
-#    description: Modem manager
-#    start: bin/modemmanager
-#    security-template: unconfined
-#    bus-name: org.freedesktop.ModemManager
+  modemmanager:
+    description: Modem manager
+    start: bin/modemmanager
+    security-template: unconfined
+    bus-name: org.freedesktop.ModemManager1
 binaries:
   nmcli:
     exec: usr/bin/nmcli
@@ -246,5 +246,8 @@ parts:
         - usr/sbin/ModemManager
         - usr/lib/*/ModemManager
         - usr/lib/*/libmm-glib.so*
+      configs:
+        - etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
     snap:
       - $binaries
+      - $configs
