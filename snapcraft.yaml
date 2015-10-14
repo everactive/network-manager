@@ -68,7 +68,7 @@ parts:
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
       conf/dnsmasq-dbus.conf: conf/dnsmasq-dbus.conf
 
-  network-manager:
+  networkmanager:
     plugin: x-custom
 
     # NOTE: The branch below is a unpacked debian source package
@@ -90,49 +90,77 @@ parts:
       - mkdir -p $SNAPCRAFT_PART_INSTALL_DIR/etc/dnsmasq.d/network-manager
       - install -m 644 debian/network-manager.dnsmasq $SNAPCRAFT_PART_INSTALL_DIR/etc/dnsmasq.d/network-manager
 
-    # We only stage build time dependencies here. All runtime ones
-    # are staged with the rdepends part
+    # We stage everything here we need for build and runtime
     stage-packages:
-      - pkg-config
-      - intltool
-      - libdbus-glib-1-dev
-      - libdbus-1-dev
-      - libiw-dev
-      - libglib2.0-dev
-      - libnl-3-dev
-      - libnl-route-3-dev
-      - libnl-genl-3-dev
-      - ppp-dev
-      - libpolkit-gobject-1-dev
-      - libgnutls28-dev
-      - libgcrypt11-dev
-      - uuid-dev
-      - libsystemd-dev
-      - libudev-dev
-      - libmm-glib-dev
-      - libgudev-1.0-dev
-      - libgirepository1.0-dev
-      - gobject-introspection
-      - libsoup2.4-dev
-      - gtk-doc-tools
-      - libglib2.0-doc
-      - libndp-dev
-      - libreadline-dev
-      - libnewt-dev
-      - valac
+      - adduser
       - dbus-test-runner
+      - dnsmasq-base
+      - gobject-introspection
+      - gtk-doc-tools
+      - init-system-helpers
+      - intltool
+      - iputils-arping
       - isc-dhcp-client
+      - libc6
+      - libdbus-1-3
+      - libdbus-1-dev
+      - libdbus-glib-1-2
+      - libdbus-glib-1-dev
+      - libgcrypt11-dev
+      - libgcrypt20
+      - libgirepository1.0-dev
+      - libglib2.0-0
+      - libglib2.0-dev
+      - libglib2.0-doc
+      - libgnutls-deb0-28
+      - libgnutls28-dev
+      - libgudev-1.0-0
+      - libgudev-1.0-dev
+      - libiw-dev
+      - libmbim-glib4
+      - libmm-glib-dev
+      - libndp-dev
+      - libndp0
+      - libnewt-dev
+      - libnewt0.52
+      - libnl-3-200
+      - libnl-3-dev
+      - libnl-genl-3-200
+      - libnl-genl-3-dev
+      - libnl-route-3-200
+      - libnl-route-3-dev
+      - libpam-systemd
+      - libpolkit-agent-1-0
+      - libpolkit-gobject-1-0
+      - libpolkit-gobject-1-dev
+      - libqmi-glib1
+      - libreadline-dev
+      - libreadline6
+      - libsoup2.4-1
+      - libsoup2.4-dev
+      - libsystemd-dev
+      - libsystemd0
+      - libudev-dev
+      - libuuid1
+      - lsb-base
+      - pkg-config
+      - policykit-1
+      - ppp-dev
       - python-dbus
       - python-gi
+      - udev
+      - uuid-dev
+      - valac
+      - wireless-tools
 
-    # Ignore things we have in our install directory through
-    # pulling in certain dependencies
+    # Don't stage the following things as we would get conflicts at
+    # build time otherwise
     stage:
-      - -usr/include/libmm-glib/*
-      - -usr/bin/mmcli
       - -etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
-      - -usr/lib/x86_64-linux-gnu/ModemManager/
-      - -usr/lib/x86_64-linux-gnu/libmm-glib.so.0.2.0
+      - -usr/bin/mmcli
+      - -usr/include/libmm-glib/
+      - -usr/lib/*/libmm-glib.so*
+      - -usr/lib/*/ModemManager/
       - -usr/sbin/ModemManager
       - -usr/share/icons/hicolor/22x22/apps/ModemManager.png
 
@@ -157,24 +185,31 @@ parts:
       configs:
         - etc/NetworkManager
         - etc/dbus-1/system.d/*
-
-        # Unneeded config files:
-        # - usr/share/dbus-1/system-services/org.freedesktop.nm_dispatcher.service
-        # - usr/share/polkit-1/actions/org.freedesktop.NetworkManager.policy
-
-        # TODO: dpkg -L network-manager lists the following files but it
-        # doesn't get installed with make install. Propably part of the
-        # debian package?
-        # - usr/share/polkit-1/rules.d/60-network-manager.rules
-        # - etc/dnsmasq.d/network-manager
-        # - var/lib/polkit-1/localauthority/10-vendor.d/org.freedesktop.NetworkManager.pkla
-
+      rdepends:
+        - lib64/*
+        - lib/x86_64-linux-gnu/
+        - usr/lib/x86_64-linux-gnu/
+        - sbin/iwconfig
+        - sbin/iwlist
+        - sbin/dhclient-script
+        - sbin/dhclient
+        - bin/ip
+        - etc/dbus-1/system.d/dnsmasq.conf
+        - etc/iproute2/
+        - usr/sbin/arpd
+        - usr/sbin/dnsmasq
+        - usr/bin/arping
+        - usr/share/dnsmasq-base/
+        - etc/dhcp/
     snap:
       - $binaries
       - $configs
+      - $rdepends
 
   modemmanager:
     plugin: x-custom
+    after:
+      - networkmanager
     source: https://git.launchpad.net/~phablet-team/+git/modemmanager-snappy-vivid
     source-type: git
     custom-cmds:
@@ -202,42 +237,3 @@ parts:
         - usr/lib/x86_64-linux-gnu/libmm-glib.so*
     snap:
       - $binaries
-
-  rdepends:
-    # noop to pull packages
-    plugin: copy
-    files:
-      none: []
-    stage-packages:
-      # package list generated manually by looking at the output of:
-      # $ apt-cache showpkg network-manager
-      - adduser
-      - libc6
-      - libdbus-1-3
-      - libdbus-glib-1-2
-      - libgcrypt20
-      - libglib2.0-0
-      - libgnutls-deb0-28
-      - libgudev-1.0-0
-      - libndp0
-      - libnewt0.52
-      - libnl-3-200
-      - libnl-genl-3-200
-      - libnl-route-3-200
-      - libpolkit-agent-1-0
-      - libpolkit-gobject-1-0
-      - libreadline6
-      - libsoup2.4-1
-      - libsystemd0
-      - libuuid1
-      - init-system-helpers
-      - lsb-base
-      - dnsmasq-base
-      - udev
-      - isc-dhcp-client
-      - iputils-arping
-      - libpam-systemd
-      - policykit-1
-      - wireless-tools
-      - libqmi-glib1
-      - libmbim-glib4
