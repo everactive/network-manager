@@ -6,6 +6,11 @@ NetworkManager. At the moment this is not officially supported.
 
 You can reach us on the #snappy IRC channel on freenode.
 
+Dependencies
+============
+
+We require snapcraft >= 0.3 for building this snap.
+
 Build Instructions
 ==================
 
