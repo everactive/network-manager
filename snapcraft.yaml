@@ -211,6 +211,35 @@ parts:
         - -usr/lib/*/ModemManager/
         - -usr/sbin/ModemManager
         - -usr/share/icons/hicolor/22x22/apps/ModemManager.png
+        - -usr/lib/*/gobject-introspection
+        - -usr/lib/*/pkgconfig
+        - -usr/lib/pkgconfig
+        - -usr/lib/*/perl/
+        - -usr/lib/*/perl5/
+        - -usr/lib/python2.7/
+        - -usr/lib/python3.4/
+        - -usr/lib/python3/
+        - -usr/lib/gcc/
+        - -usr/lib/ldscripts/
+        - -usr/lib/policykit-1
+        - -usr/lib/valgrind/
+        - -usr/lib/*/dbus-1.0/
+        - -usr/lib/*/girepository-1.0/
+        - -usr/lib/*/gconv/
+        - -usr/lib/girepository-1.0/
+        - -usr/lib/compat-ld/
+        - -usr/lib/dbus-1.0/dbus-daemon-launch-helper
+        - -usr/lib/dpkg/
+        - -lib/udev
+        - -lib/systemd
+        - -lib/ifupdown
+        - -lib/lsb
+        - -usr/lib/*.a
+        - -usr/lib/*/*.a
+        - -usr/lib/*.la
+        - -usr/lib/*/*.la
+        - -usr/lib/*/NetworkManager/*.la
+        - -usr/lib/pppd/*/nm-pppd-plugin.la
     snap:
       - $binaries
       - $configs
@@ -248,6 +277,14 @@ parts:
         - usr/lib/*/libmm-glib.so*
       configs:
         - etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
+      unwanted:
+        - -usr/lib/*/ModemManager/*.a
+        - -usr/lib/*/ModemManager/*.la
+        - -usr/lib/*.a
+        - -usr/lib/*/*.a
+        - -usr/lib/*.la
+        - -usr/lib/*/*.la
     snap:
       - $binaries
       - $configs
+      - $unwanted
