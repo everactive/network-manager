@@ -4,9 +4,8 @@ probably incomplete):
 - Confinement: Currently everything runs unconfined which needs to be
   changed to secure everything.
 
-- ModemManager support: We need to modify modem manager the same
-  way as we modified NetworkManager to not rely on any directories
-  outside of SNAP_APP_PATH or SNAP_APP_DATA_PATH
+- ModemManager:
+    * Verify with a real modem that everything we need is working
 
 - NetworkManager:
     * Fix usage of timestamp files outside of SNAP_APP_DATA_PATH
