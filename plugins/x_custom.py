@@ -42,6 +42,16 @@ class CustomPlugin(snapcraft.BasePlugin):
         executed. This is a limitation of the current version of snapcraft.
     """
 
+    @classmethod
+    def schema(cls):
+        schema = super().schema()
+        schema['properties']['custom-cmds'] = {
+            'type': 'array'
+        }
+        schema['required'].append('custom-cmds')
+        return schema
+
+
     def build(self):
         """Build a custom snap part."""
         def make_cmd_list(cmd):

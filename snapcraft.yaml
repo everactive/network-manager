@@ -60,7 +60,7 @@ icon: icon.svg
 
 parts:
   common:
-    type: copy
+    plugin: copy
     files:
       bin/networkmanager: bin/networkmanager
       bin/modemmanager: bin/modemmanager
@@ -69,7 +69,7 @@ parts:
       conf/dnsmasq-dbus.conf: conf/dnsmasq-dbus.conf
 
   network-manager:
-    type: x-custom
+    plugin: x-custom
 
     # NOTE: The branch below is a unpacked debian source package
     # generated from lp:~phablet-team/network-manager/enable-snappy-15.04
@@ -174,7 +174,7 @@ parts:
       - $configs
 
   modemmanager:
-    type: x-custom
+    plugin: x-custom
     source: https://git.launchpad.net/~phablet-team/+git/modemmanager-snappy-vivid
     source-type: git
     custom-cmds:
@@ -205,8 +205,9 @@ parts:
 
   rdepends:
     # noop to pull packages
-    type: copy
-    files: []
+    plugin: copy
+    files:
+      none: []
     stage-packages:
       # package list generated manually by looking at the output of:
       # $ apt-cache showpkg network-manager
