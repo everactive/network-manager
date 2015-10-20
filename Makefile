@@ -5,6 +5,9 @@ ssh_opts=\
 	-oUserKnownHostsFile=/dev/null \
 	-oKbdInteractiveAuthentication=no
 
+all:
+	snapcraft
+
 install:
 	while sleep 10s; do ssh $(ssh_opts) -p 8022 ubuntu@localhost true && break; done
 	scp $(ssh_opts) -P 8022 *.snap 'ubuntu@localhost:~/'
