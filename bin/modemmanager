@@ -28,6 +28,7 @@ esac
 # XXX hardcoded architecture
 LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/$TRIPLET:$SNAP_APP_PATH/usr/lib/$TRIPLET/ModemManager" \
 $SNAP_APP_PATH/usr/sbin/ModemManager \
+    --debug \
     --log-level=DEBUG \
     "$@"
 
