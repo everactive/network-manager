@@ -88,7 +88,7 @@ parts:
     # We're using the debian packaging infrastructure here to build
     # the binaries instead of doing every step manually here.
     custom-cmds:
-      - debian/rules build
+      - debian/rules -j4 build
       - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
       - mkdir -p $SNAPCRAFT_PART_INSTALL_DIR/etc/NetworkManager/dispatcher.d
       - install -m 755 debian/network-manager-dispatcher.script $SNAPCRAFT_PART_INSTALL_DIR/etc/NetworkManager/dispatcher.d/01ifupdown
@@ -260,7 +260,7 @@ parts:
     source: https://git.launchpad.net/~phablet-team/+git/modemmanager-snappy-vivid
     source-type: git
     custom-cmds:
-      - debian/rules build
+      - debian/rules -j4 build
       - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
     stage-packages:
       - automake
