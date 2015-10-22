@@ -54,6 +54,12 @@ binaries:
   mmcli:
     exec: usr/bin/mmcli
     security-template: unconfined
+  qmicli:
+    exec: usr/bin/qmicli
+    security-template: unconfined
+  qmi-network:
+    exec: usr/bin/qmi-network
+    security-template: unconfined
 summary: Network management based on NeworkManager and ModemManager
 description: Network management of wired ethernet, WiFi and mobile data connection based on NetworkManager and ModemManager
 icon: icon.svg
@@ -270,12 +276,15 @@ parts:
       - libmbim-glib-dev
       - libglib2.0-doc
       - valac
+      - libqmi-utils
     filesets:
       binaries:
         - usr/bin/mmcli
         - usr/sbin/ModemManager
         - usr/lib/*/ModemManager
         - usr/lib/*/libmm-glib.so*
+        - usr/bin/qmicli
+        - usr/bin/qmi-network
       configs:
         - etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
       unwanted:
