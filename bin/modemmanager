@@ -30,3 +30,8 @@ LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/$TRIPLET:$SNAP_APP_PATH/usr/lib/$TRIPLET
 $SNAP_APP_PATH/usr/sbin/ModemManager \
     --log-level=DEBUG \
     "$@"
+
+# Cleanup everything we copied into the system
+rm /etc/udev/rules.d/80-mm-candidate.rules \
+    /etc/udev/rules.d/77-mm-telit.rules
+udevadm trigger
