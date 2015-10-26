@@ -1,6 +1,6 @@
 name: network-manager
 vendor: Loïc Minier <loic.minier@ubuntu.com>, Tony Espy <tony.espy@canonical.com>, Simon Fels <simon.fels@canonical.com>
-version: 0.3
+version: 0.4
 type: framework
 architecture:
  - amd64
