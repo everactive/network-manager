@@ -30,7 +30,7 @@ $SNAP_APP_PATH/usr/sbin/dnsmasq \
     --no-resolv \
     --keep-in-foreground \
     --no-hosts \
-    --listen-address=127.0.0.1 \
+    --listen-address=127.0.1.1 \
     --cache-size=0 \
     --proxy-dnssec \
     --enable-dbus=org.freedesktop.NetworkManager.dnsmasq \
