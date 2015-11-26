@@ -33,7 +33,7 @@ steps have proved to be a good workflow:
 2. Enter the snapcraft shell
 
  $ snapcraft shell
- $ cd parst/networ-manager/build
+ $ cd parts/network-manager/build
 
 3. Do necessary modifications on the source code and build
    everything with
