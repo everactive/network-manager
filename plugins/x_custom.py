@@ -74,8 +74,7 @@ class CustomPlugin(snapcraft.BasePlugin):
 
         def dispatch_cmd_list(cmd_list):
             for cmd in cmd_list:
-                if not self.run(cmd):
-                    return False
+                self.run(cmd)
             return True
 
         return dispatch_cmd_list(make_cmd_list(self.options.custom_cmds))
