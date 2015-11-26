@@ -9,7 +9,7 @@ You can reach us on the #snappy IRC channel on freenode.
 Dependencies
 ============
 
-We require snapcraft >= 0.3 for building this snap.
+We require snapcraft >= 0.5 for building this snap.
 
 Build Instructions
 ==================
