@@ -1,0 +1,234 @@
+From dd6abd407acd461e1dd853edade83082dbb0098b Mon Sep 17 00:00:00 2001
+From: Dan Williams <dcbw@redhat.com>
+Date: Wed, 19 Feb 2014 12:00:35 -0600
+Subject: wwan: clean up and split IP method values
+
+Add an 'unknown' value; make the type an enum, and rename it since
+this enum is private to NetworkManager and abstracts differences
+in old and new MM.
+
+We also need separate methods for IPv4 and IPv6 since they may not
+use the same mechanism.  For example, IPv4 may use DHCP but IPv6 may
+require static configuration, based on what the modem firmware wants.
+
+---
+ src/devices/wwan/nm-modem-broadband.c |   10 ++--
+ src/devices/wwan/nm-modem.c           |   73 ++++++++++++++++++++--------------
+ src/devices/wwan/nm-modem.h           |   11 ++++-
+ 3 files changed, 57 insertions(+), 37 deletions(-)
+
+Index: b/src/devices/wwan/nm-modem-broadband.c
+===================================================================
+--- a/src/devices/wwan/nm-modem-broadband.c
++++ b/src/devices/wwan/nm-modem-broadband.c
+@@ -162,7 +162,7 @@ connect_ready (MMModemSimple *simple_ifa
+                NMModemBroadband *self)
+ {
+ 	GError *error = NULL;
+-	guint ip_method;
++	NMModemIPMethod ip_method;
+ 
+ 	g_clear_object (&self->priv->connect_properties);
+ 
+@@ -199,13 +199,13 @@ connect_ready (MMModemSimple *simple_ifa
+ 
+ 	switch (mm_bearer_ip_config_get_method (self->priv->ipv4_config)) {
+ 	case MM_BEARER_IP_METHOD_PPP:
+-		ip_method = MM_MODEM_IP_METHOD_PPP;
++		ip_method = NM_MODEM_IP_METHOD_PPP;
+ 		break;
+ 	case MM_BEARER_IP_METHOD_STATIC:
+-		ip_method = MM_MODEM_IP_METHOD_STATIC;
++		ip_method = NM_MODEM_IP_METHOD_STATIC;
+ 		break;
+ 	case MM_BEARER_IP_METHOD_DHCP:
+-		ip_method = MM_MODEM_IP_METHOD_DHCP;
++		ip_method = NM_MODEM_IP_METHOD_AUTO;
+ 		break;
+ 	default:
+ 		error = g_error_new (NM_MODEM_ERROR,
+@@ -223,7 +223,7 @@ connect_ready (MMModemSimple *simple_ifa
+ 	/* IPv4 for now only */
+ 	g_object_set (self,
+ 	              NM_MODEM_DATA_PORT,  mm_bearer_get_interface (self->priv->bearer),
+-	              NM_MODEM_IP_METHOD,  ip_method,
++	              NM_MODEM_IP4_METHOD, ip_method,
+ 	              NM_MODEM_IP_TIMEOUT, mm_bearer_get_ip_timeout (self->priv->bearer),
+ 	              NULL);
+ 
+Index: b/src/devices/wwan/nm-modem.c
+===================================================================
+--- a/src/devices/wwan/nm-modem.c
++++ b/src/devices/wwan/nm-modem.c
+@@ -42,7 +42,8 @@ enum {
+ 	PROP_PATH,
+ 	PROP_UID,
+ 	PROP_DRIVER,
+-	PROP_IP_METHOD,
++	PROP_IP4_METHOD,
++	PROP_IP6_METHOD,
+ 	PROP_IP_TIMEOUT,
+ 	PROP_STATE,
+ 	PROP_DEVICE_ID,
+@@ -59,7 +60,8 @@ typedef struct {
+ 	char *control_port;
+ 	char *data_port;
+ 	char *ppp_iface;
+-	guint32 ip_method;
++	NMModemIPMethod ip4_method;
++	NMModemIPMethod ip6_method;
+ 	NMModemState state;
+ 	NMModemState prev_state;  /* revert to this state if enable/disable fails */
+ 	char *device_id;
+@@ -401,18 +403,18 @@ nm_modem_stage3_ip4_config_start (NMMode
+ 	g_assert (req);
+ 
+ 	priv = NM_MODEM_GET_PRIVATE (self);
+-	switch (priv->ip_method) {
+-	case MM_MODEM_IP_METHOD_PPP:
++	switch (priv->ip4_method) {
++	case NM_MODEM_IP_METHOD_PPP:
+ 		ret = ppp_stage3_ip4_config_start (self, req, reason);
+ 		break;
+-	case MM_MODEM_IP_METHOD_STATIC:
++	case NM_MODEM_IP_METHOD_STATIC:
+ 		ret = NM_MODEM_GET_CLASS (self)->static_stage3_ip4_config_start (self, req, reason);
+ 		break;
+-	case MM_MODEM_IP_METHOD_DHCP:
++	case NM_MODEM_IP_METHOD_AUTO:
+ 		ret = device_class->act_stage3_ip4_config_start (device, NULL, reason);
+ 		break;
+ 	default:
+-		nm_log_err (LOGD_MB, "unknown IP method %d", priv->ip_method);
++		nm_log_err (LOGD_MB, "unknown IP method %d", priv->ip4_method);
+ 		ret = NM_ACT_STAGE_RETURN_FAILURE;
+ 		break;
+ 	}
+@@ -431,8 +433,8 @@ nm_modem_ip4_pre_commit (NMModem *modem,
+ 	 * not point-to-point) and IP config has a /32 prefix, then we assume that
+ 	 * ARP will be pointless and we turn it off.
+ 	 */
+-	if (   priv->ip_method == MM_MODEM_IP_METHOD_STATIC
+-	    || priv->ip_method == MM_MODEM_IP_METHOD_DHCP) {
++	if (   priv->ip4_method == NM_MODEM_IP_METHOD_STATIC
++	    || priv->ip4_method == NM_MODEM_IP_METHOD_AUTO) {
+ 		const NMPlatformIP4Address *address = nm_ip4_config_get_address (config, 0);
+ 
+ 		g_assert (address);
+@@ -641,22 +643,19 @@ deactivate (NMModem *self, NMDevice *dev
+ 		priv->ppp_manager = NULL;
+ 	}
+ 
+-	switch (priv->ip_method) {
+-	case MM_MODEM_IP_METHOD_PPP:
+-		break;
+-	case MM_MODEM_IP_METHOD_STATIC:
+-	case MM_MODEM_IP_METHOD_DHCP:
++	if (priv->ip4_method == NM_MODEM_IP_METHOD_STATIC ||
++	    priv->ip4_method == NM_MODEM_IP_METHOD_AUTO ||
++	    priv->ip6_method == NM_MODEM_IP_METHOD_STATIC ||
++	    priv->ip6_method == NM_MODEM_IP_METHOD_AUTO) {
+ 		ifindex = nm_device_get_ip_ifindex (device);
+ 		if (ifindex > 0) {
+ 			nm_platform_route_flush (ifindex);
+ 			nm_platform_address_flush (ifindex);
+ 			nm_platform_link_set_down (ifindex);
+ 		}
+-		break;
+-	default:
+-		nm_log_err (LOGD_MB, "unknown IP method %d", priv->ip_method);
+-		break;
+ 	}
++	priv->ip4_method = NM_MODEM_IP_METHOD_UNKNOWN;
++	priv->ip6_method = NM_MODEM_IP_METHOD_UNKNOWN;
+ 
+ 	g_free (priv->ppp_iface);
+ 	priv->ppp_iface = NULL;
+@@ -854,8 +853,11 @@ get_property (GObject *object, guint pro
+ 	case PROP_UID:
+ 		g_value_set_string (value, priv->uid);
+ 		break;
+-	case PROP_IP_METHOD:
+-		g_value_set_uint (value, priv->ip_method);
++	case PROP_IP4_METHOD:
++		g_value_set_uint (value, priv->ip4_method);
++		break;
++	case PROP_IP6_METHOD:
++		g_value_set_uint (value, priv->ip6_method);
+ 		break;
+ 	case PROP_IP_TIMEOUT:
+ 		g_value_set_uint (value, priv->mm_ip_timeout);
+@@ -903,8 +905,11 @@ set_property (GObject *object, guint pro
+ 		/* Construct only */
+ 		priv->uid = g_value_dup_string (value);
+ 		break;
+-	case PROP_IP_METHOD:
+-		priv->ip_method = g_value_get_uint (value);
++	case PROP_IP4_METHOD:
++		priv->ip4_method = g_value_get_uint (value);
++		break;
++	case PROP_IP6_METHOD:
++		priv->ip6_method = g_value_get_uint (value);
+ 		break;
+ 	case PROP_IP_TIMEOUT:
+ 		priv->mm_ip_timeout = g_value_get_uint (value);
+@@ -1018,14 +1023,22 @@ nm_modem_class_init (NMModemClass *klass
+ 		                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+ 
+ 	g_object_class_install_property
+-		(object_class, PROP_IP_METHOD,
+-		 g_param_spec_uint (NM_MODEM_IP_METHOD,
+-		                    "IP method",
+-		                    "IP method",
+-		                    MM_MODEM_IP_METHOD_PPP,
+-		                    MM_MODEM_IP_METHOD_DHCP,
+-		                    MM_MODEM_IP_METHOD_PPP,
+-		                    G_PARAM_READWRITE));
++		(object_class, PROP_IP4_METHOD,
++		 g_param_spec_uint (NM_MODEM_IP4_METHOD, "", "",
++		                    NM_MODEM_IP_METHOD_UNKNOWN,
++		                    NM_MODEM_IP_METHOD_AUTO,
++		                    NM_MODEM_IP_METHOD_UNKNOWN,
++		                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT |
++		                    G_PARAM_STATIC_STRINGS));
++
++	g_object_class_install_property
++		(object_class, PROP_IP6_METHOD,
++		 g_param_spec_uint (NM_MODEM_IP6_METHOD, "", "",
++		                    NM_MODEM_IP_METHOD_UNKNOWN,
++		                    NM_MODEM_IP_METHOD_AUTO,
++		                    NM_MODEM_IP_METHOD_UNKNOWN,
++		                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT |
++		                    G_PARAM_STATIC_STRINGS));
+ 
+ 	g_object_class_install_property
+ 		(object_class, PROP_IP_TIMEOUT,
+Index: b/src/devices/wwan/nm-modem.h
+===================================================================
+--- a/src/devices/wwan/nm-modem.h
++++ b/src/devices/wwan/nm-modem.h
+@@ -42,7 +42,8 @@ G_BEGIN_DECLS
+ #define NM_MODEM_DRIVER       "driver"
+ #define NM_MODEM_CONTROL_PORT "control-port"
+ #define NM_MODEM_DATA_PORT    "data-port"
+-#define NM_MODEM_IP_METHOD    "ip-method"
++#define NM_MODEM_IP4_METHOD   "ip4-method"
++#define NM_MODEM_IP6_METHOD   "ip6-method"
+ #define NM_MODEM_IP_TIMEOUT   "ip-timeout"
+ #define NM_MODEM_STATE        "state"
+ #define NM_MODEM_DEVICE_ID    "device-id"
+@@ -61,7 +62,13 @@ G_BEGIN_DECLS
+ 
+ #define MM_MODEM_IP_METHOD_PPP    0
+ #define MM_MODEM_IP_METHOD_STATIC 1
+-#define MM_MODEM_IP_METHOD_DHCP   2
++
++typedef enum {
++	NM_MODEM_IP_METHOD_UNKNOWN = 0,
++	NM_MODEM_IP_METHOD_PPP,
++	NM_MODEM_IP_METHOD_STATIC,
++	NM_MODEM_IP_METHOD_AUTO,  /* DHCP and/or SLAAC */
++} NMModemIPMethod;
+ 
+ /**
+  * NMModemIPType:

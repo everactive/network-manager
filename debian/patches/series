@@ -76,3 +76,15 @@ lp1361864-add-ofono-preferred-contexts.patch
 lp1425172-fix-wifi-scanlist-cull.patch
 lp1444162-add-ip6-config-to-nm-ofono-connections.patch
 enable-snappy-15.04.patch
+
+# lp1538690
+0000_wwan_ip6_support_06b30ad6.patch
+0001_wwan_ip6_support_af1f183b.patch
+0002_wwan_ip6_support_f3557d32.patch
+0003_wwan_ip6_support_dd6abd40.patch
+0004_wwan_ip6_support_8c05e26c.patch
+0005_wwan_ip6_support_0caea7db.patch
+0006_wwan_ip6_support_b7cc6fb6.patch
+0007_wwan_ip6_support_02beeeeb.patch
+0008_wwan_ip6_support_ofono.patch
+0008_wwan_ip6_support_oldmodems.patch

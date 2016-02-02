@@ -1,0 +1,41 @@
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Subject: Port old-modems (pre-MM1) to deal with IP4/6 split.
+
+Old modems (pre-ModemManager1) only support IPv4.
+
+---
+ src/devices/wwan/nm-modem-ofono.c |    2 +-
+ src/devices/wwan/nm-modem-old.c   |    6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+Index: b/src/devices/wwan/nm-modem-old.c
+===================================================================
+--- a/src/devices/wwan/nm-modem-old.c
++++ b/src/devices/wwan/nm-modem-old.c
+@@ -697,7 +697,7 @@ modem_properties_changed (DBusGProxy *pr
+ 	value = g_hash_table_lookup (props, "IpMethod");
+ 	if (value && G_VALUE_HOLDS_UINT (value)) {
+ 		g_object_set (self,
+-		              NM_MODEM_IP_METHOD, g_value_get_uint (value),
++		              NM_MODEM_IP4_METHOD, g_value_get_uint (value),
+ 		              NULL);
+ 	}
+ 
+@@ -935,7 +935,7 @@ nm_modem_old_new (const char *path, GHas
+ 	const char *unlock_required = NULL;
+ 	const char *device_id = NULL;
+ 	guint32 modem_type = MM_OLD_MODEM_TYPE_UNKNOWN;
+-	guint32 ip_method = MM_MODEM_IP_METHOD_PPP;
++	NMModemIPMethod ip_method = MM_MODEM_IP_METHOD_PPP;
+ 	guint32 ip_timeout = 0;
+ 	MMOldModemState state = MM_OLD_MODEM_STATE_UNKNOWN;
+ 
+@@ -994,7 +994,7 @@ nm_modem_old_new (const char *path, GHas
+ 	                                    NM_MODEM_UID, data_device,
+ 	                                    NM_MODEM_CONTROL_PORT, NULL,
+ 	                                    NM_MODEM_DATA_PORT, data_device,
+-	                                    NM_MODEM_IP_METHOD, ip_method,
++	                                    NM_MODEM_IP4_METHOD, ip_method,
+ 	                                    NM_MODEM_IP_TIMEOUT, ip_timeout,
+ 	                                    NM_MODEM_DEVICE_ID, device_id,
+ 	                                    NM_MODEM_STATE, mm_state_to_nm (state, unlock_required),

@@ -1,0 +1,47 @@
+From 06b30ad690942bd421ddcfc4e55834174ec708f6 Mon Sep 17 00:00:00 2001
+From: Lubomir Rintel <lkundrak@v3.sk>
+Date: Sat, 27 Sep 2014 09:03:17 +0200
+Subject: core: Add NMUtilsIPv6IfaceId to nm-types.h
+
+We'd like to use it in nm-platform.h, but it's included by
+NetworkManagerUtils.h before the declaration occurs.
+
+(cherry picked from commit 0d59984ce837581ff78ce747d1fcf6e393b6beb5)
+
+---
+ src/NetworkManagerUtils.h |    9 +++++++++
+ src/nm-types.h            |    3 +++
+ 2 files changed, 12 insertions(+)
+
+Index: b/src/NetworkManagerUtils.h
+===================================================================
+--- a/src/NetworkManagerUtils.h
++++ b/src/NetworkManagerUtils.h
+@@ -33,6 +33,15 @@
+ #include "nm-connection.h"
+ #include "nm-setting-private.h"
+ 
++struct _NMUtilsIPv6IfaceId {
++ 	union {
++ 		guint64 id;
++ 		guint8  id_u8[8];
++ 	};
++};
++
++#define NM_UTILS_IPV6_IFACE_ID_INIT { .id = 0 }
++
+ gboolean nm_ethernet_address_is_valid (const struct ether_addr *test_addr);
+ 
+ in_addr_t nm_utils_ip4_address_clear_host_address (in_addr_t addr, guint8 plen);
+Index: b/src/nm-types.h
+===================================================================
+--- a/src/nm-types.h
++++ b/src/nm-types.h
+@@ -23,4 +23,7 @@
+ 
+ typedef struct _NMDevice NMDevice;
+ 
++/* utils */
++typedef struct _NMUtilsIPv6IfaceId   NMUtilsIPv6IfaceId;
++
+ #endif  /* NM_TYPES_H */

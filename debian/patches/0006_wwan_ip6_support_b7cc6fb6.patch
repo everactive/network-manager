@@ -1,0 +1,45 @@
+From b7cc6fb64e021f2ac51769648f9107967337c5ad Mon Sep 17 00:00:00 2001
+From: Aleksander Morgado <aleksander@aleksander.es>
+Date: Tue, 17 Feb 2015 17:20:16 +0100
+Subject: wwan: don't assume DNS info is always available
+
+Fixes segfault with e.g. Ericsson modems that reply just with IP+gateway,
+without DNS info.
+
+ [mm-port-serial-at.c:440] debug_log(): (ttyACM8): --> 'AT*E2IPCFG?<CR>'
+ [mm-port-serial-at.c:440] debug_log(): (ttyACM8): <-- '<CR><LF>*E2IPCFG: (1,"10.191.64.12")(2,"10.191.64.10")<CR><LF>'
+ [mm-port-serial-at.c:440] debug_log(): (ttyACM8): <-- '<CR><LF>OK<CR><LF>'
+ [mm-port-serial.c:1296] mm_port_serial_close(): (ttyACM8) device open count is 1 (close)
+ [mm-port.c:95] mm_port_set_connected(): (wwan0): port now connected
+ [mm-base-bearer.c:488] connect_ready(): Connected bearer '/org/freedesktop/ModemManager1/Bearer/0'
+ [mm-iface-modem.c:1392] __iface_modem_update_state_internal(): Modem /org/freedesktop/ModemManager1/Modem/0: state changed (connecting -> connected)
+
+ <info> Activation (ttyACM8) Stage 3 of 5 (IP Configure Start) started...
+ <info> (ttyACM8): device state change: config -> ip-config (reason 'none') [50 70 0]
+ <info> Activation (ttyACM8) Stage 4 of 5 (IPv6 Configure Timeout) scheduled...
+ <info> Activation (ttyACM8) Stage 3 of 5 (IP Configure Start) complete.
+ <info> (ttyACM8): IPv4 static configuration:
+ <info>   address 10.191.64.12/28
+ <info>   gateway 10.191.64.10
+Errore di segmentazione
+
+http://lists.freedesktop.org/archives/modemmanager-devel/2015-February/001758.html
+(cherry picked from commit 5df024f57afe1cbc2a31e10bcb3b6e92bbc33104)
+
+---
+ src/devices/wwan/nm-modem-broadband.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: b/src/devices/wwan/nm-modem-broadband.c
+===================================================================
+--- a/src/devices/wwan/nm-modem-broadband.c
++++ b/src/devices/wwan/nm-modem-broadband.c
+@@ -700,7 +700,7 @@ static_stage3_ip4_done (NMModemBroadband
+ 
+ 	/* DNS servers */
+ 	dns = mm_bearer_ip_config_get_dns (self->priv->ipv4_config);
+-	for (i = 0; dns[i]; i++) {
++	for (i = 0; dns && dns[i]; i++) {
+ 		if (   ip4_string_to_num (dns[i], &address_network)
+ 		    && address_network > 0) {
+ 			nm_ip4_config_add_nameserver (config, address_network);
