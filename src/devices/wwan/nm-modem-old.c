@@ -697,7 +697,7 @@ modem_properties_changed (DBusGProxy *proxy,
 	value = g_hash_table_lookup (props, "IpMethod");
 	if (value && G_VALUE_HOLDS_UINT (value)) {
 		g_object_set (self,
-		              NM_MODEM_IP_METHOD, g_value_get_uint (value),
+		              NM_MODEM_IP4_METHOD, g_value_get_uint (value),
 		              NULL);
 	}
 
@@ -935,7 +935,7 @@ nm_modem_old_new (const char *path, GHashTable *properties, GError **error)
 	const char *unlock_required = NULL;
 	const char *device_id = NULL;
 	guint32 modem_type = MM_OLD_MODEM_TYPE_UNKNOWN;
-	guint32 ip_method = MM_MODEM_IP_METHOD_PPP;
+	NMModemIPMethod ip_method = MM_MODEM_IP_METHOD_PPP;
 	guint32 ip_timeout = 0;
 	MMOldModemState state = MM_OLD_MODEM_STATE_UNKNOWN;
 
@@ -994,7 +994,7 @@ nm_modem_old_new (const char *path, GHashTable *properties, GError **error)
 	                                    NM_MODEM_UID, data_device,
 	                                    NM_MODEM_CONTROL_PORT, NULL,
 	                                    NM_MODEM_DATA_PORT, data_device,
-	                                    NM_MODEM_IP_METHOD, ip_method,
+	                                    NM_MODEM_IP4_METHOD, ip_method,
 	                                    NM_MODEM_IP_TIMEOUT, ip_timeout,
 	                                    NM_MODEM_DEVICE_ID, device_id,
 	                                    NM_MODEM_STATE, mm_state_to_nm (state, unlock_required),
