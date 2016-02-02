@@ -516,7 +516,7 @@ nm_modem_ofono_new (const char *path)
 	                                 NM_MODEM_PATH, path,
 	                                 NM_MODEM_UID, (path + 1),
 	                                 NM_MODEM_CONTROL_PORT, "ofono", /* mandatory */
-	                                 NM_MODEM_IP_METHOD, MM_MODEM_IP_METHOD_STATIC,
+	                                 NM_MODEM_IP4_METHOD, MM_MODEM_IP_METHOD_STATIC,
 	                                 NM_MODEM_STATE, NM_MODEM_STATE_INITIALIZING,
 	                                 NULL);
 }
