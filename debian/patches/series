@@ -88,3 +88,4 @@ enable-snappy-15.04.patch
 0007_wwan_ip6_support_02beeeeb.patch
 0008_wwan_ip6_support_ofono.patch
 0008_wwan_ip6_support_oldmodems.patch
+0009_wwan_ip6_support_d29ab97c.patch
