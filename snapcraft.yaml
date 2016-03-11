@@ -1,6 +1,6 @@
 name: network-manager
 vendor: Loïc Minier <loic.minier@ubuntu.com>, Tony Espy <tony.espy@canonical.com>, Simon Fels <simon.fels@canonical.com>
-version: 0.5
+version: 0.7
 type: framework
 architecture:
  - amd64
@@ -83,7 +83,8 @@ parts:
     # which helps to improve turn around times during development.
     source: https://git.launchpad.net/~phablet-team/+git/nm-enable-snappy-15.04
     source-type: git
-    source-branch: unstable
+    #source-branch: unstable
+    source-branch: ipv4v6-fix
 
     # We're using the debian packaging infrastructure here to build
     # the binaries instead of doing every step manually here.
@@ -259,8 +260,9 @@ parts:
     plugin: x-custom
     after:
       - networkmanager
-    source: https://git.launchpad.net/~phablet-team/+git/modemmanager-snappy-vivid
+    source: git+ssh://alfonsosanchezbeato@git.launchpad.net/~phablet-team/plano/+git/modemmanager-snappy-vivid
     source-type: git
+    source-branch: plano
     custom-cmds:
       - debian/rules -j4 build
       - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
