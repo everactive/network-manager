@@ -260,7 +260,7 @@ parts:
     plugin: x-custom
     after:
       - networkmanager
-    source: git+ssh://alfonsosanchezbeato@git.launchpad.net/~phablet-team/plano/+git/modemmanager-snappy-vivid
+    source: git+ssh://git.launchpad.net/~phablet-team/plano/+git/modemmanager-snappy-vivid
     source-type: git
     source-branch: plano
     custom-cmds:
