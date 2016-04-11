@@ -33,6 +33,7 @@ $SNAP_APP_PATH/usr/sbin/dnsmasq \
     --listen-address=127.0.1.1 \
     --cache-size=0 \
     --proxy-dnssec \
+    --bind-interfaces \
     --enable-dbus=org.freedesktop.NetworkManager.dnsmasq \
     --conf-file=$SNAP_APP_DATA_PATH/var/run/NetworkManager/dnsmasq.conf \
     --conf-dir=$SNAP_APP_DATA_PATH/etc/NetworkManager/dnsmasq.d \
