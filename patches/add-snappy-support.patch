@@ -1,0 +1,691 @@
+Index: build/configure.ac
+===================================================================
+--- build.orig/configure.ac
++++ build/configure.ac
+@@ -758,6 +758,15 @@ fi
+ AM_CONDITIONAL(BUILD_NMTUI, test "$build_nmtui" = yes)
+ 
+ 
++AC_ARG_ENABLE(snappy, AS_HELP_STRING([--enable-snappy], [enable Ubuntu Snappy support]),
++	[enable_snappy=${enableval}], [enable_snappy=yes])
++if (test "${enable_snappy}" = "yes"); then
++	AC_DEFINE(WITH_SNAPPY, 1, [Define if you want Ubuntu Snappy support])
++else
++	AC_DEFINE(WITH_SNAPPY, 0, [Define if you want Ubuntu Snappy support])
++fi
++AM_CONDITIONAL(WITH_SNAPPY, test "${enable_snappy}" = "yes")
++
+ NM_COMPILER_WARNINGS
+ 
+ dnl -------------------------
+@@ -921,6 +930,7 @@ else
+ 	echo  "  policykit: no"
+ fi
+ echo "  selinux: $have_selinux"
++echo "  Ubuntu snappy: ${enable_snappy}"
+ echo
+ 
+ echo "Features:"
+Index: build/src/Makefile.am
+===================================================================
+--- build.orig/src/Makefile.am
++++ build/src/Makefile.am
+@@ -38,6 +38,11 @@ AM_CPPFLAGS =				\
+ 	-DG_LOG_DOMAIN=\""NetworkManager"\" \
+ 	-DNM_VERSION_MAX_ALLOWED=NM_VERSION_NEXT_STABLE
+ 
++if WITH_SNAPPY
++AM_CPPFLAGS += \
++	-DSNAPPY=
++endif
++
+ # add each subdirectory that contains a libNM source file. $(sort) is being used
+ # primarily for its side effect of removing duplicates.
+ AM_CPPFLAGS += $(foreach d,$(sort $(dir $(libNetworkManager_la_SOURCES))),-I$(top_srcdir)/src/$d)
+Index: build/src/devices/nm-device.c
+===================================================================
+--- build.orig/src/devices/nm-device.c
++++ build/src/devices/nm-device.c
+@@ -78,6 +78,8 @@ static void impl_device_disconnect (NMDe
+ 
+ #include "nm-device-glue.h"
+ 
++#include "snappy.h"
++
+ static void nm_device_config_device_interface_init (NMConfigDeviceInterface *iface);
+ 
+ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (NMDevice, nm_device, G_TYPE_OBJECT,
+@@ -4454,6 +4456,12 @@ send_arps (NMDevice *self, const char *m
+ 	NMIP4Address *addr;
+ 	guint32 ipaddr;
+ 	GError *error = NULL;
++	char *path = NULL;
++
++	if (get_snap_app_path()) {
++		path = g_strdup_printf("%s/usr/bin/arping", get_snap_app_path());
++		argv[0] = path;
++	}
+ 
+ 	connection = nm_device_get_connection (self);
+ 	if (!connection)
+@@ -4482,6 +4490,9 @@ send_arps (NMDevice *self, const char *m
+ 			g_clear_error (&error);
+ 		}
+ 	}
++
++	if (path)
++		g_free(path);
+ }
+ 
+ static gboolean
+Index: build/src/dhcp-manager/nm-dhcp-dhclient.c
+===================================================================
+--- build.orig/src/dhcp-manager/nm-dhcp-dhclient.c
++++ build/src/dhcp-manager/nm-dhcp-dhclient.c
+@@ -40,20 +40,21 @@
+ #include "nm-dhcp-dhclient-utils.h"
+ #include "nm-dhcp-manager.h"
+ #include "nm-posix-signals.h"
++#include "snappy.h"
+ 
+ G_DEFINE_TYPE (NMDHCPDhclient, nm_dhcp_dhclient, NM_TYPE_DHCP_CLIENT)
+ 
+ #define NM_DHCP_DHCLIENT_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NM_TYPE_DHCP_DHCLIENT, NMDHCPDhclientPrivate))
+ 
+ typedef struct {
+-	const char *path;
++	char *path;
+ 	char *conf_file;
+ 	const char *def_leasefile;
+ 	char *lease_file;
+ 	char *pid_file;
+ } NMDHCPDhclientPrivate;
+ 
+-const char *
++char *
+ nm_dhcp_dhclient_get_path (const char *try_first)
+ {
+ 	static const char *dhclient_paths[] = {
+@@ -66,7 +67,7 @@ nm_dhcp_dhclient_get_path (const char *t
+ 	const char **path = dhclient_paths;
+ 
+ 	if (strlen (try_first) && g_file_test (try_first, G_FILE_TEST_EXISTS))
+-		return try_first;
++		return g_strdup (try_first);
+ 
+ 	while (*path != NULL) {
+ 		if (g_file_test (*path, G_FILE_TEST_EXISTS))
+@@ -74,7 +75,7 @@ nm_dhcp_dhclient_get_path (const char *t
+ 		path++;
+ 	}
+ 
+-	return *path;
++	return g_strdup(*path);
+ }
+ 
+ /**
+@@ -97,9 +98,14 @@ get_dhclient_leasefile (const char *ifac
+                         char **out_preferred_path)
+ {
+ 	char *path;
++	char *base_path = NMSTATEDIR;
++
++	if (get_snap_app_data_path())
++		base_path = (char *) get_snap_app_data_path();
+ 
+ 	/* /var/lib/NetworkManager is the preferred leasefile path */
+-	path = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s-%s.lease",
++	path = g_strdup_printf ("%s/dhclient%s-%s-%s.lease",
++	                        base_path,
+ 	                        ipv6 ? "6" : "",
+ 	                        uuid,
+ 	                        iface);
+@@ -274,12 +280,16 @@ create_dhclient_config (const char *ifac
+                         const char *hostname)
+ {
+ 	char *orig = NULL, *new = NULL;
++	char *base_path = NMSTATEDIR;
+ 	GError *error = NULL;
+ 	gboolean success = FALSE;
+ 
+ 	g_return_val_if_fail (iface != NULL, NULL);
+ 
+-	new = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s.conf", is_ip6 ? "6" : "", iface);
++	if (get_snap_app_data_path())
++		base_path = (char *) get_snap_app_data_path();
++
++	new = g_strdup_printf ("%s/dhclient%s-%s.conf", base_path, is_ip6 ? "6" : "", iface);
+ 	nm_log_dbg (is_ip6 ? LOGD_DHCP6 : LOGD_DHCP4,
+ 	            "(%s): creating composite dhclient config %s",
+ 	            iface, new);
+@@ -351,9 +361,15 @@ dhclient_start (NMDHCPClient *client,
+ 		return -1;
+ 	}
+ 
+-	pid_file = g_strdup_printf ("/run/sendsigs.omit.d/network-manager.dhclient%s-%s.pid",
+-		                        ipv6 ? "6" : "",
+-		                        iface);
++	if (get_snap_app_data_path())
++		pid_file = g_strdup_printf ("%s/run/sendsigs.omit.d/network-manager.dhclient%s-%s.pid",
++		                            get_snap_app_data_path(),
++		                            ipv6 ? "6" : "",
++		                            iface);
++	else
++		pid_file = g_strdup_printf ("/run/sendsigs.omit.d/network-manager.dhclient%s-%s.pid",
++		                            ipv6 ? "6" : "",
++		                            iface);
+ 
+ 	/* Kill any existing dhclient from the pidfile */
+ 	binary_name = g_path_get_basename (priv->path);
+@@ -406,6 +422,8 @@ dhclient_start (NMDHCPClient *client,
+ 		}
+ 	}
+ 
++	nm_log_warn (log_domain, "dhclient: building argv array; binary path is: %s", priv->path);
++
+ 	argv = g_ptr_array_new ();
+ 	g_ptr_array_add (argv, (gpointer) priv->path);
+ 
+@@ -427,17 +445,22 @@ dhclient_start (NMDHCPClient *client,
+ 	g_ptr_array_add (argv, (gpointer) "-sf");	/* Set script file */
+ 	g_ptr_array_add (argv, (gpointer) nm_dhcp_helper_path);
+ 
++	nm_log_warn (log_domain, "dhclient: building argv array; -sf <helper_path> is: %s", nm_dhcp_helper_path);
++
+ 	if (pid_file) {
+ 		g_ptr_array_add (argv, (gpointer) "-pf");	/* Set pid file */
+ 		g_ptr_array_add (argv, (gpointer) pid_file);
++		nm_log_warn (log_domain, "dhclient: building argv array; -pf <pid_file> is: %s", pid_file);
+ 	}
+ 
+ 	g_ptr_array_add (argv, (gpointer) "-lf");	/* Set lease file */
+ 	g_ptr_array_add (argv, (gpointer) priv->lease_file);
++	nm_log_warn (log_domain, "dhclient: building argv array; -lf <lease_file> is: %s", priv->lease_file);
+ 
+ 	if (priv->conf_file) {
+ 		g_ptr_array_add (argv, (gpointer) "-cf");	/* Set interface config file */
+ 		g_ptr_array_add (argv, (gpointer) priv->conf_file);
++		nm_log_warn (log_domain, "dhclient: building argv array; -cf <config_file> is: %s", priv->conf_file);
+ 	}
+ 
+ 	/* Usually the system bus address is well-known; but if it's supposed
+@@ -603,8 +626,15 @@ nm_dhcp_dhclient_init (NMDHCPDhclient *s
+ {
+ 	NMDHCPDhclientPrivate *priv = NM_DHCP_DHCLIENT_GET_PRIVATE (self);
+ 	const char **iter = &def_leasefiles[0];
++	char *dhclient_path = DHCLIENT_PATH;
++
++	if (get_snap_app_path())
++		dhclient_path = g_strdup_printf("%s/sbin/dhclient", get_snap_app_path());
++
++	priv->path = nm_dhcp_dhclient_get_path (dhclient_path);
+ 
+-	priv->path = nm_dhcp_dhclient_get_path (DHCLIENT_PATH);
++	if (get_snap_app_path ())
++		g_free (dhclient_path);
+ 
+ 	while (iter && *iter) {
+ 		if (g_file_test (*iter, G_FILE_TEST_EXISTS)) {
+@@ -627,6 +657,7 @@ dispose (GObject *object)
+ 	g_free (priv->pid_file);
+ 	g_free (priv->conf_file);
+ 	g_free (priv->lease_file);
++	g_free (priv->path);
+ 
+ 	G_OBJECT_CLASS (nm_dhcp_dhclient_parent_class)->dispose (object);
+ }
+Index: build/src/main.c
+===================================================================
+--- build.orig/src/main.c
++++ build/src/main.c
+@@ -55,6 +55,7 @@
+ #include "nm-posix-signals.h"
+ #include "nm-session-monitor.h"
+ #include "nm-dispatcher.h"
++#include "snappy.h"
+ 
+ #if !defined(NM_DIST_VERSION)
+ # define NM_DIST_VERSION VERSION
+@@ -63,6 +64,9 @@
+ #define NM_DEFAULT_PID_FILE          NMRUNDIR "/NetworkManager.pid"
+ #define NM_DEFAULT_SYSTEM_STATE_FILE NMSTATEDIR "/NetworkManager.state"
+ 
++extern const char* get_snap_app_path();
++extern const char* get_snap_app_data_path();
++
+ /*
+  * Globals
+  */
+@@ -355,6 +359,7 @@ main (int argc, char *argv[])
+ 	GError *error = NULL;
+ 	gboolean wrote_pidfile = FALSE;
+ 	char *bad_domains = NULL;
++	char *run_dir, *state_dir;
+ 
+ 	GOptionEntry options[] = {
+ 		{ "version", 'V', 0, G_OPTION_ARG_NONE, &show_version, N_("Print NetworkManager version and exit"), NULL },
+@@ -476,18 +481,37 @@ main (int argc, char *argv[])
+ 		g_free (path);
+ 	}
+ 
++	if (get_snap_app_data_path()) {
++		run_dir = g_strdup_printf("%s/var/run/", get_snap_app_data_path());
++		state_dir = g_strdup_printf("%s/var/lib/", get_snap_app_data_path());
++	} else {
++		run_dir = g_strdup (NMRUNDIR);
++		state_dir = g_strdup (NMSTATEDIR);
++	}
++
++	nm_log_warn (LOGD_CORE, "run_dir: '%s", run_dir);
++	nm_log_warn (LOGD_CORE, "state_dir: '%s", state_dir);
++
+ 	/* Setup runtime directory */
+-	if (g_mkdir_with_parents (NMRUNDIR, 0755) != 0) {
+-		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", NMRUNDIR, strerror (errno));
++	if (g_mkdir_with_parents (run_dir, 0755) != 0) {
++		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", run_dir, strerror (errno));
++		g_free (run_dir);
++		g_free (state_dir);
+ 		exit (1);
+ 	}
+ 
++	g_free (run_dir);
++
+ 	/* Ensure state directory exists */
+-	if (g_mkdir_with_parents (NMSTATEDIR, 0755) != 0) {
+-		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", NMSTATEDIR, strerror (errno));
++	if (g_mkdir_with_parents (state_dir, 0755) != 0) {
++		nm_log_err (LOGD_CORE, "Cannot create '%s': %s", state_dir, strerror (errno));
++		g_free (run_dir);
++		g_free (state_dir);
+ 		exit (1);
+ 	}
+ 
++	g_free (state_dir);
++
+ 	pidfile = pidfile ? pidfile : g_strdup (NM_DEFAULT_PID_FILE);
+ 	state_file = state_file ? state_file : g_strdup (NM_DEFAULT_SYSTEM_STATE_FILE);
+ 
+@@ -561,7 +585,10 @@ main (int argc, char *argv[])
+ 		g_log_set_always_fatal (fatal_mask);
+ 	}
+ 
++#ifndef SNAPPY
++	/* FIXME: this causes us to segfault in a snappy environment */
+ 	nm_logging_syslog_openlog (debug);
++#endif
+ 
+ #if !GLIB_CHECK_VERSION (2, 35, 0)
+ 	g_type_init ();
+@@ -593,6 +620,7 @@ main (int argc, char *argv[])
+ 
+ 	/* Initialize our DBus service & connection */
+ 	dbus_mgr = nm_dbus_manager_get ();
++
+ 	g_assert (dbus_mgr != NULL);
+ 
+ 	vpn_manager = nm_vpn_manager_get ();
+Index: build/src/nm-activation-request.c
+===================================================================
+--- build.orig/src/nm-activation-request.c
++++ build/src/nm-activation-request.c
+@@ -37,6 +37,7 @@
+ #include "nm-active-connection.h"
+ #include "nm-settings-connection.h"
+ #include "nm-posix-signals.h"
++#include "snappy.h"
+ 
+ 
+ G_DEFINE_TYPE (NMActRequest, nm_act_request, NM_TYPE_ACTIVE_CONNECTION)
+@@ -228,8 +229,13 @@ nm_act_request_set_shared (NMActRequest
+ 		char *envp[1] = { NULL };
+ 		gs_strfreev char **argv = NULL;
+ 		gs_free char *cmd = NULL;
++		char *base_path = "";
+ 
+-		cmd = g_strdup_printf ("%s --table %s %s %s",
++		if (get_snap_app_path())
++			base_path = get_snap_app_path();
++
++		cmd = g_strdup_printf ("%s%s --table %s %s %s",
++		                       base_path,
+ 		                       IPTABLES_PATH,
+ 		                       rule->table,
+ 		                       shared ? "--insert" : "--delete",
+Index: build/src/nm-manager.c
+===================================================================
+--- build.orig/src/nm-manager.c
++++ build/src/nm-manager.c
+@@ -70,7 +70,7 @@
+ #include "nm-sleep-monitor.h"
+ #include "nm-connectivity.h"
+ #include "nm-policy.h"
+-
++#include "snappy.h"
+ 
+ #define NM_AUTOIP_DBUS_SERVICE "org.freedesktop.nm_avahi_autoipd"
+ #define NM_AUTOIP_DBUS_IFACE   "org.freedesktop.nm_avahi_autoipd"
+@@ -2022,13 +2022,25 @@ load_device_factories (NMManager *self)
+ 	const char *item;
+ 	char *path;
+ 	GSList *iter;
++	char *plugin_dir;
++
++	/* FIXME: hard-coded arch path... */
++	if (get_snap_app_path())
++		plugin_dir = g_strdup_printf("%s/usr/lib/NetworkManager/",
++					     get_snap_app_path());
++	else
++		plugin_dir = g_strdup (NMPLUGINDIR);
++
++   	nm_log_warn (LOGD_HW, "load_device_factories: about to open plugin directory %s", plugin_dir);
++
++	dir = g_dir_open (plugin_dir, 0, &error);
+ 
+-	dir = g_dir_open (NMPLUGINDIR, 0, &error);
+ 	if (!dir) {
+ 		nm_log_warn (LOGD_HW, "Failed to open plugin directory %s: %s",
+-		             NMPLUGINDIR,
++		             plugin_dir,
+ 		             (error && error->message) ? error->message : "(unknown)");
+ 		g_clear_error (&error);
++		g_free (plugin_dir);
+ 		return;
+ 	}
+ 
+@@ -2045,7 +2057,11 @@ load_device_factories (NMManager *self)
+ 		if (g_str_has_suffix (item, ".la"))
+ 			continue;
+ 
+-		path = g_module_build_path (NMPLUGINDIR, item);
++		if (get_snap_app_path())
++			path = g_module_build_path(plugin_dir, item);
++		else
++			path = g_module_build_path (NMPLUGINDIR, item);
++
+ 		g_assert (path);
+ 		plugin = g_module_open (path, G_MODULE_BIND_LOCAL);
+ 		g_free (path);
+@@ -2113,8 +2129,11 @@ load_device_factories (NMManager *self)
+ 		nm_log_info (LOGD_HW, "Loaded device plugin: %s", g_module_name (plugin));
+ 	};
+ 	g_dir_close (dir);
++	g_free (plugin_dir);
+ 
+ 	priv->factories = g_slist_reverse (priv->factories);
++
++   	nm_log_warn (LOGD_HW, "load_device_factories: all done");
+ }
+ 
+ static void
+Index: build/src/ppp-manager/nm-ppp-manager.c
+===================================================================
+--- build.orig/src/ppp-manager/nm-ppp-manager.c
++++ build/src/ppp-manager/nm-ppp-manager.c
+@@ -53,6 +53,7 @@
+ #include "nm-dbus-manager.h"
+ #include "nm-logging.h"
+ #include "nm-posix-signals.h"
++#include "snappy.h"
+ 
+ static void impl_ppp_manager_need_secrets (NMPPPManager *manager,
+                                            DBusGMethodInvocation *context);
+@@ -972,7 +973,16 @@ create_pppd_cmd_line (NMPPPManager *self
+ 	nm_cmd_line_add_string (cmd, priv->dbus_path);
+ 
+ 	nm_cmd_line_add_string (cmd, "plugin");
+-	nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
++
++	if (get_snap_app_path()) {
++		gchar *plugin_path = g_strdup_printf("%s%s",
++					get_snap_app_path(),
++					NM_PPPD_PLUGIN);
++		nm_cmd_line_add_string (cmd, plugin_path);
++		g_free(plugin_path);
++	} else {
++		nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
++	}
+ 
+ 	return cmd;
+ }
+Index: build/src/settings/nm-settings.c
+===================================================================
+--- build.orig/src/settings/nm-settings.c
++++ build/src/settings/nm-settings.c
+@@ -68,6 +68,7 @@
+ #include "nm-connection-provider.h"
+ #include "nm-config.h"
+ #include "NetworkManagerUtils.h"
++#include "snappy.h"
+ 
+ /* LINKER CRACKROCK */
+ #define EXPORT(sym) void * __export_##sym = &sym;
+@@ -124,7 +125,6 @@ static void connection_provider_init (NM
+ G_DEFINE_TYPE_EXTENDED (NMSettings, nm_settings, G_TYPE_OBJECT, 0,
+                         G_IMPLEMENT_INTERFACE (NM_TYPE_CONNECTION_PROVIDER, connection_provider_init))
+ 
+-
+ typedef struct {
+ 	NMDBusManager *dbus_mgr;
+ 
+@@ -615,6 +615,15 @@ load_plugins (NMSettings *self, const ch
+ 	const char **iter;
+ 	gboolean keyfile_added = FALSE;
+ 	gboolean success = TRUE;
++	char *plugin_dir = NULL;
++
++	if (get_snap_app_path()) {
++		plugin_dir = g_strdup_printf ("%s/usr/lib/NetworkManager/", get_snap_app_path());
++	}
++	else
++		plugin_dir = g_strdup (NMPLUGINDIR);
++
++   	nm_log_warn (LOGD_HW, "load_plugins: about to open plugin directory %s", plugin_dir);
+ 
+ 	for (iter = plugins; iter && *iter; iter++) {
+ 		GModule *plugin;
+@@ -645,7 +654,7 @@ load_plugins (NMSettings *self, const ch
+ 		}
+ 
+ 		full_name = g_strdup_printf ("nm-settings-plugin-%s", pname);
+-		path = g_module_build_path (NMPLUGINDIR, full_name);
++		path = g_module_build_path (plugin_dir, full_name);
+ 
+ 		plugin = g_module_open (path, G_MODULE_BIND_LOCAL);
+ 		if (!plugin) {
+@@ -690,6 +699,9 @@ load_plugins (NMSettings *self, const ch
+ 
+ 	g_slist_free_full (list, g_object_unref);
+ 
++	if (plugin_dir)
++		g_free (plugin_dir);
++
+ 	return success;
+ }
+ 
+@@ -1754,6 +1766,8 @@ nm_settings_new (GError **error)
+ 	NMSettings *self;
+ 	NMSettingsPrivate *priv;
+ 
++   	nm_log_warn (LOGD_HW, "nm_settings_new");
++
+ 	self = g_object_new (NM_TYPE_SETTINGS, NULL);
+ 
+ 	priv = NM_SETTINGS_GET_PRIVATE (self);
+@@ -1761,8 +1775,11 @@ nm_settings_new (GError **error)
+ 	priv->config = nm_config_get ();
+ 	priv->dbus_mgr = nm_dbus_manager_get ();
+ 
++   	nm_log_warn (LOGD_HW, "nm_settings_new: about to call load_plugins");
++
+ 	/* Load the plugins; fail if a plugin is not found. */
+ 	if (!load_plugins (self, nm_config_get_plugins (priv->config), error)) {
++		fprintf (stderr, "load settings plugins - FAILED!!!\n");
+ 		g_object_unref (self);
+ 		return NULL;
+ 	}
+Index: build/src/settings/plugins/keyfile/plugin.c
+===================================================================
+--- build.orig/src/settings/plugins/keyfile/plugin.c
++++ build/src/settings/plugins/keyfile/plugin.c
+@@ -44,6 +44,7 @@
+ #include "writer.h"
+ #include "common.h"
+ #include "utils.h"
++#include "snappy.h"
+ 
+ static char *plugin_get_hostname (SCPluginKeyfile *plugin);
+ static void system_config_interface_init (NMSystemConfigInterface *system_config_interface_class);
+@@ -282,7 +283,17 @@ setup_monitoring (NMSystemConfigInterfac
+ 	GFileMonitor *monitor;
+ 
+ 	if (nm_config_get_monitor_connection_files (nm_config_get ())) {
+-		file = g_file_new_for_path (KEYFILE_DIR);
++
++		if (get_snap_app_data_path()) {
++			char *keyfile_dir = NULL;
++			keyfile_dir = g_strdup_printf("%s/%s", get_snap_app_data_path(),
++						       KEYFILE_DIR);
++			file = g_file_new_for_path (keyfile_dir);
++			g_free(keyfile_dir);
++		} else {
++			file = g_file_new_for_path (KEYFILE_DIR);
++		}
++
+ 		monitor = g_file_monitor_directory (file, G_FILE_MONITOR_NONE, NULL, NULL);
+ 		g_object_unref (file);
+ 
+@@ -316,7 +327,16 @@ read_connections (NMSystemConfigInterfac
+ 	GHashTableIter iter;
+ 	gpointer data;
+ 
+-	dir = g_dir_open (KEYFILE_DIR, 0, &error);
++	if (get_snap_app_data_path()) {
++		char *keyfile_dir = NULL;
++		keyfile_dir = g_strdup_printf("%s/%s", get_snap_app_data_path(),
++						KEYFILE_DIR);
++		dir = g_dir_open (keyfile_dir, 0, &error);
++		g_free(keyfile_dir);
++	} else {
++		dir = g_dir_open (KEYFILE_DIR, 0, &error);
++	}
++
+ 	if (!dir) {
+ 		nm_log_warn (LOGD_SETTINGS, "Cannot read directory '%s': (%d) %s",
+ 		             KEYFILE_DIR,
+@@ -341,7 +361,10 @@ read_connections (NMSystemConfigInterfac
+ 		if (nm_keyfile_plugin_utils_should_ignore_file (item))
+ 			continue;
+ 
+-		full_path = g_build_filename (KEYFILE_DIR, item, NULL);
++		if (get_snap_app_data_path())
++			full_path = g_build_filename (get_snap_app_data_path(), KEYFILE_DIR, item, NULL);
++		else
++			full_path = g_build_filename (KEYFILE_DIR, item, NULL);
+ 
+ 		connection = g_hash_table_lookup (oldconns, full_path);
+ 		if (connection) {
+Index: build/src/settings/plugins/keyfile/writer.c
+===================================================================
+--- build.orig/src/settings/plugins/keyfile/writer.c
++++ build/src/settings/plugins/keyfile/writer.c
+@@ -48,6 +48,7 @@
+ #include "writer.h"
+ #include "common.h"
+ #include "utils.h"
++#include "snappy.h"
+ 
+ /* Some setting properties also contain setting names, such as
+  * NMSettingConnection's 'type' property (which specifies the base type of the
+@@ -1124,12 +1125,26 @@ nm_keyfile_plugin_write_connection (NMCo
+                                     char **out_path,
+                                     GError **error)
+ {
+-	return _internal_write_connection (connection,
+-	                                   KEYFILE_DIR,
++	gboolean ret;
++	char *keyfile_dir = NULL;
++
++	if (get_snap_app_data_path())
++		keyfile_dir = g_strdup_printf("%s%s",
++					      get_snap_app_data_path(),
++					      KEYFILE_DIR);
++	else
++		keyfile_dir = g_strdup(KEYFILE_DIR);
++
++	ret = _internal_write_connection (connection,
++	                                   keyfile_dir,
+ 	                                   0, 0,
+ 	                                   existing_path,
+ 	                                   out_path,
+ 	                                   error);
++
++	g_free(keyfile_dir);
++
++	return ret;
+ }
+ 
+ gboolean
+Index: build/src/snappy.h
+===================================================================
+--- /dev/null
++++ build/src/snappy.h
+@@ -0,0 +1,45 @@
++/* NetworkManager -- Network link manager
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Copyright (C) 2015 Canonical Ltd.
++ */
++
++#ifndef SNAPPY_H_
++#define SNAPPY_H_
++
++#include <stdlib.h>
++
++static const char* get_snap_app_data_path()
++{
++	static char *path = NULL;
++
++	if (!path)
++		path = getenv("SNAP_APP_DATA_PATH");
++
++	return path;
++}
++
++static const char* get_snap_app_path()
++{
++	static char *path = NULL;
++
++			if (!path)
++				path = getenv("SNAP_APP_PATH");
++
++			return path;
++}
++
++#endif
+Index: build/src/dhcp-manager/nm-dhcp-dhclient.h
+===================================================================
+--- build.orig/src/dhcp-manager/nm-dhcp-dhclient.h
++++ build/src/dhcp-manager/nm-dhcp-dhclient.h
+@@ -45,7 +45,7 @@ GSList *nm_dhcp_dhclient_get_lease_ip_co
+                                                const char *uuid,
+                                                gboolean ipv6);
+ 
+-const char *nm_dhcp_dhclient_get_path (const char *try_first);
++char *nm_dhcp_dhclient_get_path (const char *try_first);
+ 
+ #endif /* NM_DHCP_DHCLIENT_H */
+ 
