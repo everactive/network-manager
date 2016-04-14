@@ -110,9 +110,11 @@ parts:
     configflags:
       # Disable all features we don't want enabled as we're not
       # supporting them (yet).
+      - --prefix=/usr
+      - --libexecdir=/usr/lib
       - --disable-qt
       - --disable-teamdctl
-      - --disable-polkit=disabled
+      - --disable-polkit
       - --disable-vala
       - --disable-ppp
       - --with-dhcpcd=no
