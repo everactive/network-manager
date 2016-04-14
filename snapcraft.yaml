@@ -9,18 +9,8 @@ apps:
   nmcli:
     command: usr/bin/nmcli
     plugs: [unconfined]
-  nmtui-connect:
-    command: usr/bin/nmtui-connect
-    plugs: [unconfined]
-  nmtui-edit:
-    command: usr/bin/nmtui-edit
-    plugs: [unconfined]
   NetworkManager:
     command: bin/networkmanager
-    daemon: simple
-    plugs: [unconfined]
-  dnsmasq:
-    command: bin/dnsmasq
     daemon: simple
     plugs: [unconfined]
 
