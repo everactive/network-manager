@@ -62,7 +62,7 @@
 static void _ppp_cleanup  (NMPPPManager *manager);
 static void _ppp_kill (NMPPPManager *manager);
 
-#define NM_PPPD_PLUGIN PPPD_PLUGIN_DIR "/nm-pppd-plugin.so"
+#define NM_PPPD_PLUGIN "nm-pppd-plugin.so"
 #define PPP_MANAGER_SECRET_TRIES "ppp-manager-secret-tries"
 
 typedef struct {
@@ -840,6 +840,7 @@ create_pppd_cmd_line (NMPPPManager *self,
 	const char *pppd_binary = NULL;
 	NMCmdLine *cmd;
 	gboolean ppp_debug;
+	char *pppd_plugin_dir;
 
 	g_return_val_if_fail (setting != NULL, NULL);
 
@@ -985,8 +986,12 @@ create_pppd_cmd_line (NMPPPManager *self,
 	nm_cmd_line_add_string (cmd, "ipparam");
 	nm_cmd_line_add_string (cmd, nm_exported_object_get_path (NM_EXPORTED_OBJECT (self)));
 
+	pppd_plugin_dir = g_strdup_printf ("%s/%s", nm_utils_get_pppd_plugin_dir (), NM_PPPD_PLUGIN);
+
 	nm_cmd_line_add_string (cmd, "plugin");
-	nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
+	nm_cmd_line_add_string (cmd, pppd_plugin_dir);
+
+	g_free (pppd_plugin_dir);
 
 	return cmd;
 }

@@ -394,4 +394,10 @@ gboolean nm_utils_lifetime_get (guint32 timestamp,
 
 gboolean nm_utils_ip4_address_is_link_local (in_addr_t addr);
 
+const char* nm_utils_get_state_dir (void);
+const char* nm_utils_get_run_dir (void);
+const char* nm_utils_get_plugin_dir (void);
+const char* nm_utils_get_conf_dir (void);
+const char* nm_utils_get_pppd_plugin_dir (void);
+
 #endif /* __NM_CORE_UTILS_H__ */

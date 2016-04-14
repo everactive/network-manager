@@ -64,6 +64,13 @@ DISTCLEANFILES = intltool-extract intltool-merge intltool-update
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = NetworkManager.pc
 
+licensedir =$(datadir)/doc/network-manager
+license_DATA = \
+	COPYING \
+	AUTHORS \
+	NEWS \
+	README
+
 CLEANFILES = cscope.in.out cscope.out cscope.po.out
 
 cscope:

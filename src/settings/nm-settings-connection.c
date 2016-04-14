@@ -32,11 +32,29 @@
 #include "NetworkManagerUtils.h"
 #include "nm-core-internal.h"
 #include "nm-audit-manager.h"
+#include "nm-core-utils.h"
 
 #include "nmdbus-settings-connection.h"
 
-#define SETTINGS_TIMESTAMPS_FILE  NMSTATEDIR "/timestamps"
-#define SETTINGS_SEEN_BSSIDS_FILE NMSTATEDIR "/seen-bssids"
+static const char *get_settings_timestamps_path()
+{
+	const char *timestamps_path = NULL;
+
+	if (!timestamps_path)
+		timestamps_path = g_strdup_printf("%s/timestamps", nm_utils_get_state_dir());
+
+	return timestamps_path;
+}
+
+static const char *get_settings_seen_bssids_path()
+{
+	const char *seen_bssids_path = NULL;
+
+	if (!seen_bssids_path)
+		seen_bssids_path = g_strdup_printf("%s/seen-bssids", nm_utils_get_state_dir());
+
+	return seen_bssids_path;
+}
 
 #define _NMLOG_DOMAIN        LOGD_SETTINGS
 #define _NMLOG_PREFIX_NAME   "settings-connection"
@@ -703,9 +721,9 @@ remove_entry_from_db (NMSettingsConnection *self, const char* db_name)
 	const char *db_file;
 
 	if (strcmp (db_name, "timestamps") == 0)
-		db_file = SETTINGS_TIMESTAMPS_FILE;
+		db_file = get_settings_timestamps_path();
 	else if (strcmp (db_name, "seen-bssids") == 0)
-		db_file = SETTINGS_SEEN_BSSIDS_FILE;
+		db_file = get_settings_seen_bssids_path();
 	else
 		return;
 
@@ -2161,9 +2179,9 @@ nm_settings_connection_update_timestamp (NMSettingsConnection *self,
 
 	/* Save timestamp to timestamps database file */
 	timestamps_file = g_key_file_new ();
-	if (!g_key_file_load_from_file (timestamps_file, SETTINGS_TIMESTAMPS_FILE, G_KEY_FILE_KEEP_COMMENTS, &error)) {
+	if (!g_key_file_load_from_file (timestamps_file, get_settings_timestamps_path(), G_KEY_FILE_KEEP_COMMENTS, &error)) {
 		if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
-			_LOGW ("error parsing timestamps file '%s': %s", SETTINGS_TIMESTAMPS_FILE, error->message);
+			_LOGW ("error parsing timestamps file '%s': %s", get_settings_timestamps_path(), error->message);
 		g_clear_error (&error);
 	}
 
@@ -2174,11 +2192,11 @@ nm_settings_connection_update_timestamp (NMSettingsConnection *self,
 
 	data = g_key_file_to_data (timestamps_file, &len, &error);
 	if (data) {
-		g_file_set_contents (SETTINGS_TIMESTAMPS_FILE, data, len, &error);
+		g_file_set_contents (get_settings_timestamps_path(), data, len, &error);
 		g_free (data);
 	}
 	if (error) {
-		_LOGW ("error saving timestamp to file '%s': %s", SETTINGS_TIMESTAMPS_FILE, error->message);
+		_LOGW ("error saving timestamp to file '%s': %s", get_settings_timestamps_path(), error->message);
 		g_error_free (error);
 	}
 	g_key_file_free (timestamps_file);
@@ -2205,7 +2223,7 @@ nm_settings_connection_read_and_fill_timestamp (NMSettingsConnection *self)
 
 	/* Get timestamp from database file */
 	timestamps_file = g_key_file_new ();
-	g_key_file_load_from_file (timestamps_file, SETTINGS_TIMESTAMPS_FILE, G_KEY_FILE_KEEP_COMMENTS, NULL);
+	g_key_file_load_from_file (timestamps_file, get_settings_timestamps_path(), G_KEY_FILE_KEEP_COMMENTS, NULL);
 	connection_uuid = nm_settings_connection_get_uuid (self);
 	tmp_str = g_key_file_get_value (timestamps_file, "timestamps", connection_uuid, &err);
 	if (tmp_str) {
@@ -2312,10 +2330,10 @@ nm_settings_connection_add_seen_bssid (NMSettingsConnection *self,
 	/* Save BSSID to seen-bssids file */
 	seen_bssids_file = g_key_file_new ();
 	g_key_file_set_list_separator (seen_bssids_file, ',');
-	if (!g_key_file_load_from_file (seen_bssids_file, SETTINGS_SEEN_BSSIDS_FILE, G_KEY_FILE_KEEP_COMMENTS, &error)) {
+	if (!g_key_file_load_from_file (seen_bssids_file, get_settings_seen_bssids_path(), G_KEY_FILE_KEEP_COMMENTS, &error)) {
 		if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
 			_LOGW ("error parsing seen-bssids file '%s': %s",
-			       SETTINGS_SEEN_BSSIDS_FILE, error->message);
+				   get_settings_seen_bssids_path(), error->message);
 		}
 		g_clear_error (&error);
 	}
@@ -2326,14 +2344,14 @@ nm_settings_connection_add_seen_bssid (NMSettingsConnection *self,
 
 	data = g_key_file_to_data (seen_bssids_file, &len, &error);
 	if (data) {
-		g_file_set_contents (SETTINGS_SEEN_BSSIDS_FILE, data, len, &error);
+		g_file_set_contents (get_settings_seen_bssids_path(), data, len, &error);
 		g_free (data);
 	}
 	g_key_file_free (seen_bssids_file);
 
 	if (error) {
 		_LOGW ("error saving seen-bssids to file '%s': %s",
-		       SETTINGS_SEEN_BSSIDS_FILE, error->message);
+			   get_settings_seen_bssids_path(), error->message);
 		g_error_free (error);
 	}
 }
@@ -2358,7 +2376,7 @@ nm_settings_connection_read_and_fill_seen_bssids (NMSettingsConnection *self)
 	/* Get seen BSSIDs from database file */
 	seen_bssids_file = g_key_file_new ();
 	g_key_file_set_list_separator (seen_bssids_file, ',');
-	if (g_key_file_load_from_file (seen_bssids_file, SETTINGS_SEEN_BSSIDS_FILE, G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+	if (g_key_file_load_from_file (seen_bssids_file, get_settings_seen_bssids_path(), G_KEY_FILE_KEEP_COMMENTS, NULL)) {
 		connection_uuid = nm_settings_connection_get_uuid (self);
 		tmp_strv = g_key_file_get_string_list (seen_bssids_file, "seen-bssids", connection_uuid, &len, NULL);
 	}

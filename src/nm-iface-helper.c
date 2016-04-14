@@ -50,8 +50,6 @@ extern unsigned int if_nametoindex (const char *__ifname);
 # define NM_DIST_VERSION VERSION
 #endif
 
-#define NMIH_PID_FILE_FMT NMRUNDIR "/nm-iface-helper-%d.pid"
-
 static GMainLoop *main_loop = NULL;
 static int ifindex = -1;
 
@@ -380,7 +378,7 @@ main (int argc, char *argv[])
 		fprintf (stderr, _("Failed to find interface index for %s (%s)\n"), global_opt.ifname, strerror (errno));
 		exit (1);
 	}
-	pidfile = g_strdup_printf (NMIH_PID_FILE_FMT, ifindex);
+	pidfile = g_strdup_printf ("%s/nm-iface-helper-%d.pid", nm_utils_get_run_dir(), ifindex);
 	nm_main_utils_ensure_not_running_pidfile (pidfile);
 
 	nm_main_utils_ensure_rundir ();

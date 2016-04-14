@@ -138,7 +138,9 @@ test_utils_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DPREFIX=\"/nonexistent\" \
 	-DLOCALSTATEDIR=\"$(localstatedir)\" \
-	-DNMSTATEDIR=\"/nonsense\"
+	-DNMSTATEDIR=\"/nonsense\" \
+	-DNMPLUGINDIR=\"/nonsense\" \
+	-DPPPD_PLUGIN_DIR=\"/nonsense\"
 
 test_utils_LDADD = \
 	$(top_builddir)/src/libNetworkManager.la

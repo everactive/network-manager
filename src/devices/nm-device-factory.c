@@ -28,6 +28,7 @@
 #include "nm-device-factory.h"
 #include "nm-platform.h"
 #include "nm-utils.h"
+#include "nm-core-utils.h"
 
 const NMLinkType _nm_device_factory_no_default_links[] = { NM_LINK_TYPE_NONE };
 const char *_nm_device_factory_no_default_settings[] = { NULL };
@@ -367,10 +368,10 @@ read_device_factory_paths (void)
 	char **result;
 	guint i;
 
-	dir = g_dir_open (NMPLUGINDIR, 0, &error);
+	dir = g_dir_open (nm_utils_get_plugin_dir(), 0, &error);
 	if (!dir) {
 		nm_log_warn (LOGD_HW, "device plugin: failed to open directory %s: %s",
-		             NMPLUGINDIR,
+					 nm_utils_get_plugin_dir(),
 		             error->message);
 		g_clear_error (&error);
 		return NULL;
@@ -387,7 +388,7 @@ read_device_factory_paths (void)
 		if (g_str_has_suffix (item, ".la"))
 			continue;
 
-		data.path = g_build_filename (NMPLUGINDIR, item, NULL);
+		data.path = g_build_filename (nm_utils_get_plugin_dir(), item, NULL);
 
 		if (stat (data.path, &data.st) != 0) {
 			errsv = errno;

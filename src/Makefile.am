@@ -210,6 +210,8 @@ libNetworkManager_base_la_CPPFLAGS = \
 	-DPREFIX=\"$(prefix)\" \
 	-DLOCALSTATEDIR=\"$(localstatedir)\" \
 	-DNMSTATEDIR=\"$(nmstatedir)\" \
+	-DNMPLUGINDIR=\"$(pkglibdir)\" \
+	-DPPPD_PLUGIN_DIR=\"$(PPPD_PLUGIN_DIR)\" \
 	$(GLIB_CFLAGS)
 
 libNetworkManager_base_la_LIBADD = \

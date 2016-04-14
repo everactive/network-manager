@@ -57,6 +57,7 @@
 #include "nm-setting-bond.h"
 #include "nm-utils.h"
 #include "nm-core-internal.h"
+#include "nm-core-utils.h"
 
 #include "nm-device-ethernet.h"
 #include "nm-settings.h"
@@ -805,7 +806,7 @@ load_plugin:
 			int errsv;
 
 			full_name = g_strdup_printf ("nm-settings-plugin-%s", pname);
-			path = g_module_build_path (NMPLUGINDIR, full_name);
+			path = g_module_build_path (nm_utils_get_plugin_dir(), full_name);
 
 			if (stat (path, &st) != 0) {
 				errsv = errno;

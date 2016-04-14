@@ -39,6 +39,16 @@
 #define DEFAULT_NO_AUTO_DEFAULT_FILE    NMSTATEDIR "/no-auto-default.state"
 #define DEFAULT_INTERN_CONFIG_FILE      NMSTATEDIR "/NetworkManager-intern.conf"
 
+static const char *get_no_auto_default_file_path()
+{
+	const char *no_auto_default_file = NULL;
+
+	if (!no_auto_default_file)
+		no_auto_default_file = g_strdup_printf("%s/no-auto-default.state", nm_utils_get_state_dir());
+
+	return no_auto_default_file;
+}
+
 struct NMConfigCmdLineOptions {
 	char *config_main_file;
 	char *intern_config_file;
@@ -1851,7 +1861,7 @@ init_sync (GInitable *initable, GCancellable *cancellable, GError **error)
 	if (priv->cli.no_auto_default_file)
 		priv->no_auto_default_file = g_strdup (priv->cli.no_auto_default_file);
 	else
-		priv->no_auto_default_file = g_strdup (DEFAULT_NO_AUTO_DEFAULT_FILE);
+		priv->no_auto_default_file = g_strdup (get_no_auto_default_file_path());
 
 	priv->plugins = _nm_utils_strv_cleanup (g_key_file_get_string_list (keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "plugins", NULL, NULL),
 	                                        TRUE, TRUE, TRUE);

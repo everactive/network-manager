@@ -51,6 +51,7 @@
 #include "nm-core-internal.h"
 #include "nm-exported-object.h"
 #include "nm-sd.h"
+#include "nm-core-utils.h"
 
 #if !defined(NM_DIST_VERSION)
 # define NM_DIST_VERSION VERSION
@@ -254,8 +255,8 @@ do_early_setup (int *argc, char **argv[], NMConfigCmdLineOptions *config_cli)
 	                                _("NetworkManager monitors all network connections and automatically\nchooses the best connection to use.  It also allows the user to\nspecify wireless access points which wireless cards in the computer\nshould associate with.")))
 		exit (1);
 
-	global_opt.pidfile = global_opt.pidfile ? global_opt.pidfile : g_strdup (NM_DEFAULT_PID_FILE);
-	global_opt.state_file = global_opt.state_file ? global_opt.state_file : g_strdup (NM_DEFAULT_SYSTEM_STATE_FILE);
+	global_opt.pidfile = global_opt.pidfile ? global_opt.pidfile : g_strdup_printf ("%s/NetworkManager.pid", nm_utils_get_run_dir());
+	global_opt.state_file = global_opt.state_file ? global_opt.state_file : g_strdup_printf ("%s/NetworkManager.state", nm_utils_get_state_dir());
 }
 
 /*

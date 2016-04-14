@@ -160,7 +160,7 @@ nm_keyfile_plugin_get_path (void)
 		                                 NM_CONFIG_KEYFILE_KEY_KEYFILE_PATH,
 		                                 NM_CONFIG_GET_VALUE_STRIP | NM_CONFIG_GET_VALUE_NO_EMPTY);
 		if (!path)
-			path = g_strdup (""NM_CONFIG_KEYFILE_PATH_DEFAULT"");
+			path = g_strdup_printf ("%s/system-connections", nm_utils_get_conf_dir());
 	}
 	return path;
 }

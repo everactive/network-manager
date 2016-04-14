@@ -35,6 +35,7 @@
 
 #include "main-utils.h"
 #include "NetworkManagerUtils.h"
+#include "nm-core-utils.h"
 
 static gboolean
 sighup_handler (gpointer user_data)
@@ -118,7 +119,7 @@ nm_main_utils_ensure_statedir ()
 	gs_free char *parent = NULL;
 	int errsv;
 
-	parent = g_path_get_dirname (NMSTATEDIR);
+	parent = g_path_get_dirname (nm_utils_get_state_dir());
 
 	/* Ensure parent state directories exists */
 	if (   parent
@@ -126,13 +127,13 @@ nm_main_utils_ensure_statedir ()
 	    && parent[1] != '\0'
 	    && g_mkdir_with_parents (parent, 0755) != 0) {
 		errsv = errno;
-		fprintf (stderr, "Cannot create parents for '%s': %s", NMSTATEDIR, g_strerror (errsv));
+		fprintf (stderr, "Cannot create parents for '%s': %s", nm_utils_get_state_dir(), g_strerror (errsv));
 		exit (1);
 	}
 	/* Ensure state directory exists */
-	if (g_mkdir_with_parents (NMSTATEDIR, 0700) != 0) {
+	if (g_mkdir_with_parents (nm_utils_get_state_dir(), 0700) != 0) {
 		errsv = errno;
-		fprintf (stderr, "Cannot create '%s': %s", NMSTATEDIR, g_strerror (errsv));
+		fprintf (stderr, "Cannot create '%s': %s", nm_utils_get_state_dir(), g_strerror (errsv));
 		exit (1);
 	}
 }
@@ -141,8 +142,8 @@ void
 nm_main_utils_ensure_rundir ()
 {
 	/* Setup runtime directory */
-	if (g_mkdir_with_parents (NMRUNDIR, 0755) != 0) {
-		fprintf (stderr, _("Cannot create '%s': %s"), NMRUNDIR, strerror (errno));
+	if (g_mkdir_with_parents (nm_utils_get_run_dir(), 0755) != 0) {
+		fprintf (stderr, _("Cannot create '%s': %s"), nm_utils_get_run_dir(), strerror (errno));
 		exit (1);
 	}
 }

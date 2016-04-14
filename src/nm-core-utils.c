@@ -43,6 +43,7 @@
 #include "nm-setting-ip6-config.h"
 #include "nm-setting-wireless.h"
 #include "nm-setting-wireless-security.h"
+#include "nm-core-utils.h"
 
 /*
  * Some toolchains (E.G. uClibc 0.9.33 and earlier) don't export
@@ -2621,14 +2622,17 @@ guint8 *
 nm_utils_secret_key_read (gsize *out_key_len, GError **error)
 {
 	guint8 *secret_key = NULL;
+	char *secret_key_path = NULL;
 	gsize key_len;
 
 	/* out_key_len is not optional, because without it you cannot safely
 	 * access the returned memory. */
 	*out_key_len = 0;
 
+	secret_key_path = g_strdup_printf("%s/sceret_key", nm_utils_get_state_dir());
+
 	/* Let's try to load a saved secret key first. */
-	if (g_file_get_contents (NMSTATEDIR "/secret_key", (char **) &secret_key, &key_len, NULL)) {
+	if (g_file_get_contents (secret_key_path, (char **) &secret_key, &key_len, NULL)) {
 		if (key_len < 16) {
 			g_set_error_literal (error, NM_UTILS_ERROR, NM_UTILS_ERROR_UNKNOWN,
 			                     "Key is too short to be usable");
@@ -3085,3 +3089,57 @@ nm_utils_lifetime_get (guint32 timestamp,
 	return TRUE;
 }
 
+const char*
+nm_utils_get_state_dir(void)
+{
+	static const char *state_dir = NULL;
+
+	if (!state_dir)
+		state_dir = g_strdup_printf("%s/state", getenv("SNAP_DATA"));
+
+	return state_dir;
+}
+
+const char*
+nm_utils_get_run_dir(void)
+{
+	static const char *run_dir = NULL;
+
+	if (!run_dir)
+		run_dir = g_strdup_printf("%s/run", getenv("SNAP_DATA"));
+
+	return run_dir;
+}
+
+const char*
+nm_utils_get_plugin_dir(void)
+{
+	static const char *plugin_dir = NULL;
+
+	if (!plugin_dir)
+		plugin_dir = g_strdup_printf("%s/%s", getenv("SNAP"), NMPLUGINDIR);
+
+	return plugin_dir;
+}
+
+const char*
+nm_utils_get_conf_dir(void)
+{
+	static const char *conf_dir = NULL;
+
+	if (!conf_dir)
+		conf_dir = g_strdup_printf("%s/conf", getenv("SNAP_DATA"));
+
+	return conf_dir;
+}
+
+const char*
+nm_utils_get_pppd_plugin_dir (void)
+{
+	static const char *pppd_plugin_dir = NULL;
+
+	if (!pppd_plugin_dir)
+		pppd_plugin_dir = g_strdup_printf("%s%s", getenv("SNAP"), PPPD_PLUGIN_DIR);
+
+	return pppd_plugin_dir;
+}

@@ -42,6 +42,7 @@
 #include "NetworkManagerUtils.h"
 #include "nm-dhcp-listener.h"
 #include "nm-dhcp-client-logging.h"
+#include "nm-core-utils.h"
 
 G_DEFINE_TYPE (NMDhcpDhclient, nm_dhcp_dhclient, NM_TYPE_DHCP_CLIENT)
 
@@ -86,7 +87,8 @@ get_dhclient_leasefile (const char *iface,
 	char *path;
 
 	/* /var/lib/NetworkManager is the preferred leasefile path */
-	path = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s-%s.lease",
+	path = g_strdup_printf ("%s/dhclient%s-%s-%s.lease",
+							nm_utils_get_state_dir(),
 	                        ipv6 ? "6" : "",
 	                        uuid,
 	                        iface);
@@ -274,7 +276,7 @@ create_dhclient_config (NMDhcpDhclient *self,
 
 	g_return_val_if_fail (iface != NULL, NULL);
 
-	new = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s.conf", is_ip6 ? "6" : "", iface);
+	new = g_strdup_printf ("%s/dhclient%s-%s.conf", nm_utils_get_state_dir(), is_ip6 ? "6" : "", iface);
 	_LOGD ("creating composite dhclient config %s", new);
 
 	orig = find_existing_config (self, iface, uuid, is_ip6);
