@@ -24,9 +24,7 @@ parts:
     plugin: copy
     files:
       bin/networkmanager: bin/networkmanager
-      bin/dnsmasq: bin/dnsmasq
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
-      conf/dnsmasq-dbus.conf: conf/dnsmasq-dbus.conf
 
   networkmanager:
     plugin: autotools
