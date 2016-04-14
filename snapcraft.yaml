@@ -58,8 +58,6 @@ parts:
       - libnl-3-dev
       - libnl-route-3-dev
       - libnl-genl-3-dev
-      - ppp-dev
-      - libpolkit-gobject-1-dev
       - libgnutls28-dev
       - libgcrypt11-dev
       - uuid-dev
@@ -80,52 +78,14 @@ parts:
       - python-dbus
       - python-gi
 
-    # NOTE: Keep this in sync with what the debian package configures
-    # NetworkManager. For everything we do differently please add a 
-    # comment why we do so.
-    configflags:
-      - --prefix=/usr
-      - --sysconfdir=/etc
-      - --libexecdir=/usr/lib/NetworkManager
-      - --with-pppd-plugin-dir=/usr/lib/pppd/2.4.6
-      - --with-pppd=/usr/sbin/pppd
-      - --with-pppoe=/usr/sbin/pppoe
-      - --with-resolvconf=/sbin/resolvconf
-      - --with-dhclient=/sbin/dhclient
-      - --with-iptables=/sbin/iptables
-      - --with-dnsmasq=/usr/sbin/dnsmasq
-      - --with-systemdsystemunitdir=/lib/systemd/system
-      - --with-crypto=gnutls
-      - --with-session-tracking=systemd
-      - --with-suspend-resume=systemd
-      - --with-modem-manager-1
-      - --with-nmtui
-      - --with-tests
-      - --enable-snappy
-      - --enable-ppp
-      - --enable-ifupdown
-      - --enable-introspection
-      - --enable-gtk-doc
-      - --enable-concheck
-      - --enable-teamdctl=no
-      - --enable-bluez4
-      - --disable-qt
-      - --disable-more-warnings
-      - --disable-modify-system
-      - --disable-polkit
-      - --disable-vala
-
     # We stage everything here we need for build and runtime
     stage-packages:
-      - dnsmasq-base
-      - gobject-introspection
       - init-system-helpers
       - iputils-arping
       - isc-dhcp-client
       - iw
       - libc6
       - libdbus-1-3
-      - libdbus-1-dev
       - libdbus-glib-1-2
       - libgcrypt20
       - libglib2.0-0
@@ -139,103 +99,23 @@ parts:
       - libnl-genl-3-200
       - libnl-route-3-200
       - libpam-systemd
-      - libpolkit-agent-1-0
-      - libpolkit-gobject-1-0
-      - libqmi-glib1
       - libreadline6
       - libsoup2.4-1
       - libsystemd0
       - libuuid1
       - lsb-base
-      - ppp-dev
-      - python-dbus
-      - python-gi
-      - udev
       - uuid-dev
       - wireless-tools
 
-    # We don't want that anything from our staged packages ends
-    # up in the resulting snap. We only need them to build
-    # NetworkManager. All runtime dependencies are pulled in with
-    # the rdepends part below. The only left items specified
-    # here are the results of the network manager build.
-    filesets:
-      docs:
-        # Need those to chip the license files of all things
-        # we put into the snap.
-        - usr/share/doc
-      binaries:
-        - usr/bin/nm-online
-        - usr/bin/nmcli
-        - usr/bin/nmtui
-        - usr/bin/nmtui-connect
-        - usr/bin/nmtui-hostname
-        - usr/bin/nmtui-edit
-        - usr/lib/*/NetworkManager
-        - usr/lib/pppd/2.4.6/nm-pppd-plugin.so
-        - usr/lib/NetworkManager
-        - usr/sbin/NetworkManager
-        - usr/lib/*/libnm-*.so*
-        - usr/lib/libnm-*.so*
-      configs:
-        - etc/dbus-1/system.d/*
-      rdepends:
-        - lib64/*
-        - lib/*/
-        - usr/lib/*/
-        - sbin/iwconfig
-        - sbin/iwlist
-        - sbin/iw
-        - sbin/dhclient-script
-        - sbin/dhclient
-        - bin/ip
-        - etc/dbus-1/system.d/dnsmasq.conf
-        - etc/iproute2/
-        - usr/sbin/arpd
-        - usr/sbin/dnsmasq
-        - usr/bin/arping
-        - usr/share/dnsmasq-base/
-        - etc/dhcp/
-      unwanted:
-        - -etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf
-        - -usr/bin/mmcli
-        - -usr/include/libmm-glib/
-        - -usr/lib/*/libmm-glib.so*
-        - -usr/lib/*/ModemManager/
-        - -usr/sbin/ModemManager
-        - -usr/share/icons/hicolor/22x22/apps/ModemManager.png
-        - -usr/lib/*/gobject-introspection
-        - -usr/lib/*/pkgconfig
-        - -usr/lib/pkgconfig
-        - -usr/lib/*/perl/
-        - -usr/lib/*/perl5/
-        - -usr/lib/python2.7/
-        - -usr/lib/python3.4/
-        - -usr/lib/python3/
-        - -usr/lib/gcc/
-        - -usr/lib/ldscripts/
-        - -usr/lib/policykit-1
-        - -usr/lib/valgrind/
-        - -usr/lib/*/dbus-1.0/
-        - -usr/lib/*/girepository-1.0/
-        - -usr/lib/*/gconv/
-        - -usr/lib/girepository-1.0/
-        - -usr/lib/compat-ld/
-        - -usr/lib/dbus-1.0/dbus-daemon-launch-helper
-        - -usr/lib/dpkg/
-        - -lib/udev
-        - -lib/systemd
-        - -lib/ifupdown
-        - -lib/lsb
-        - -usr/lib/*.a
-        - -usr/lib/*/*.a
-        - -usr/lib/*.la
-        - -usr/lib/*/*.la
-        - -usr/lib/*/NetworkManager/*.la
-        - -usr/lib/pppd/*/nm-pppd-plugin.la
-    snap:
-      - $docs
-      - $binaries
-      - $configs
-      - $rdepends
-      - $unwanted
+    configflags:
+      # Disable all features we don't want enabled as we're not
+      # supporting them (yet).
+      - --disable-qt
+      - --disable-teamdctl
+      - --disable-polkit=disabled
+      - --disable-vala
+      - --disable-ppp
+      - --with-dhcpcd=no
+      - --with-dhclient=no
+      - --with-dnsmasq=no
+      - --with-modem-manager-1=no
