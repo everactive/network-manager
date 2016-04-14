@@ -1,0 +1,109 @@
+From bb16529ab1154ad9d8c34d982518b62e94888133 Mon Sep 17 00:00:00 2001
+From: Simon Fels <simon.fels@canonical.com>
+Date: Thu, 14 Apr 2016 14:01:26 +0200
+Subject: [PATCH] Add snappy support (unfinished)
+
+---
+ src/Makefile.am |  2 ++
+ src/nm-snappy.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ src/nm-snappy.h | 26 ++++++++++++++++++++++++++
+ 3 files changed, 70 insertions(+)
+ create mode 100644 src/nm-snappy.c
+ create mode 100644 src/nm-snappy.h
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index bf668d7..d9ec10e 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -438,6 +438,8 @@ libNetworkManager_la_SOURCES = \
+ 	nm-session-monitor.h \
+ 	nm-session-monitor.c \
+ 	nm-sleep-monitor.h \
++	nm-snappy.c \
++	nm-snappy.h \
+ 	nm-types.h \
+ 	nm-core-utils.c \
+ 	nm-core-utils.h \
+diff --git a/src/nm-snappy.c b/src/nm-snappy.c
+new file mode 100644
+index 0000000..4dfb677
+--- /dev/null
++++ b/src/nm-snappy.c
+@@ -0,0 +1,42 @@
++/* NetworkManager -- Network link manager
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Copyright (C) 2015-2016 Canonical Ltd.
++ */
++
++#include <stdlib.h>
++
++#include "nm-snappy.h"
++
++const char* nm_snappy_get_app_data_path()
++{
++	static char *path = NULL;
++
++	if (!path)
++		path = getenv("SNAP_APP_DATA_PATH");
++
++	return path;
++}
++
++const char* nm_snappy_get_app_path()
++{
++	static char *path = NULL;
++
++			if (!path)
++				path = getenv("SNAP_APP_PATH");
++
++			return path;
++}
+diff --git a/src/nm-snappy.h b/src/nm-snappy.h
+new file mode 100644
+index 0000000..f97c6ee
+--- /dev/null
++++ b/src/nm-snappy.h
+@@ -0,0 +1,26 @@
++/* NetworkManager -- Network link manager
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Copyright (C) 2015-2016 Canonical Ltd.
++ */
++
++#ifndef NM_SNAPPY_H_
++#define NM_SNAPPY_H_
++
++const char* nm_snappy_get_app_data_path();
++const char* nm_snappy_get_app_path();
++
++#endif
+-- 
+2.7.4
+
