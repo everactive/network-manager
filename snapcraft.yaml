@@ -111,3 +111,4 @@ parts:
       - --with-dhclient=no
       - --with-dnsmasq=no
       - --with-modem-manager-1=no
+      - --with-systemd-journal=no
