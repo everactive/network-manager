@@ -1,37 +1,16 @@
 #!/bin/sh
-
 set -e
 set -x
 
-# Copy in our dbus policy until snappy has support for this
-cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf \
-    /etc/dbus-1/system.d/$SNAP_APP.conf
-
 # Create all necessary directories we need at runtime
-mkdir -p $SNAP_APP_DATA_PATH/etc/NetworkManager/system-connections
-mkdir -p $SNAP_APP_DATA_PATH/run/sendsigs.omit.d
-mkdir -p $SNAP_APP_DATA_PATH/var/run
-mkdir -p $SNAP_APP_DATA_PATH/var/lib
-
-TRIPLET=
-
-case $SNAP_ARCH in
-    amd64)
-        TRIPLET=x86_64-linux-gnu
-        ;;
-    *)
-        echo "ERROR: Architecture $SNAP_ARCH isn't supported by this snap"
-        exit 1
-esac
+mkdir -p $SNAP_DATA/etc/NetworkManager/system-connections
+mkdir -p $SNAP_DATA/run/sendsigs.omit.d
+mkdir -p $SNAP_DATA/var/run
+mkdir -p $SNAP_DATA/var/lib
 
 # TODO drop DEBUG
-LD_LIBRARY_PATH="$SNAP_APP_PATH/usr/lib/$TRIPLET:$SNAP_APP_PATH/usr/lib:$SNAP_APP_PATH/usr/lib/$TRIPLET/NetworkManager:$SNAP_APP_PATH/usr/lib/NetworkManager:$SNAP_APP_PATH/lib/$TRIPLET" \
-$SNAP_APP_PATH/usr/sbin/NetworkManager \
-    --state-file=$SNAP_APP_DATA_PATH/NetworkManager.state \
-    --config-dir=$SNAP_APP_PATH/etc/NetworkManager \
-    --config=$SNAP_APP_PATH/etc/NetworkManager/NetworkManager.conf \
+$SNAP/usr/sbin/NetworkManager \
+    --config-dir=$SNAP/etc/NetworkManager \
+    --config=$SNAP/etc/NetworkManager/NetworkManager.conf \
     --log-level=DEBUG \
-    --no-daemon \
-    "$@"
-
-rm /etc/dbus-1/system.d/$SNAP_APP.conf
+    --no-daemon
