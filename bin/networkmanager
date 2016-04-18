@@ -3,14 +3,12 @@ set -e
 set -x
 
 # Create all necessary directories we need at runtime
-mkdir -p $SNAP_DATA/etc/NetworkManager/system-connections
-mkdir -p $SNAP_DATA/run/sendsigs.omit.d
-mkdir -p $SNAP_DATA/var/run
-mkdir -p $SNAP_DATA/var/lib
+mkdir -p $SNAP_DATA/conf/system-connections
+mkdir -p $SNAP_DATA/run
 
 # A directory where users can place any additional configuration
 # files for NetworkManager
-mkdir -p $SNAP_USER/conf.d
+mkdir -p $SNAP_USER_DATA/conf.d
 
 # TODO drop DEBUG
 $SNAP/usr/sbin/NetworkManager \
