@@ -100,7 +100,8 @@ parts:
       # Disable all features we don't want enabled as we're not
       # supporting them (yet).
       - --prefix=/usr
-      - --libexecdir=/usr/lib
+      - --libdir=/usr/lib
+      - --libexecdir=/usr/lib/NetworkManager
       - --disable-qt
       - --disable-teamdctl
       - --disable-polkit
