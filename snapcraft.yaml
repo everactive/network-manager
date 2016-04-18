@@ -74,9 +74,7 @@ parts:
 
     # We stage everything here we need for build and runtime
     stage-packages:
-      - init-system-helpers
       - iputils-arping
-      - isc-dhcp-client
       - iw
       - libc6
       - libdbus-1-3
@@ -87,7 +85,6 @@ parts:
       - libiw-dev
       - libmbim-glib4
       - libndp0
-      - libnewt0.52
       - libnl-3-200
       - libnl-3-dev
       - libnl-genl-3-200
