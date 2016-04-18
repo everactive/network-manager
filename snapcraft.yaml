@@ -3,7 +3,6 @@ version: 1.1.94-1
 type: app
 summary: Network management based on NeworkManager
 description: Network management of wired ethernet and WiFi based on NetworkManager
-icon: icon.svg
 
 apps:
   nmcli:
