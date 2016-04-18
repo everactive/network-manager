@@ -1,7 +1,12 @@
 name: network-manager
 version: 1.1.94-1
-summary: Network management based on NeworkManager
-description: Network management of wired ethernet and WiFi based on NetworkManager
+summary: Network management framework
+description: |
+  NetworkManager is a system network service that manages your network
+  devices and connections, attempting to keep active network connectivity
+  when available. It manages ethernet, WiFi, mobile broadband (WWAN) and
+  PPPoE devices, provides VPN integration with a variety of different
+  VPN serivces.
 
 slots:
   service: networkmanager
