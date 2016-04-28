@@ -1,4 +1,4 @@
-From 2115ecdc2d3bfafd7ccf71a72f760e5a0d5d9c56 Mon Sep 17 00:00:00 2001
+From ed034bee0dd2227a931fc5ecd1a233535aaa19c8 Mon Sep 17 00:00:00 2001
 From: Simon Fels <simon.fels@canonical.com>
 Date: Thu, 14 Apr 2016 14:01:26 +0200
 Subject: [PATCH] Add support for Ubuntu Snappy
@@ -13,6 +13,7 @@ changes.
 
 Signed-off-by: Simon Fels <simon.fels@canonical.com>
 ---
+ Makefile.am                           |  7 +++++
  src/Makefile.am                       |  1 +
  src/devices/nm-device-factory.c       |  7 +++--
  src/dhcp-manager/nm-dhcp-dhclient.c   |  6 ++--
@@ -20,15 +21,33 @@ Signed-off-by: Simon Fels <simon.fels@canonical.com>
  src/main-utils.c                      | 13 +++++----
  src/main.c                            |  5 ++--
  src/nm-config.c                       | 12 +++++++-
- src/nm-core-utils.c                   | 52 +++++++++++++++++++++++++++++++++--
+ src/nm-core-utils.c                   | 54 +++++++++++++++++++++++++++++++++--
  src/nm-core-utils.h                   |  5 ++++
  src/nm-iface-helper.c                 |  4 +--
- src/settings/nm-settings-connection.c | 46 +++++++++++++++++++++----------
+ src/settings/nm-settings-connection.c | 46 ++++++++++++++++++++---------
  src/settings/nm-settings.c            |  3 +-
  src/settings/plugins/keyfile/utils.c  |  2 +-
  src/tests/Makefile.am                 |  3 +-
- 14 files changed, 124 insertions(+), 38 deletions(-)
+ 15 files changed, 133 insertions(+), 38 deletions(-)
 
+diff --git a/Makefile.am b/Makefile.am
+index a79bddc..0c850c5 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -64,6 +64,13 @@ DISTCLEANFILES = intltool-extract intltool-merge intltool-update
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = NetworkManager.pc
+ 
++licensedir =$(datadir)/doc/network-manager
++license_DATA = \
++	COPYING \
++	AUTHORS \
++	NEWS \
++	README
++
+ CLEANFILES = cscope.in.out cscope.out cscope.po.out
+ 
+ cscope:
 diff --git a/src/Makefile.am b/src/Makefile.am
 index bf668d7..7df76fc 100644
 --- a/src/Makefile.am
@@ -223,7 +242,7 @@ index 58fd96c..4c70ba1 100644
  	priv->plugins = _nm_utils_strv_cleanup (g_key_file_get_string_list (keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "plugins", NULL, NULL),
  	                                        TRUE, TRUE, TRUE);
 diff --git a/src/nm-core-utils.c b/src/nm-core-utils.c
-index 714aaa9..16e729f 100644
+index 714aaa9..fde7768 100644
 --- a/src/nm-core-utils.c
 +++ b/src/nm-core-utils.c
 @@ -43,6 +43,7 @@
@@ -273,7 +292,7 @@ index 714aaa9..16e729f 100644
  	g_free (secret_key);
  	return success;
  }
-@@ -3043,3 +3048,44 @@ nm_utils_lifetime_get (guint32 timestamp,
+@@ -3043,3 +3048,46 @@ nm_utils_lifetime_get (guint32 timestamp,
  	return TRUE;
  }
  
@@ -317,6 +336,8 @@ index 714aaa9..16e729f 100644
 +
 +	if (!conf_dir)
 +		conf_dir = g_strdup_printf("%s/conf", getenv("SNAP_DATA"));
++
++	return conf_dir;
 +}
 diff --git a/src/nm-core-utils.h b/src/nm-core-utils.h
 index 280be04..b0b71d0 100644
