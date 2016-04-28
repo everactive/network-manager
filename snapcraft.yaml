@@ -30,6 +30,7 @@ parts:
     files:
       bin/networkmanager: bin/networkmanager
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
+      data/copyright: usr/share/doc/network-manager/copyright
 
   networkmanager:
     plugin: autotools
