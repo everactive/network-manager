@@ -10,10 +10,10 @@ description: |
   Please find the source code at https://code.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
 
 slots:
-  service: networkmanager
+  service: network-manager
 
 plugs:
-  nmcli: networkmanager
+  nmcli: network-manager
 
 apps:
   nmcli:
