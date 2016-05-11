@@ -1,0 +1,20 @@
+#!/bin/sh
+set -e
+set -x
+
+# Create all necessary directories we need at runtime
+mkdir -p $SNAP_DATA/conf/system-connections
+mkdir -p $SNAP_DATA/run
+
+# A directory where users can place any additional configuration
+# files for NetworkManager
+mkdir -p $SNAP_USER_DATA/conf.d
+
+# TODO drop DEBUG
+$SNAP/usr/sbin/NetworkManager \
+    --config-dir=$SNAP_USER/conf.d/ \
+    --config=$SNAP/etc/NetworkManager/NetworkManager.conf \
+    --intern-config=$SNAP/var/lib/NetworkManager/NetworkManager-intern.conf \
+    --system-config-dir=$SNAP/usr/lib/NetworkManager/conf.d \
+    --log-level=DEBUG \
+    --no-daemon

@@ -1,0 +1,550 @@
+From ed034bee0dd2227a931fc5ecd1a233535aaa19c8 Mon Sep 17 00:00:00 2001
+From: Simon Fels <simon.fels@canonical.com>
+Date: Thu, 14 Apr 2016 14:01:26 +0200
+Subject: [PATCH] Add support for Ubuntu Snappy
+
+We have to relocate NetworkManager's filesystem access where need to
+work propably in a Ubuntu Snappy based environment.
+
+This tries to just change the minimum of things to get NetworkManager
+working. Where paths can be changed through configuration files or
+command line arguments this will be preferred over making source code
+changes.
+
+Signed-off-by: Simon Fels <simon.fels@canonical.com>
+---
+ Makefile.am                           |  7 +++++
+ src/Makefile.am                       |  1 +
+ src/devices/nm-device-factory.c       |  7 +++--
+ src/dhcp-manager/nm-dhcp-dhclient.c   |  6 ++--
+ src/dhcp-manager/nm-dhcp-systemd.c    |  3 +-
+ src/main-utils.c                      | 13 +++++----
+ src/main.c                            |  5 ++--
+ src/nm-config.c                       | 12 +++++++-
+ src/nm-core-utils.c                   | 54 +++++++++++++++++++++++++++++++++--
+ src/nm-core-utils.h                   |  5 ++++
+ src/nm-iface-helper.c                 |  4 +--
+ src/settings/nm-settings-connection.c | 46 ++++++++++++++++++++---------
+ src/settings/nm-settings.c            |  3 +-
+ src/settings/plugins/keyfile/utils.c  |  2 +-
+ src/tests/Makefile.am                 |  3 +-
+ 15 files changed, 133 insertions(+), 38 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index a79bddc..0c850c5 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -64,6 +64,13 @@ DISTCLEANFILES = intltool-extract intltool-merge intltool-update
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = NetworkManager.pc
+ 
++licensedir =$(datadir)/doc/network-manager
++license_DATA = \
++	COPYING \
++	AUTHORS \
++	NEWS \
++	README
++
+ CLEANFILES = cscope.in.out cscope.out cscope.po.out
+ 
+ cscope:
+diff --git a/src/Makefile.am b/src/Makefile.am
+index bf668d7..7df76fc 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -209,6 +209,7 @@ libNetworkManager_base_la_CPPFLAGS = \
+ 	-DNO_SYSTEMD_JOURNAL \
+ 	-DPREFIX=\"$(prefix)\" \
+ 	-DNMSTATEDIR=\"$(nmstatedir)\" \
++	-DNMPLUGINDIR=\"$(pkglibdir)\" \
+ 	$(GLIB_CFLAGS)
+ 
+ libNetworkManager_base_la_LIBADD = \
+diff --git a/src/devices/nm-device-factory.c b/src/devices/nm-device-factory.c
+index 9dfa9bc..474c366 100644
+--- a/src/devices/nm-device-factory.c
++++ b/src/devices/nm-device-factory.c
+@@ -28,6 +28,7 @@
+ #include "nm-device-factory.h"
+ #include "nm-platform.h"
+ #include "nm-utils.h"
++#include "nm-core-utils.h"
+ 
+ const NMLinkType _nm_device_factory_no_default_links[] = { NM_LINK_TYPE_NONE };
+ const char *_nm_device_factory_no_default_settings[] = { NULL };
+@@ -368,10 +369,10 @@ read_device_factory_paths (void)
+ 	char **result;
+ 	guint i;
+ 
+-	dir = g_dir_open (NMPLUGINDIR, 0, &error);
++	dir = g_dir_open (nm_utils_get_plugin_dir(), 0, &error);
+ 	if (!dir) {
+ 		nm_log_warn (LOGD_HW, "device plugin: failed to open directory %s: %s",
+-		             NMPLUGINDIR,
++					 nm_utils_get_plugin_dir(),
+ 		             error->message);
+ 		g_clear_error (&error);
+ 		return NULL;
+@@ -388,7 +389,7 @@ read_device_factory_paths (void)
+ 		if (g_str_has_suffix (item, ".la"))
+ 			continue;
+ 
+-		data.path = g_build_filename (NMPLUGINDIR, item, NULL);
++		data.path = g_build_filename (nm_utils_get_plugin_dir(), item, NULL);
+ 
+ 		if (stat (data.path, &data.st) != 0) {
+ 			errsv = errno;
+diff --git a/src/dhcp-manager/nm-dhcp-dhclient.c b/src/dhcp-manager/nm-dhcp-dhclient.c
+index 4b6d301..2357123 100644
+--- a/src/dhcp-manager/nm-dhcp-dhclient.c
++++ b/src/dhcp-manager/nm-dhcp-dhclient.c
+@@ -42,6 +42,7 @@
+ #include "NetworkManagerUtils.h"
+ #include "nm-dhcp-listener.h"
+ #include "nm-dhcp-client-logging.h"
++#include "nm-core-utils.h"
+ 
+ G_DEFINE_TYPE (NMDhcpDhclient, nm_dhcp_dhclient, NM_TYPE_DHCP_CLIENT)
+ 
+@@ -86,7 +87,8 @@ get_dhclient_leasefile (const char *iface,
+ 	char *path;
+ 
+ 	/* /var/lib/NetworkManager is the preferred leasefile path */
+-	path = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s-%s.lease",
++	path = g_strdup_printf ("%s/dhclient%s-%s-%s.lease",
++							nm_utils_get_state_dir(),
+ 	                        ipv6 ? "6" : "",
+ 	                        uuid,
+ 	                        iface);
+@@ -274,7 +276,7 @@ create_dhclient_config (NMDhcpDhclient *self,
+ 
+ 	g_return_val_if_fail (iface != NULL, NULL);
+ 
+-	new = g_strdup_printf (NMSTATEDIR "/dhclient%s-%s.conf", is_ip6 ? "6" : "", iface);
++	new = g_strdup_printf ("%s/dhclient%s-%s.conf", nm_utils_get_state_dir(), is_ip6 ? "6" : "", iface);
+ 	_LOGD ("creating composite dhclient config %s", new);
+ 
+ 	orig = find_existing_config (self, iface, uuid, is_ip6);
+diff --git a/src/dhcp-manager/nm-dhcp-systemd.c b/src/dhcp-manager/nm-dhcp-systemd.c
+index 5d49c27..0b321cd 100644
+--- a/src/dhcp-manager/nm-dhcp-systemd.c
++++ b/src/dhcp-manager/nm-dhcp-systemd.c
+@@ -397,7 +397,8 @@ lease_to_ip4_config (const char *iface,
+ static char *
+ get_leasefile_path (const char *iface, const char *uuid, gboolean ipv6)
+ {
+-	return g_strdup_printf (NMSTATEDIR "/internal%s-%s-%s.lease",
++	return g_strdup_printf ("%s/internal%s-%s-%s.lease",
++							nm_utils_get_state_dir(),
+ 	                        ipv6 ? "6" : "",
+ 	                        uuid,
+ 	                        iface);
+diff --git a/src/main-utils.c b/src/main-utils.c
+index 8624280..ecedd3a 100644
+--- a/src/main-utils.c
++++ b/src/main-utils.c
+@@ -35,6 +35,7 @@
+ 
+ #include "main-utils.h"
+ #include "NetworkManagerUtils.h"
++#include "nm-core-utils.h"
+ 
+ static gboolean
+ sighup_handler (gpointer user_data)
+@@ -118,7 +119,7 @@ nm_main_utils_ensure_statedir ()
+ 	gs_free char *parent = NULL;
+ 	int errsv;
+ 
+-	parent = g_path_get_dirname (NMSTATEDIR);
++	parent = g_path_get_dirname (nm_utils_get_state_dir());
+ 
+ 	/* Ensure parent state directories exists */
+ 	if (   parent
+@@ -126,13 +127,13 @@ nm_main_utils_ensure_statedir ()
+ 	    && parent[1] != '\0'
+ 	    && g_mkdir_with_parents (parent, 0755) != 0) {
+ 		errsv = errno;
+-		fprintf (stderr, "Cannot create parents for '%s': %s", NMSTATEDIR, g_strerror (errsv));
++		fprintf (stderr, "Cannot create parents for '%s': %s", nm_utils_get_state_dir(), g_strerror (errsv));
+ 		exit (1);
+ 	}
+ 	/* Ensure state directory exists */
+-	if (g_mkdir_with_parents (NMSTATEDIR, 0700) != 0) {
++	if (g_mkdir_with_parents (nm_utils_get_state_dir(), 0700) != 0) {
+ 		errsv = errno;
+-		fprintf (stderr, "Cannot create '%s': %s", NMSTATEDIR, g_strerror (errsv));
++		fprintf (stderr, "Cannot create '%s': %s", nm_utils_get_state_dir(), g_strerror (errsv));
+ 		exit (1);
+ 	}
+ }
+@@ -141,8 +142,8 @@ void
+ nm_main_utils_ensure_rundir ()
+ {
+ 	/* Setup runtime directory */
+-	if (g_mkdir_with_parents (NMRUNDIR, 0755) != 0) {
+-		fprintf (stderr, _("Cannot create '%s': %s"), NMRUNDIR, strerror (errno));
++	if (g_mkdir_with_parents (nm_utils_get_run_dir(), 0755) != 0) {
++		fprintf (stderr, _("Cannot create '%s': %s"), nm_utils_get_run_dir(), strerror (errno));
+ 		exit (1);
+ 	}
+ }
+diff --git a/src/main.c b/src/main.c
+index 4616155..7540422 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -51,6 +51,7 @@
+ #include "nm-core-internal.h"
+ #include "nm-exported-object.h"
+ #include "nm-sd.h"
++#include "nm-core-utils.h"
+ 
+ #if !defined(NM_DIST_VERSION)
+ # define NM_DIST_VERSION VERSION
+@@ -254,8 +255,8 @@ do_early_setup (int *argc, char **argv[], NMConfigCmdLineOptions *config_cli)
+ 	                                _("NetworkManager monitors all network connections and automatically\nchooses the best connection to use.  It also allows the user to\nspecify wireless access points which wireless cards in the computer\nshould associate with.")))
+ 		exit (1);
+ 
+-	global_opt.pidfile = global_opt.pidfile ? global_opt.pidfile : g_strdup (NM_DEFAULT_PID_FILE);
+-	global_opt.state_file = global_opt.state_file ? global_opt.state_file : g_strdup (NM_DEFAULT_SYSTEM_STATE_FILE);
++	global_opt.pidfile = global_opt.pidfile ? global_opt.pidfile : g_strdup_printf ("%s/NetworkManager.pid", nm_utils_get_run_dir());
++	global_opt.state_file = global_opt.state_file ? global_opt.state_file : g_strdup_printf ("%s/NetworkManager.state", nm_utils_get_state_dir());
+ }
+ 
+ /*
+diff --git a/src/nm-config.c b/src/nm-config.c
+index 58fd96c..4c70ba1 100644
+--- a/src/nm-config.c
++++ b/src/nm-config.c
+@@ -39,6 +39,16 @@
+ #define DEFAULT_NO_AUTO_DEFAULT_FILE    NMSTATEDIR "/no-auto-default.state"
+ #define DEFAULT_INTERN_CONFIG_FILE      NMSTATEDIR "/NetworkManager-intern.conf"
+ 
++static const char *get_no_auto_default_file_path()
++{
++	const char *no_auto_default_file = NULL;
++
++	if (!no_auto_default_file)
++		no_auto_default_file = g_strdup_printf("%s/no-auto-default.state", nm_utils_get_state_dir());
++
++	return no_auto_default_file;
++}
++
+ struct NMConfigCmdLineOptions {
+ 	char *config_main_file;
+ 	char *intern_config_file;
+@@ -1851,7 +1861,7 @@ init_sync (GInitable *initable, GCancellable *cancellable, GError **error)
+ 	if (priv->cli.no_auto_default_file)
+ 		priv->no_auto_default_file = g_strdup (priv->cli.no_auto_default_file);
+ 	else
+-		priv->no_auto_default_file = g_strdup (DEFAULT_NO_AUTO_DEFAULT_FILE);
++		priv->no_auto_default_file = g_strdup (get_no_auto_default_file_path());
+ 
+ 	priv->plugins = _nm_utils_strv_cleanup (g_key_file_get_string_list (keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "plugins", NULL, NULL),
+ 	                                        TRUE, TRUE, TRUE);
+diff --git a/src/nm-core-utils.c b/src/nm-core-utils.c
+index 714aaa9..fde7768 100644
+--- a/src/nm-core-utils.c
++++ b/src/nm-core-utils.c
+@@ -43,6 +43,7 @@
+ #include "nm-setting-ip6-config.h"
+ #include "nm-setting-wireless.h"
+ #include "nm-setting-wireless-security.h"
++#include "nm-core-utils.h"
+ 
+ /*
+  * Some toolchains (E.G. uClibc 0.9.33 and earlier) don't export
+@@ -2779,6 +2780,7 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
+                                        GError **error)
+ {
+ 	gchar *secret_key = NULL;
++	char *secret_key_path = NULL;
+ 	gsize key_len = 0;
+ 	gboolean success = FALSE;
+ 
+@@ -2788,8 +2790,10 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
+ 		return FALSE;
+ 	}
+ 
++	secret_key_path = g_strdup_printf("%s/sceret_key", nm_utils_get_state_dir());
++
+ 	/* Let's try to load a saved secret key first. */
+-	if (g_file_get_contents (NMSTATEDIR "/secret_key", &secret_key, &key_len, NULL)) {
++	if (g_file_get_contents (secret_key_path, &secret_key, &key_len, NULL)) {
+ 		if (key_len < 16) {
+ 			g_set_error_literal (error, NM_UTILS_ERROR, NM_UTILS_ERROR_UNKNOWN,
+ 			                     "Key is too short to be usable");
+@@ -2812,8 +2816,8 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
+ 
+ 		key_mask = umask (0077);
+ 		if (read (urandom, secret_key, key_len) == key_len) {
+-			if (!g_file_set_contents (NMSTATEDIR "/secret_key", secret_key, key_len, error)) {
+-				g_prefix_error (error, "Can't write " NMSTATEDIR "/secret_key: ");
++			if (!g_file_set_contents (secret_key_path, secret_key, key_len, error)) {
++				g_prefix_error (error, "Can't write %s: ", secret_key_path);
+ 				key_len = 0;
+ 			}
+ 		} else {
+@@ -2830,6 +2834,7 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
+ 		                               secret_key, key_len, error);
+ 	}
+ 
++	g_free (secret_key_path);
+ 	g_free (secret_key);
+ 	return success;
+ }
+@@ -3043,3 +3048,46 @@ nm_utils_lifetime_get (guint32 timestamp,
+ 	return TRUE;
+ }
+ 
++const char*
++nm_utils_get_state_dir(void)
++{
++	static const char *state_dir = NULL;
++
++	if (!state_dir)
++		state_dir = g_strdup_printf("%s/state", getenv("SNAP_DATA"));
++
++	return state_dir;
++}
++
++const char*
++nm_utils_get_run_dir(void)
++{
++	static const char *run_dir = NULL;
++
++	if (!run_dir)
++		run_dir = g_strdup_printf("%s/run", getenv("SNAP_DATA"));
++
++	return run_dir;
++}
++
++const char*
++nm_utils_get_plugin_dir(void)
++{
++	static const char *plugin_dir = NULL;
++
++	if (!plugin_dir)
++		plugin_dir = g_strdup_printf("%s/%s", getenv("SNAP"), NMPLUGINDIR);
++
++	return plugin_dir;
++}
++
++const char*
++nm_utils_get_conf_dir(void)
++{
++	static const char *conf_dir = NULL;
++
++	if (!conf_dir)
++		conf_dir = g_strdup_printf("%s/conf", getenv("SNAP_DATA"));
++
++	return conf_dir;
++}
+diff --git a/src/nm-core-utils.h b/src/nm-core-utils.h
+index 280be04..b0b71d0 100644
+--- a/src/nm-core-utils.h
++++ b/src/nm-core-utils.h
+@@ -394,4 +394,9 @@ gboolean nm_utils_lifetime_get (guint32 timestamp,
+ 
+ gboolean nm_utils_ip4_address_is_link_local (in_addr_t addr);
+ 
++const char* nm_utils_get_state_dir(void);
++const char* nm_utils_get_run_dir(void);
++const char* nm_utils_get_plugin_dir(void);
++const char* nm_utils_get_conf_dir(void);
++
+ #endif /* __NM_CORE_UTILS_H__ */
+diff --git a/src/nm-iface-helper.c b/src/nm-iface-helper.c
+index 20f7729..e715f44 100644
+--- a/src/nm-iface-helper.c
++++ b/src/nm-iface-helper.c
+@@ -50,8 +50,6 @@ extern unsigned int if_nametoindex (const char *__ifname);
+ # define NM_DIST_VERSION VERSION
+ #endif
+ 
+-#define NMIH_PID_FILE_FMT NMRUNDIR "/nm-iface-helper-%d.pid"
+-
+ static GMainLoop *main_loop = NULL;
+ static int ifindex = -1;
+ 
+@@ -380,7 +378,7 @@ main (int argc, char *argv[])
+ 		fprintf (stderr, _("Failed to find interface index for %s (%s)\n"), global_opt.ifname, strerror (errno));
+ 		exit (1);
+ 	}
+-	pidfile = g_strdup_printf (NMIH_PID_FILE_FMT, ifindex);
++	pidfile = g_strdup_printf ("%s/nm-iface-helper-%d.pid", nm_utils_get_run_dir(), ifindex);
+ 	nm_main_utils_ensure_not_running_pidfile (pidfile);
+ 
+ 	nm_main_utils_ensure_rundir ();
+diff --git a/src/settings/nm-settings-connection.c b/src/settings/nm-settings-connection.c
+index 6bed3fe..3830769 100644
+--- a/src/settings/nm-settings-connection.c
++++ b/src/settings/nm-settings-connection.c
+@@ -32,11 +32,29 @@
+ #include "NetworkManagerUtils.h"
+ #include "nm-core-internal.h"
+ #include "nm-audit-manager.h"
++#include "nm-core-utils.h"
+ 
+ #include "nmdbus-settings-connection.h"
+ 
+-#define SETTINGS_TIMESTAMPS_FILE  NMSTATEDIR "/timestamps"
+-#define SETTINGS_SEEN_BSSIDS_FILE NMSTATEDIR "/seen-bssids"
++static const char *get_settings_timestamps_path()
++{
++	const char *timestamps_path = NULL;
++
++	if (!timestamps_path)
++		timestamps_path = g_strdup_printf("%s/timestamps", nm_utils_get_state_dir());
++
++	return timestamps_path;
++}
++
++static const char *get_settings_seen_bssids_path()
++{
++	const char *seen_bssids_path = NULL;
++
++	if (!seen_bssids_path)
++		seen_bssids_path = g_strdup_printf("%s/seen-bssids", nm_utils_get_state_dir());
++
++	return seen_bssids_path;
++}
+ 
+ #define _NMLOG_DOMAIN        LOGD_SETTINGS
+ #define _NMLOG_PREFIX_NAME   "settings-connection"
+@@ -703,9 +721,9 @@ remove_entry_from_db (NMSettingsConnection *self, const char* db_name)
+ 	const char *db_file;
+ 
+ 	if (strcmp (db_name, "timestamps") == 0)
+-		db_file = SETTINGS_TIMESTAMPS_FILE;
++		db_file = get_settings_timestamps_path();
+ 	else if (strcmp (db_name, "seen-bssids") == 0)
+-		db_file = SETTINGS_SEEN_BSSIDS_FILE;
++		db_file = get_settings_seen_bssids_path();
+ 	else
+ 		return;
+ 
+@@ -2161,9 +2179,9 @@ nm_settings_connection_update_timestamp (NMSettingsConnection *self,
+ 
+ 	/* Save timestamp to timestamps database file */
+ 	timestamps_file = g_key_file_new ();
+-	if (!g_key_file_load_from_file (timestamps_file, SETTINGS_TIMESTAMPS_FILE, G_KEY_FILE_KEEP_COMMENTS, &error)) {
++	if (!g_key_file_load_from_file (timestamps_file, get_settings_timestamps_path(), G_KEY_FILE_KEEP_COMMENTS, &error)) {
+ 		if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
+-			_LOGW ("error parsing timestamps file '%s': %s", SETTINGS_TIMESTAMPS_FILE, error->message);
++			_LOGW ("error parsing timestamps file '%s': %s", get_settings_timestamps_path(), error->message);
+ 		g_clear_error (&error);
+ 	}
+ 
+@@ -2174,11 +2192,11 @@ nm_settings_connection_update_timestamp (NMSettingsConnection *self,
+ 
+ 	data = g_key_file_to_data (timestamps_file, &len, &error);
+ 	if (data) {
+-		g_file_set_contents (SETTINGS_TIMESTAMPS_FILE, data, len, &error);
++		g_file_set_contents (get_settings_timestamps_path(), data, len, &error);
+ 		g_free (data);
+ 	}
+ 	if (error) {
+-		_LOGW ("error saving timestamp to file '%s': %s", SETTINGS_TIMESTAMPS_FILE, error->message);
++		_LOGW ("error saving timestamp to file '%s': %s", get_settings_timestamps_path(), error->message);
+ 		g_error_free (error);
+ 	}
+ 	g_key_file_free (timestamps_file);
+@@ -2205,7 +2223,7 @@ nm_settings_connection_read_and_fill_timestamp (NMSettingsConnection *self)
+ 
+ 	/* Get timestamp from database file */
+ 	timestamps_file = g_key_file_new ();
+-	g_key_file_load_from_file (timestamps_file, SETTINGS_TIMESTAMPS_FILE, G_KEY_FILE_KEEP_COMMENTS, NULL);
++	g_key_file_load_from_file (timestamps_file, get_settings_timestamps_path(), G_KEY_FILE_KEEP_COMMENTS, NULL);
+ 	connection_uuid = nm_settings_connection_get_uuid (self);
+ 	tmp_str = g_key_file_get_value (timestamps_file, "timestamps", connection_uuid, &err);
+ 	if (tmp_str) {
+@@ -2312,10 +2330,10 @@ nm_settings_connection_add_seen_bssid (NMSettingsConnection *self,
+ 	/* Save BSSID to seen-bssids file */
+ 	seen_bssids_file = g_key_file_new ();
+ 	g_key_file_set_list_separator (seen_bssids_file, ',');
+-	if (!g_key_file_load_from_file (seen_bssids_file, SETTINGS_SEEN_BSSIDS_FILE, G_KEY_FILE_KEEP_COMMENTS, &error)) {
++	if (!g_key_file_load_from_file (seen_bssids_file, get_settings_seen_bssids_path(), G_KEY_FILE_KEEP_COMMENTS, &error)) {
+ 		if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+ 			_LOGW ("error parsing seen-bssids file '%s': %s",
+-			       SETTINGS_SEEN_BSSIDS_FILE, error->message);
++				   get_settings_seen_bssids_path(), error->message);
+ 		}
+ 		g_clear_error (&error);
+ 	}
+@@ -2326,14 +2344,14 @@ nm_settings_connection_add_seen_bssid (NMSettingsConnection *self,
+ 
+ 	data = g_key_file_to_data (seen_bssids_file, &len, &error);
+ 	if (data) {
+-		g_file_set_contents (SETTINGS_SEEN_BSSIDS_FILE, data, len, &error);
++		g_file_set_contents (get_settings_seen_bssids_path(), data, len, &error);
+ 		g_free (data);
+ 	}
+ 	g_key_file_free (seen_bssids_file);
+ 
+ 	if (error) {
+ 		_LOGW ("error saving seen-bssids to file '%s': %s",
+-		       SETTINGS_SEEN_BSSIDS_FILE, error->message);
++			   get_settings_seen_bssids_path(), error->message);
+ 		g_error_free (error);
+ 	}
+ }
+@@ -2358,7 +2376,7 @@ nm_settings_connection_read_and_fill_seen_bssids (NMSettingsConnection *self)
+ 	/* Get seen BSSIDs from database file */
+ 	seen_bssids_file = g_key_file_new ();
+ 	g_key_file_set_list_separator (seen_bssids_file, ',');
+-	if (g_key_file_load_from_file (seen_bssids_file, SETTINGS_SEEN_BSSIDS_FILE, G_KEY_FILE_KEEP_COMMENTS, NULL)) {
++	if (g_key_file_load_from_file (seen_bssids_file, get_settings_seen_bssids_path(), G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+ 		connection_uuid = nm_settings_connection_get_uuid (self);
+ 		tmp_strv = g_key_file_get_string_list (seen_bssids_file, "seen-bssids", connection_uuid, &len, NULL);
+ 	}
+diff --git a/src/settings/nm-settings.c b/src/settings/nm-settings.c
+index 4ad395a..c008795 100644
+--- a/src/settings/nm-settings.c
++++ b/src/settings/nm-settings.c
+@@ -57,6 +57,7 @@
+ #include "nm-setting-bond.h"
+ #include "nm-utils.h"
+ #include "nm-core-internal.h"
++#include "nm-core-utils.h"
+ 
+ #include "nm-device-ethernet.h"
+ #include "nm-settings.h"
+@@ -768,7 +769,7 @@ load_plugin:
+ 			int errsv;
+ 
+ 			full_name = g_strdup_printf ("nm-settings-plugin-%s", pname);
+-			path = g_module_build_path (NMPLUGINDIR, full_name);
++			path = g_module_build_path (nm_utils_get_plugin_dir(), full_name);
+ 
+ 			if (stat (path, &st) != 0) {
+ 				errsv = errno;
+diff --git a/src/settings/plugins/keyfile/utils.c b/src/settings/plugins/keyfile/utils.c
+index b5c306e..dd0c572 100644
+--- a/src/settings/plugins/keyfile/utils.c
++++ b/src/settings/plugins/keyfile/utils.c
+@@ -160,7 +160,7 @@ nm_keyfile_plugin_get_path (void)
+ 		                                 NM_CONFIG_KEYFILE_KEY_KEYFILE_PATH,
+ 		                                 NM_CONFIG_GET_VALUE_STRIP | NM_CONFIG_GET_VALUE_NO_EMPTY);
+ 		if (!path)
+-			path = g_strdup (""NM_CONFIG_KEYFILE_PATH_DEFAULT"");
++			path = g_strdup_printf ("%s/system-connections", nm_utils_get_conf_dir());
+ 	}
+ 	return path;
+ }
+diff --git a/src/tests/Makefile.am b/src/tests/Makefile.am
+index 5dacae8..6e53fc8 100644
+--- a/src/tests/Makefile.am
++++ b/src/tests/Makefile.am
+@@ -137,7 +137,8 @@ test_utils_DEPENDENCIES = \
+ test_utils_CPPFLAGS = \
+ 	$(AM_CPPFLAGS) \
+ 	-DPREFIX=\"/nonexistent\" \
+-	-DNMSTATEDIR=\"/nonsense\"
++	-DNMSTATEDIR=\"/nonsense\" \
++	-DNMPLUGINDIR=\"/nonsense\"
+ 
+ test_utils_LDADD = \
+ 	$(top_builddir)/src/libNetworkManager.la
+-- 
+2.7.4
+
