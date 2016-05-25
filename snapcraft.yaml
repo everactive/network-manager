@@ -14,6 +14,7 @@ slots:
 
 plugs:
   nmcli: network-manager
+  modem-manager: modem-manager
 
 apps:
   nmcli:
@@ -23,6 +24,7 @@ apps:
     command: bin/networkmanager
     daemon: simple
     slots: [service]
+    plugs: [modem-manager]
 
 parts:
   networkmanager-common:
@@ -73,6 +75,7 @@ parts:
       - python-dbus
       - python-gi
       - iptables
+      - ppp-dev
 
     # We stage everything here we need for build and runtime
     stage-packages:
@@ -110,9 +113,8 @@ parts:
       - --disable-teamdctl
       - --disable-polkit
       - --disable-vala
-      - --disable-ppp
       - --with-dhcpcd=no
       - --with-dhclient=no
       - --with-dnsmasq=no
-      - --with-modem-manager-1=no
+      - --with-modem-manager-1=yes
       - --with-systemd-journal=no

@@ -10,6 +10,8 @@ mkdir -p $SNAP_DATA/run
 # files for NetworkManager
 mkdir -p $SNAP_USER_DATA/conf.d
 
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
+
 # TODO drop DEBUG
 $SNAP/usr/sbin/NetworkManager \
     --config-dir=$SNAP_USER/conf.d/ \
