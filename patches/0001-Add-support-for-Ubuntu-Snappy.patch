@@ -1,4 +1,4 @@
-From ed034bee0dd2227a931fc5ecd1a233535aaa19c8 Mon Sep 17 00:00:00 2001
+From d8107de0b2db4d9e7c4180eb2336563d5d0b02e3 Mon Sep 17 00:00:00 2001
 From: Simon Fels <simon.fels@canonical.com>
 Date: Thu, 14 Apr 2016 14:01:26 +0200
 Subject: [PATCH] Add support for Ubuntu Snappy
@@ -15,20 +15,20 @@ Signed-off-by: Simon Fels <simon.fels@canonical.com>
 ---
  Makefile.am                           |  7 +++++
  src/Makefile.am                       |  1 +
- src/devices/nm-device-factory.c       |  7 +++--
- src/dhcp-manager/nm-dhcp-dhclient.c   |  6 ++--
- src/dhcp-manager/nm-dhcp-systemd.c    |  3 +-
- src/main-utils.c                      | 13 +++++----
+ src/devices/nm-device-factory.c       |  7 ++---
+ src/dhcp-manager/nm-dhcp-dhclient.c   |  6 +++--
+ src/dhcp-manager/nm-dhcp-systemd.c    |  3 ++-
+ src/main-utils.c                      | 13 +++++-----
  src/main.c                            |  5 ++--
- src/nm-config.c                       | 12 +++++++-
- src/nm-core-utils.c                   | 54 +++++++++++++++++++++++++++++++++--
+ src/nm-config.c                       | 12 ++++++++-
+ src/nm-core-utils.c                   | 49 ++++++++++++++++++++++++++++++++++-
  src/nm-core-utils.h                   |  5 ++++
  src/nm-iface-helper.c                 |  4 +--
- src/settings/nm-settings-connection.c | 46 ++++++++++++++++++++---------
- src/settings/nm-settings.c            |  3 +-
+ src/settings/nm-settings-connection.c | 46 ++++++++++++++++++++++----------
+ src/settings/nm-settings.c            |  3 ++-
  src/settings/plugins/keyfile/utils.c  |  2 +-
- src/tests/Makefile.am                 |  3 +-
- 15 files changed, 133 insertions(+), 38 deletions(-)
+ src/tests/Makefile.am                 |  3 ++-
+ 15 files changed, 130 insertions(+), 36 deletions(-)
 
 diff --git a/Makefile.am b/Makefile.am
 index a79bddc..0c850c5 100644
@@ -49,19 +49,19 @@ index a79bddc..0c850c5 100644
  
  cscope:
 diff --git a/src/Makefile.am b/src/Makefile.am
-index bf668d7..7df76fc 100644
+index aa35eef..a90a0e9 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -209,6 +209,7 @@ libNetworkManager_base_la_CPPFLAGS = \
- 	-DNO_SYSTEMD_JOURNAL \
+@@ -210,6 +210,7 @@ libNetworkManager_base_la_CPPFLAGS = \
  	-DPREFIX=\"$(prefix)\" \
+ 	-DLOCALSTATEDIR=\"$(localstatedir)\" \
  	-DNMSTATEDIR=\"$(nmstatedir)\" \
 +	-DNMPLUGINDIR=\"$(pkglibdir)\" \
  	$(GLIB_CFLAGS)
  
  libNetworkManager_base_la_LIBADD = \
 diff --git a/src/devices/nm-device-factory.c b/src/devices/nm-device-factory.c
-index 9dfa9bc..474c366 100644
+index 7873756..0bb6e0b 100644
 --- a/src/devices/nm-device-factory.c
 +++ b/src/devices/nm-device-factory.c
 @@ -28,6 +28,7 @@
@@ -72,7 +72,7 @@ index 9dfa9bc..474c366 100644
  
  const NMLinkType _nm_device_factory_no_default_links[] = { NM_LINK_TYPE_NONE };
  const char *_nm_device_factory_no_default_settings[] = { NULL };
-@@ -368,10 +369,10 @@ read_device_factory_paths (void)
+@@ -367,10 +368,10 @@ read_device_factory_paths (void)
  	char **result;
  	guint i;
  
@@ -85,7 +85,7 @@ index 9dfa9bc..474c366 100644
  		             error->message);
  		g_clear_error (&error);
  		return NULL;
-@@ -388,7 +389,7 @@ read_device_factory_paths (void)
+@@ -387,7 +388,7 @@ read_device_factory_paths (void)
  		if (g_str_has_suffix (item, ".la"))
  			continue;
  
@@ -126,10 +126,10 @@ index 4b6d301..2357123 100644
  
  	orig = find_existing_config (self, iface, uuid, is_ip6);
 diff --git a/src/dhcp-manager/nm-dhcp-systemd.c b/src/dhcp-manager/nm-dhcp-systemd.c
-index 5d49c27..0b321cd 100644
+index 82cb335..80e6523 100644
 --- a/src/dhcp-manager/nm-dhcp-systemd.c
 +++ b/src/dhcp-manager/nm-dhcp-systemd.c
-@@ -397,7 +397,8 @@ lease_to_ip4_config (const char *iface,
+@@ -398,7 +398,8 @@ lease_to_ip4_config (const char *iface,
  static char *
  get_leasefile_path (const char *iface, const char *uuid, gboolean ipv6)
  {
@@ -212,7 +212,7 @@ index 4616155..7540422 100644
  
  /*
 diff --git a/src/nm-config.c b/src/nm-config.c
-index 58fd96c..4c70ba1 100644
+index 8bca687..b28ac2f 100644
 --- a/src/nm-config.c
 +++ b/src/nm-config.c
 @@ -39,6 +39,16 @@
@@ -242,7 +242,7 @@ index 58fd96c..4c70ba1 100644
  	priv->plugins = _nm_utils_strv_cleanup (g_key_file_get_string_list (keyfile, NM_CONFIG_KEYFILE_GROUP_MAIN, "plugins", NULL, NULL),
  	                                        TRUE, TRUE, TRUE);
 diff --git a/src/nm-core-utils.c b/src/nm-core-utils.c
-index 714aaa9..fde7768 100644
+index ef44a13..4b510f6 100644
 --- a/src/nm-core-utils.c
 +++ b/src/nm-core-utils.c
 @@ -43,6 +43,7 @@
@@ -253,46 +253,26 @@ index 714aaa9..fde7768 100644
  
  /*
   * Some toolchains (E.G. uClibc 0.9.33 and earlier) don't export
-@@ -2779,6 +2780,7 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
-                                        GError **error)
+@@ -2621,14 +2622,17 @@ guint8 *
+ nm_utils_secret_key_read (gsize *out_key_len, GError **error)
  {
- 	gchar *secret_key = NULL;
+ 	guint8 *secret_key = NULL;
 +	char *secret_key_path = NULL;
- 	gsize key_len = 0;
- 	gboolean success = FALSE;
+ 	gsize key_len;
  
-@@ -2788,8 +2790,10 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
- 		return FALSE;
- 	}
+ 	/* out_key_len is not optional, because without it you cannot safely
+ 	 * access the returned memory. */
+ 	*out_key_len = 0;
  
 +	secret_key_path = g_strdup_printf("%s/sceret_key", nm_utils_get_state_dir());
 +
  	/* Let's try to load a saved secret key first. */
--	if (g_file_get_contents (NMSTATEDIR "/secret_key", &secret_key, &key_len, NULL)) {
-+	if (g_file_get_contents (secret_key_path, &secret_key, &key_len, NULL)) {
+-	if (g_file_get_contents (NMSTATEDIR "/secret_key", (char **) &secret_key, &key_len, NULL)) {
++	if (g_file_get_contents (secret_key_path, (char **) &secret_key, &key_len, NULL)) {
  		if (key_len < 16) {
  			g_set_error_literal (error, NM_UTILS_ERROR, NM_UTILS_ERROR_UNKNOWN,
  			                     "Key is too short to be usable");
-@@ -2812,8 +2816,8 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
- 
- 		key_mask = umask (0077);
- 		if (read (urandom, secret_key, key_len) == key_len) {
--			if (!g_file_set_contents (NMSTATEDIR "/secret_key", secret_key, key_len, error)) {
--				g_prefix_error (error, "Can't write " NMSTATEDIR "/secret_key: ");
-+			if (!g_file_set_contents (secret_key_path, secret_key, key_len, error)) {
-+				g_prefix_error (error, "Can't write %s: ", secret_key_path);
- 				key_len = 0;
- 			}
- 		} else {
-@@ -2830,6 +2834,7 @@ nm_utils_ipv6_addr_set_stable_privacy (struct in6_addr *addr,
- 		                               secret_key, key_len, error);
- 	}
- 
-+	g_free (secret_key_path);
- 	g_free (secret_key);
- 	return success;
- }
-@@ -3043,3 +3048,46 @@ nm_utils_lifetime_get (guint32 timestamp,
+@@ -3085,3 +3089,46 @@ nm_utils_lifetime_get (guint32 timestamp,
  	return TRUE;
  }
  
@@ -340,7 +320,7 @@ index 714aaa9..fde7768 100644
 +	return conf_dir;
 +}
 diff --git a/src/nm-core-utils.h b/src/nm-core-utils.h
-index 280be04..b0b71d0 100644
+index ad0f995..f6765ab 100644
 --- a/src/nm-core-utils.h
 +++ b/src/nm-core-utils.h
 @@ -394,4 +394,9 @@ gboolean nm_utils_lifetime_get (guint32 timestamp,
@@ -498,7 +478,7 @@ index 6bed3fe..3830769 100644
  		tmp_strv = g_key_file_get_string_list (seen_bssids_file, "seen-bssids", connection_uuid, &len, NULL);
  	}
 diff --git a/src/settings/nm-settings.c b/src/settings/nm-settings.c
-index 4ad395a..c008795 100644
+index 6514899..fe460e3 100644
 --- a/src/settings/nm-settings.c
 +++ b/src/settings/nm-settings.c
 @@ -57,6 +57,7 @@
@@ -509,7 +489,7 @@ index 4ad395a..c008795 100644
  
  #include "nm-device-ethernet.h"
  #include "nm-settings.h"
-@@ -768,7 +769,7 @@ load_plugin:
+@@ -805,7 +806,7 @@ load_plugin:
  			int errsv;
  
  			full_name = g_strdup_printf ("nm-settings-plugin-%s", pname);
@@ -532,13 +512,13 @@ index b5c306e..dd0c572 100644
  	return path;
  }
 diff --git a/src/tests/Makefile.am b/src/tests/Makefile.am
-index 5dacae8..6e53fc8 100644
+index e1734b6..25bc04f 100644
 --- a/src/tests/Makefile.am
 +++ b/src/tests/Makefile.am
-@@ -137,7 +137,8 @@ test_utils_DEPENDENCIES = \
- test_utils_CPPFLAGS = \
+@@ -138,7 +138,8 @@ test_utils_CPPFLAGS = \
  	$(AM_CPPFLAGS) \
  	-DPREFIX=\"/nonexistent\" \
+ 	-DLOCALSTATEDIR=\"$(localstatedir)\" \
 -	-DNMSTATEDIR=\"/nonsense\"
 +	-DNMSTATEDIR=\"/nonsense\" \
 +	-DNMPLUGINDIR=\"/nonsense\"
