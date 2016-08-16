@@ -8,6 +8,7 @@ description: |
   PPPoE devices, provides VPN integration with a variety of different
   VPN serivces.
   Please find the source code at https://code.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
+confinement: strict
 
 slots:
   service: network-manager
