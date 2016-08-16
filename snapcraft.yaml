@@ -119,4 +119,5 @@ parts:
       - --with-systemd-journal=no
 
     snap:
-      - -usr/lib/systemd/system/network-online.target.wants/NetworkManager-wait-online.service
+      - -usr/lib/systemd
+      - -lib/systemd
