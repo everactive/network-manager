@@ -117,3 +117,6 @@ parts:
       - --with-dnsmasq=no
       - --with-modem-manager-1=yes
       - --with-systemd-journal=no
+
+    snap:
+      - -usr/lib/systemd/system/network-online.target.wants/NetworkManager-wait-online.service
