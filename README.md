@@ -9,7 +9,13 @@ You can reach us on the #snappy IRC channel on freenode.
 Dependencies
 ============
 
-We require snapcraft >= 0.5 for building this snap.
+For 15.04 builds, snapcraft must be installed the Snappy Tools
+PPA:
+
+sudo add-apt-repository ppa:snappy-dev/tools
+sudo apt-get update
+
+We require snapcraft >= 1.1 for building this snap.
 
 Build Instructions
 ==================
