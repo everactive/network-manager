@@ -79,11 +79,10 @@ parts:
     plugin: x-custom
 
     # NOTE: The branch below is a unpacked debian source package
-    # generated from lp:~phablet-team/network-manager/enable-snappy-15.04
     # which helps to improve turn around times during development.
-    source: https:///git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
+    source: https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
     source-type: git
-    source-branch: master
+    source-branch: network-manager/0.9.10
 
     # We're using the debian packaging infrastructure here to build
     # the binaries instead of doing every step manually here.
