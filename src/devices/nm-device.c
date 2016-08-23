@@ -242,6 +242,7 @@ typedef struct {
 	IpState         ip4_state;
 	NMIP4Config *   dev_ip4_config; /* Config from DHCP, PPP, LLv4, etc */
 	NMIP4Config *   ext_ip4_config; /* Stuff added outside NM */
+	NMIP4Config *   wwan_ip4_config; /* WWAN configuration */
 
 	/* DHCPv4 tracking */
 	NMDHCPClient *  dhcp4_client;
@@ -270,6 +271,7 @@ typedef struct {
 	NMIP6Config *  ip6_config;
 	IpState        ip6_state;
 	NMIP6Config *  vpn6_config;  /* routes added by a VPN which uses this device */
+	NMIP6Config *  wwan_ip6_config;
 	NMIP6Config *  ext_ip6_config; /* Stuff added outside NM */
 
 	NMRDisc *      rdisc;
@@ -451,7 +453,7 @@ reason_to_string (NMDeviceStateReason reason)
 
 /***********************************************************/
 
-static inline gboolean
+gboolean
 nm_device_ipv6_sysctl_set (NMDevice *self, const char *property, const char *value)
 {
 	return nm_platform_sysctl_set (nm_utils_ip6_property_path (nm_device_get_ip_iface (self), property), value);
@@ -2641,6 +2643,12 @@ ip4_config_merge_and_apply (NMDevice *self,
 	if (priv->ext_ip4_config)
 		nm_ip4_config_merge (composite, priv->ext_ip4_config);
 
+	/* Merge WWAN config *last* to ensure modem-given settings overwrite
+	 * any external stuff set by pppd or other scripts.
+	 */
+	if (priv->wwan_ip4_config)
+		nm_ip4_config_merge (composite, priv->wwan_ip4_config);
+
 	/* Merge user overrides into the composite config */
 	connection = nm_device_get_connection (self);
 	if (connection) {
@@ -3085,6 +3093,12 @@ ip6_config_merge_and_apply (NMDevice *self,
 		nm_ip6_config_merge (composite, priv->vpn6_config);
 	if (priv->ext_ip6_config)
 		nm_ip6_config_merge (composite, priv->ext_ip6_config);
+
+	/* Merge WWAN config *last* to ensure modem-given settings overwrite
+	 * any external stuff set by pppd or other scripts.
+	 */
+	if (priv->wwan_ip6_config)
+		nm_ip6_config_merge (composite, priv->wwan_ip6_config);
 
 	/* Merge user overrides into the composite config */
 	connection = nm_device_get_connection (self);
@@ -4633,11 +4647,11 @@ nm_device_activate_schedule_ip4_config_result (NMDevice *self, NMIP4Config *conf
 	NMDevicePrivate *priv;
 
 	g_return_if_fail (NM_IS_DEVICE (self));
-	g_return_if_fail (NM_IS_IP4_CONFIG (config));
 	priv = NM_DEVICE_GET_PRIVATE (self);
 
 	g_clear_object (&priv->dev_ip4_config);
-	priv->dev_ip4_config = g_object_ref (config);
+	if (config)
+		priv->dev_ip4_config = g_object_ref (config);
 
 	activation_source_schedule (self, nm_device_activate_ip4_config_commit, AF_INET);
 
@@ -5174,6 +5188,25 @@ nm_device_set_vpn4_config (NMDevice *device, NMIP4Config *config)
 	}
 }
 
+void
+nm_device_set_wwan_ip4_config (NMDevice *device, NMIP4Config *config)
+{
+	NMDevicePrivate *priv = NM_DEVICE_GET_PRIVATE (device);
+
+	if (priv->wwan_ip4_config == config)
+		return;
+
+	g_clear_object (&priv->wwan_ip4_config);
+	if (config)
+		priv->wwan_ip4_config = g_object_ref (config);
+
+	/* NULL to use existing configs */
+	if (!ip4_config_merge_and_apply (device, NULL, TRUE, NULL)) {
+		nm_log_warn (LOGD_IP4, "(%s): failed to set WWAN IPv4 configuration",
+		             nm_device_get_ip_iface (device));
+	}
+}
+
 static gboolean
 nm_device_set_ip6_config (NMDevice *self,
                           NMIP6Config *new_config,
@@ -5274,6 +5307,25 @@ nm_device_set_vpn6_config (NMDevice *device, NMIP6Config *config)
 	/* NULL to use existing configs */
 	if (!ip6_config_merge_and_apply (device, TRUE, NULL)) {
 		nm_log_warn (LOGD_IP6, "(%s): failed to set VPN routes for device",
+			         nm_device_get_ip_iface (device));
+	}
+}
+
+void
+nm_device_set_wwan_ip6_config (NMDevice *device, NMIP6Config *config)
+{
+	NMDevicePrivate *priv = NM_DEVICE_GET_PRIVATE (device);
+
+	if (priv->wwan_ip6_config == config)
+		return;
+
+	g_clear_object (&priv->wwan_ip6_config);
+	if (config)
+		priv->wwan_ip6_config = g_object_ref (config);
+
+	/* NULL to use existing configs */
+	if (!ip6_config_merge_and_apply (device, TRUE, NULL)) {
+		nm_log_warn (LOGD_IP6, "(%s): failed to set WWAN IPv6 configuration",
 			         nm_device_get_ip_iface (device));
 	}
 }
@@ -5843,6 +5895,8 @@ update_ip_config (NMDevice *self, gboolean initial)
 			nm_ip4_config_subtract (priv->ext_ip4_config, priv->dev_ip4_config);
 		if (priv->vpn4_config)
 			nm_ip4_config_subtract (priv->ext_ip4_config, priv->vpn4_config);
+		if (priv->wwan_ip4_config)
+			nm_ip4_config_subtract (priv->ext_ip4_config, priv->wwan_ip4_config);
 
 		ip4_config_merge_and_apply (self, NULL, FALSE, NULL);
 	}
@@ -5860,6 +5914,8 @@ update_ip_config (NMDevice *self, gboolean initial)
 			nm_ip6_config_subtract (priv->ext_ip6_config, priv->ac_ip6_config);
 		if (priv->dhcp6_ip6_config)
 			nm_ip6_config_subtract (priv->ext_ip6_config, priv->dhcp6_ip6_config);
+		if (priv->wwan_ip6_config)
+			nm_ip6_config_subtract (priv->ext_ip6_config, priv->wwan_ip6_config);
 		if (priv->vpn6_config)
 			nm_ip6_config_subtract (priv->ext_ip6_config, priv->vpn6_config);
 
@@ -6492,11 +6548,13 @@ _cleanup_generic_post (NMDevice *self, gboolean deconfigure)
 	nm_device_set_ip6_config (self, NULL, TRUE, &ignored);
 	g_clear_object (&priv->dev_ip4_config);
 	g_clear_object (&priv->ext_ip4_config);
+	g_clear_object (&priv->wwan_ip4_config);
 	g_clear_object (&priv->vpn4_config);
 	g_clear_object (&priv->ip4_config);
 	g_clear_object (&priv->ac_ip6_config);
 	g_clear_object (&priv->ext_ip6_config);
 	g_clear_object (&priv->vpn6_config);
+	g_clear_object (&priv->wwan_ip6_config);
 	g_clear_object (&priv->ip6_config);
 
 	clear_act_request (self);

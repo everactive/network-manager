@@ -1,0 +1,117 @@
+From af1f183b3d1a38548be96cf41e835847e89b953b Mon Sep 17 00:00:00 2001
+From: Dan Williams <dcbw@redhat.com>
+Date: Tue, 15 Jul 2014 17:16:56 -0500
+Subject: wwan: split out WWAN IP4Config from device config
+
+We want to set the WWAN config last, to ensure that the configuration we
+use overwrites anything that pppd might have set, becuase it touches some
+stuff itself.  That means we have to keep the WWAN config separate, since
+dev_ip4_config is used for DHCP and IPv4LL, which we always set first to
+ensure they these don't overwrite external, administrator added config
+(eg, priv->ext_ip4_config).
+
+This also synchronizes the IPv4 config path with the upcoming IPv6
+config path.
+
+---
+ src/devices/nm-device-private.h    |    2 ++
+ src/devices/nm-device.c            |   29 +++++++++++++++++++++++++++++
+ src/devices/wwan/nm-device-modem.c |    6 ++++--
+ 3 files changed, 35 insertions(+), 2 deletions(-)
+
+Index: b/src/devices/nm-device-private.h
+===================================================================
+--- a/src/devices/nm-device-private.h
++++ b/src/devices/nm-device-private.h
+@@ -99,4 +99,6 @@ void nm_device_set_carrier (NMDevice *de
+ void nm_device_emit_recheck_auto_activate (NMDevice *device);
+ void nm_device_queue_recheck_assume (NMDevice *device);
+ 
++void nm_device_set_wwan_ip4_config (NMDevice *device, NMIP4Config *config);
++
+ #endif	/* NM_DEVICE_PRIVATE_H */
+Index: b/src/devices/nm-device.c
+===================================================================
+--- a/src/devices/nm-device.c
++++ b/src/devices/nm-device.c
+@@ -240,6 +240,7 @@ typedef struct {
+ 	IpState         ip4_state;
+ 	NMIP4Config *   dev_ip4_config; /* Config from DHCP, PPP, LLv4, etc */
+ 	NMIP4Config *   ext_ip4_config; /* Stuff added outside NM */
++	NMIP4Config *   wwan_ip4_config; /* WWAN configuration */
+ 
+ 	/* DHCPv4 tracking */
+ 	NMDHCPClient *  dhcp4_client;
+@@ -2639,6 +2640,12 @@ ip4_config_merge_and_apply (NMDevice *se
+ 	if (priv->ext_ip4_config)
+ 		nm_ip4_config_merge (composite, priv->ext_ip4_config);
+ 
++	/* Merge WWAN config *last* to ensure modem-given settings overwrite
++	 * any external stuff set by pppd or other scripts.
++	 */
++	if (priv->wwan_ip4_config)
++		nm_ip4_config_merge (composite, priv->wwan_ip4_config);
++
+ 	/* Merge user overrides into the composite config */
+ 	connection = nm_device_get_connection (self);
+ 	if (connection) {
+@@ -5164,6 +5171,25 @@ nm_device_set_vpn4_config (NMDevice *dev
+ 	}
+ }
+ 
++void
++nm_device_set_wwan_ip4_config (NMDevice *device, NMIP4Config *config)
++{
++	NMDevicePrivate *priv = NM_DEVICE_GET_PRIVATE (device);
++
++	if (priv->wwan_ip4_config == config)
++		return;
++
++	g_clear_object (&priv->wwan_ip4_config);
++	if (config)
++		priv->wwan_ip4_config = g_object_ref (config);
++
++	/* NULL to use existing configs */
++	if (!ip4_config_merge_and_apply (device, NULL, TRUE, NULL)) {
++		nm_log_warn (LOGD_IP4, "(%s): failed to set WWAN IPv4 configuration",
++		             nm_device_get_ip_iface (device));
++	}
++}
++
+ static gboolean
+ nm_device_set_ip6_config (NMDevice *self,
+                           NMIP6Config *new_config,
+@@ -5833,6 +5859,8 @@ update_ip_config (NMDevice *self, gboole
+ 			nm_ip4_config_subtract (priv->ext_ip4_config, priv->dev_ip4_config);
+ 		if (priv->vpn4_config)
+ 			nm_ip4_config_subtract (priv->ext_ip4_config, priv->vpn4_config);
++		if (priv->wwan_ip4_config)
++			nm_ip4_config_subtract (priv->ext_ip4_config, priv->wwan_ip4_config);
+ 
+ 		ip4_config_merge_and_apply (self, NULL, FALSE, NULL);
+ 	}
+@@ -6482,6 +6510,7 @@ _cleanup_generic_post (NMDevice *self, g
+ 	nm_device_set_ip6_config (self, NULL, TRUE, &ignored);
+ 	g_clear_object (&priv->dev_ip4_config);
+ 	g_clear_object (&priv->ext_ip4_config);
++	g_clear_object (&priv->wwan_ip4_config);
+ 	g_clear_object (&priv->vpn4_config);
+ 	g_clear_object (&priv->ip4_config);
+ 	g_clear_object (&priv->ac_ip6_config);
+Index: b/src/devices/wwan/nm-device-modem.c
+===================================================================
+--- a/src/devices/wwan/nm-device-modem.c
++++ b/src/devices/wwan/nm-device-modem.c
+@@ -162,8 +162,10 @@ modem_ip4_config_result (NMModem *self,
+ 		             error && error->message ? error->message : "(unknown)");
+ 
+ 		nm_device_state_changed (device, NM_DEVICE_STATE_FAILED, NM_DEVICE_STATE_REASON_IP_CONFIG_UNAVAILABLE);
+-	} else
+-		nm_device_activate_schedule_ip4_config_result (device, config);
++	} else {
++		nm_device_set_wwan_ip4_config (device, config);
++		nm_device_activate_schedule_ip4_config_result (device, NULL);
++	}
+ }
+ 
+ static void

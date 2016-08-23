@@ -1,0 +1,171 @@
+From f3557d326cdab575cde84d93743b3c9744925bb2 Mon Sep 17 00:00:00 2001
+From: Dan Williams <dcbw@redhat.com>
+Date: Tue, 15 Oct 2013 20:50:48 -0500
+Subject: wwan: read supported IP types from ModemManager
+
+Not all modems support IPv6, and to prevent some common failure
+cases, make sure we don't try to use IPv6 when the modem doesn't
+support it.
+
+---
+ src/devices/wwan/nm-modem-broadband.c |   16 ++++++++++++++++
+ src/devices/wwan/nm-modem.c           |   22 ++++++++++++++++++++++
+ src/devices/wwan/nm-modem.h           |   23 +++++++++++++++++++++++
+ 3 files changed, 61 insertions(+)
+
+Index: b/src/devices/wwan/nm-modem-broadband.c
+===================================================================
+--- a/src/devices/wwan/nm-modem-broadband.c
++++ b/src/devices/wwan/nm-modem-broadband.c
+@@ -806,6 +806,21 @@ modem_state_changed (MMModem *modem,
+ 
+ /*****************************************************************************/
+ 
++static NMModemIPType
++mm_ip_family_to_nm (MMBearerIpFamily family)
++{
++	NMModemIPType nm_type = NM_MODEM_IP_TYPE_UNKNOWN;
++
++	if (family & MM_BEARER_IP_FAMILY_IPV4)
++		nm_type |= NM_MODEM_IP_TYPE_IPV4;
++	if (family & MM_BEARER_IP_FAMILY_IPV6)
++		nm_type |= NM_MODEM_IP_TYPE_IPV6;
++	if (family & MM_BEARER_IP_FAMILY_IPV4V6)
++		nm_type |= MM_BEARER_IP_FAMILY_IPV4V6;
++
++	return nm_type;
++}
++
+ NMModem *
+ nm_modem_broadband_new (GObject *object, GError **error)
+ {
+@@ -830,6 +845,7 @@ nm_modem_broadband_new (GObject *object,
+ 	                      NM_MODEM_UID, mm_modem_get_primary_port (modem_iface),
+ 	                      NM_MODEM_CONTROL_PORT, mm_modem_get_primary_port (modem_iface),
+ 	                      NM_MODEM_DATA_PORT, NULL, /* We don't know it until bearer created */
++	                      NM_MODEM_IP_TYPES, mm_ip_family_to_nm (mm_modem_get_supported_ip_families (modem_iface)),
+ 	                      NM_MODEM_STATE, mm_state_to_nm (mm_modem_get_state (modem_iface)),
+ 	                      NM_MODEM_DEVICE_ID, mm_modem_get_device_identifier (modem_iface),
+ 	                      NM_MODEM_BROADBAND_MODEM, modem_object,
+Index: b/src/devices/wwan/nm-modem.c
+===================================================================
+--- a/src/devices/wwan/nm-modem.c
++++ b/src/devices/wwan/nm-modem.c
+@@ -47,6 +47,7 @@ enum {
+ 	PROP_STATE,
+ 	PROP_DEVICE_ID,
+ 	PROP_SIM_ID,
++	PROP_IP_TYPES,
+ 
+ 	LAST_PROP
+ };
+@@ -63,6 +64,7 @@ typedef struct {
+ 	NMModemState prev_state;  /* revert to this state if enable/disable fails */
+ 	char *device_id;
+ 	char *sim_id;
++	NMModemIPType ip_types;
+ 
+ 	NMPPPManager *ppp_manager;
+ 
+@@ -218,6 +220,12 @@ nm_modem_emit_removed (NMModem *self)
+ 	g_signal_emit (self, signals[REMOVED], 0);
+ }
+ 
++NMModemIPType
++nm_modem_get_supported_ip_types (NMModem *self)
++{
++	return NM_MODEM_GET_PRIVATE (self)->ip_types;
++}
++
+ /*****************************************************************************/
+ /* IP method PPP */
+ 
+@@ -861,6 +869,9 @@ get_property (GObject *object, guint pro
+ 	case PROP_SIM_ID:
+ 		g_value_set_string (value, priv->sim_id);
+ 		break;
++	case PROP_IP_TYPES:
++		g_value_set_uint (value, priv->ip_types);
++		break;
+ 	default:
+ 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+ 		break;
+@@ -909,6 +920,9 @@ set_property (GObject *object, guint pro
+ 		g_free (priv->sim_id);
+ 		priv->sim_id = g_value_dup_string (value);
+ 		break;
++	case PROP_IP_TYPES:
++		priv->ip_types = g_value_get_uint (value);
++		break;
+ 	default:
+ 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+ 		break;
+@@ -1046,6 +1060,14 @@ nm_modem_class_init (NMModemClass *klass
+ 		                      NULL,
+ 		                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+ 
++	g_object_class_install_property
++		(object_class, PROP_IP_TYPES,
++		 g_param_spec_uint (NM_MODEM_IP_TYPES,
++		                    "IP Types",
++		                    "Supported IP types",
++		                    0, G_MAXUINT32, NM_MODEM_IP_TYPE_IPV4,
++		                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
++
+ 	/* Signals */
+ 
+ 	signals[PPP_STATS] =
+Index: b/src/devices/wwan/nm-modem.h
+===================================================================
+--- a/src/devices/wwan/nm-modem.h
++++ b/src/devices/wwan/nm-modem.h
+@@ -47,6 +47,7 @@ G_BEGIN_DECLS
+ #define NM_MODEM_STATE        "state"
+ #define NM_MODEM_DEVICE_ID    "device-id"
+ #define NM_MODEM_SIM_ID       "sim-id"
++#define NM_MODEM_IP_TYPES     "ip-types"   /* Supported IP types */
+ 
+ /* Signals */
+ #define NM_MODEM_PPP_STATS         "ppp-stats"
+@@ -62,12 +63,32 @@ G_BEGIN_DECLS
+ #define MM_MODEM_IP_METHOD_STATIC 1
+ #define MM_MODEM_IP_METHOD_DHCP   2
+ 
++/**
++ * NMModemIPType:
++ * @NM_MODEM_IP_TYPE_UNKNOWN: unknown or no IP support
++ * @NM_MODEM_IP_TYPE_IPV4: IPv4-only bearers are supported
++ * @NM_MODEM_IP_TYPE_IPV6: IPv6-only bearers are supported
++ * @NM_MODEM_IP_TYPE_IPV4V6: dual-stack IPv4 + IPv6 bearers are supported
++ *
++ * Indicates what IP protocols the modem supports for an IP bearer.  Any
++ * combination of flags is possible.  For example, (%NM_MODEM_IP_TYPE_IPV4 |
++ * %NM_MODEM_IP_TYPE_IPV6) indicates that the modem supports IPv4 and IPv6
++ * but not simultaneously on the same bearer.
++ */
++typedef enum {
++	NM_MODEM_IP_TYPE_UNKNOWN = 0x0,
++	NM_MODEM_IP_TYPE_IPV4 = 0x1,
++	NM_MODEM_IP_TYPE_IPV6 = 0x2,
++	NM_MODEM_IP_TYPE_IPV4V6 = 0x4
++} NMModemIPType;
++
+ typedef enum {
+ 	NM_MODEM_ERROR_CONNECTION_NOT_GSM,      /*< nick=ConnectionNotGsm >*/
+ 	NM_MODEM_ERROR_CONNECTION_NOT_CDMA,     /*< nick=ConnectionNotCdma >*/
+ 	NM_MODEM_ERROR_CONNECTION_INVALID,      /*< nick=ConnectionInvalid >*/
+ 	NM_MODEM_ERROR_CONNECTION_INCOMPATIBLE, /*< nick=ConnectionIncompatible >*/
+ 	NM_MODEM_ERROR_INITIALIZATION_FAILED,   /*< nick=InitializationFailed >*/
++	NM_MODEM_ERROR_IP_CONFIG_INVALID,       /*< nick=IpConfigInvalid >*/
+ } NMModemError;
+ 
+ typedef enum {  /*< underscore_name=nm_modem_state >*/
+@@ -209,6 +230,8 @@ void          nm_modem_set_state (NMMode
+ void          nm_modem_set_prev_state (NMModem *self, const char *reason);
+ const char *  nm_modem_state_to_string (NMModemState state);
+ 
++NMModemIPType nm_modem_get_supported_ip_types (NMModem *self);
++
+ /* For the modem-manager only */
+ void          nm_modem_emit_removed (NMModem *self);
+ 

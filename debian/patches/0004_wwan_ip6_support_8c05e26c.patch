@@ -1,0 +1,763 @@
+From 8c05e26c425f8bbe2429614dbc0ee34c70301110 Mon Sep 17 00:00:00 2001
+From: Dan Williams <dcbw@redhat.com>
+Date: Tue, 15 Oct 2013 21:03:42 -0500
+Subject: wwan: add infrastructure for IPv6 config results
+
+
+---
+ src/devices/bluetooth/nm-device-bt.c |    3 
+ src/devices/nm-device-private.h      |    3 
+ src/devices/nm-device.c              |   35 ++++
+ src/devices/wwan/nm-device-modem.c   |  107 +++++++++++++-
+ src/devices/wwan/nm-modem.c          |  257 ++++++++++++++++++++++++++++++++---
+ src/devices/wwan/nm-modem.h          |   24 ++-
+ src/devices/wwan/wwan-exports.ver    |    1 
+ 7 files changed, 403 insertions(+), 27 deletions(-)
+
+Index: b/src/devices/bluetooth/nm-device-bt.c
+===================================================================
+--- a/src/devices/bluetooth/nm-device-bt.c
++++ b/src/devices/bluetooth/nm-device-bt.c
+@@ -897,8 +897,7 @@ act_stage3_ip6_config_start (NMDevice *d
+ 
+ 	if (priv->bt_type == NM_BT_CAPABILITY_DUN) {
+ 		ret = nm_modem_stage3_ip6_config_start (NM_DEVICE_BT_GET_PRIVATE (device)->modem,
+-		                                        device,
+-		                                        NM_DEVICE_CLASS (nm_device_bt_parent_class),
++		                                        nm_device_get_act_request (device),
+ 		                                        reason);
+ 	} else
+ 		ret = NM_DEVICE_CLASS (nm_device_bt_parent_class)->act_stage3_ip6_config_start (device, out_config, reason);
+Index: b/src/devices/nm-device-private.h
+===================================================================
+--- a/src/devices/nm-device-private.h
++++ b/src/devices/nm-device-private.h
+@@ -100,5 +100,8 @@ void nm_device_emit_recheck_auto_activat
+ void nm_device_queue_recheck_assume (NMDevice *device);
+ 
+ void nm_device_set_wwan_ip4_config (NMDevice *device, NMIP4Config *config);
++void nm_device_set_wwan_ip6_config (NMDevice *device, NMIP6Config *config);
++
++gboolean nm_device_ipv6_sysctl_set (NMDevice *self, const char *property, const char *value);
+ 
+ #endif	/* NM_DEVICE_PRIVATE_H */
+Index: b/src/devices/nm-device.c
+===================================================================
+--- a/src/devices/nm-device.c
++++ b/src/devices/nm-device.c
+@@ -269,6 +269,7 @@ typedef struct {
+ 	NMIP6Config *  ip6_config;
+ 	IpState        ip6_state;
+ 	NMIP6Config *  vpn6_config;  /* routes added by a VPN which uses this device */
++	NMIP6Config *  wwan_ip6_config;
+ 	NMIP6Config *  ext_ip6_config; /* Stuff added outside NM */
+ 
+ 	NMRDisc *      rdisc;
+@@ -450,7 +451,7 @@ reason_to_string (NMDeviceStateReason re
+ 
+ /***********************************************************/
+ 
+-static inline gboolean
++gboolean
+ nm_device_ipv6_sysctl_set (NMDevice *self, const char *property, const char *value)
+ {
+ 	return nm_platform_sysctl_set (nm_utils_ip6_property_path (nm_device_get_ip_iface (self), property), value);
+@@ -3091,6 +3092,12 @@ ip6_config_merge_and_apply (NMDevice *se
+ 	if (priv->ext_ip6_config)
+ 		nm_ip6_config_merge (composite, priv->ext_ip6_config);
+ 
++	/* Merge WWAN config *last* to ensure modem-given settings overwrite
++	 * any external stuff set by pppd or other scripts.
++	 */
++	if (priv->wwan_ip6_config)
++		nm_ip6_config_merge (composite, priv->wwan_ip6_config);
++
+ 	/* Merge user overrides into the composite config */
+ 	connection = nm_device_get_connection (self);
+ 	if (connection) {
+@@ -4629,11 +4636,11 @@ nm_device_activate_schedule_ip4_config_r
+ 	NMDevicePrivate *priv;
+ 
+ 	g_return_if_fail (NM_IS_DEVICE (self));
+-	g_return_if_fail (NM_IS_IP4_CONFIG (config));
+ 	priv = NM_DEVICE_GET_PRIVATE (self);
+ 
+ 	g_clear_object (&priv->dev_ip4_config);
+-	priv->dev_ip4_config = g_object_ref (config);
++	if (config)
++		priv->dev_ip4_config = g_object_ref (config);
+ 
+ 	activation_source_schedule (self, nm_device_activate_ip4_config_commit, AF_INET);
+ 
+@@ -5294,6 +5301,25 @@ nm_device_set_vpn6_config (NMDevice *dev
+ 	}
+ }
+ 
++void
++nm_device_set_wwan_ip6_config (NMDevice *device, NMIP6Config *config)
++{
++	NMDevicePrivate *priv = NM_DEVICE_GET_PRIVATE (device);
++
++	if (priv->wwan_ip6_config == config)
++		return;
++
++	g_clear_object (&priv->wwan_ip6_config);
++	if (config)
++		priv->wwan_ip6_config = g_object_ref (config);
++
++	/* NULL to use existing configs */
++	if (!ip6_config_merge_and_apply (device, TRUE, NULL)) {
++		nm_log_warn (LOGD_IP6, "(%s): failed to set WWAN IPv6 configuration",
++			         nm_device_get_ip_iface (device));
++	}
++}
++
+ NMDHCP6Config *
+ nm_device_get_dhcp6_config (NMDevice *self)
+ {
+@@ -5878,6 +5904,8 @@ update_ip_config (NMDevice *self, gboole
+ 			nm_ip6_config_subtract (priv->ext_ip6_config, priv->ac_ip6_config);
+ 		if (priv->dhcp6_ip6_config)
+ 			nm_ip6_config_subtract (priv->ext_ip6_config, priv->dhcp6_ip6_config);
++		if (priv->wwan_ip6_config)
++			nm_ip6_config_subtract (priv->ext_ip6_config, priv->wwan_ip6_config);
+ 		if (priv->vpn6_config)
+ 			nm_ip6_config_subtract (priv->ext_ip6_config, priv->vpn6_config);
+ 
+@@ -6516,6 +6544,7 @@ _cleanup_generic_post (NMDevice *self, g
+ 	g_clear_object (&priv->ac_ip6_config);
+ 	g_clear_object (&priv->ext_ip6_config);
+ 	g_clear_object (&priv->vpn6_config);
++	g_clear_object (&priv->wwan_ip6_config);
+ 	g_clear_object (&priv->ip6_config);
+ 
+ 	clear_act_request (self);
+Index: b/src/devices/wwan/nm-device-modem.c
+===================================================================
+--- a/src/devices/wwan/nm-device-modem.c
++++ b/src/devices/wwan/nm-device-modem.c
+@@ -20,6 +20,7 @@
+ 
+ #include "config.h"
+ 
++#include <string.h>
+ #include <glib.h>
+ 
+ #include "nm-device-modem.h"
+@@ -30,6 +31,7 @@
+ #include "nm-logging.h"
+ #include "nm-dbus-manager.h"
+ #include "nm-settings-connection.h"
++#include "NetworkManagerUtils.h"
+ 
+ #if WITH_MODEM_MANAGER_1
+ #include "nm-modem-broadband.h"
+@@ -157,7 +159,7 @@ modem_ip4_config_result (NMModem *self,
+ 	g_return_if_fail (nm_device_activate_ip4_state_in_conf (device) == TRUE);
+ 
+ 	if (error) {
+-		nm_log_warn (LOGD_MB | LOGD_IP4, "retrieving IP4 configuration failed: (%d) %s",
++		nm_log_warn (LOGD_MB | LOGD_IP4, "retrieving IPv4 configuration failed: (%d) %s",
+ 		             error ? error->code : -1,
+ 		             error && error->message ? error->message : "(unknown)");
+ 
+@@ -169,13 +171,88 @@ modem_ip4_config_result (NMModem *self,
+ }
+ 
+ static void
++modem_ip6_config_result (NMModem *self,
++                         NMIP6Config *config,
++                         gboolean do_slaac,
++                         GError *error,
++                         gpointer user_data)
++{
++	NMDevice *device = NM_DEVICE (user_data);
++	NMActStageReturn ret;
++	NMDeviceStateReason reason = NM_DEVICE_STATE_REASON_NONE;
++	NMIP6Config *ignored = NULL;
++	gboolean got_config = !!config;
++
++	g_return_if_fail (nm_device_activate_ip6_state_in_conf (device) == TRUE);
++
++	if (error) {
++		nm_log_warn (LOGD_MB | LOGD_IP6, "retrieving IPv6 configuration failed: (%d) %s",
++		             error ? error->code : -1,
++		             error && error->message ? error->message : "(unknown)");
++
++		nm_device_state_changed (device, NM_DEVICE_STATE_FAILED, NM_DEVICE_STATE_REASON_IP_CONFIG_UNAVAILABLE);
++		return;
++	}
++
++	/* Re-enable IPv6 on the interface */
++	nm_device_ipv6_sysctl_set (device, "disable_ipv6", "0");
++
++	if (config)
++		nm_device_set_wwan_ip6_config (device, config);
++
++	if (do_slaac == FALSE) {
++		if (got_config)
++			nm_device_activate_schedule_ip6_config_result (device);
++		else {
++			nm_log_warn (LOGD_MB | LOGD_IP6, "retrieving IPv6 configuration failed: SLAAC not requested and no addresses");
++			nm_device_state_changed (device, NM_DEVICE_STATE_FAILED, NM_DEVICE_STATE_REASON_IP_CONFIG_UNAVAILABLE);
++		}
++		return;
++	}
++
++	/* Start SLAAC now that we have a link-local address from the modem */
++	ret = NM_DEVICE_CLASS (nm_device_modem_parent_class)->act_stage3_ip6_config_start (device, &ignored, &reason);
++	g_assert (ignored == NULL);
++	switch (ret) {
++	case NM_ACT_STAGE_RETURN_FAILURE:
++		nm_device_state_changed (device, NM_DEVICE_STATE_FAILED, reason);
++		break;
++	case NM_ACT_STAGE_RETURN_STOP:
++		/* all done */
++		nm_device_activate_schedule_ip6_config_result (device);
++		break;
++	case NM_ACT_STAGE_RETURN_POSTPONE:
++		/* let SLAAC run */
++		break;
++	default:
++		/* Should never get here since we've assured that the IPv6 method
++		 * will either be "auto" or "ignored" when starting IPv6 configuration.
++		 */
++		g_assert_not_reached ();
++	}
++}
++
++static void
+ data_port_changed_cb (NMModem *modem, GParamSpec *pspec, gpointer user_data)
+ {
+ 	NMDevice *self = NM_DEVICE (user_data);
++	const char *old = nm_device_get_ip_iface (self);
++	const char *new = nm_modem_get_data_port (modem);
++	gboolean changed = FALSE;
++
++	if (new && g_strcmp0 (new, old))
++		changed = TRUE;
+ 
+ 	/* We set the IP iface in the device as soon as we know it, so that we
+ 	 * properly ifup it if needed */
+-	nm_device_set_ip_iface (self, nm_modem_get_data_port (modem));
++	nm_device_set_ip_iface (self, new);
++
++	/* Disable IPv6 immediately on the interface since NM handles IPv6
++	 * internally, and leaving it enabled could allow the kernel's IPv6
++	 * RA handling code to run before NM is ready.
++	 */
++	if (changed)
++		nm_device_ipv6_sysctl_set (self, "disable_ipv6", "1");
+ }
+ 
+ static void
+@@ -423,9 +500,26 @@ act_stage3_ip6_config_start (NMDevice *d
+                              NMIP6Config **out_config,
+                              NMDeviceStateReason *reason)
+ {
++	NMConnection *connection;
++	const char *method;
++
++	connection = nm_device_get_connection (device);
++	g_assert (connection);
++	method = nm_utils_get_ip_config_method (connection, NM_TYPE_SETTING_IP6_CONFIG);
++
++	/* Only Ignore and Auto methods make sense for WWAN */
++	if (strcmp (method, NM_SETTING_IP6_CONFIG_METHOD_IGNORE) == 0)
++		return NM_ACT_STAGE_RETURN_STOP;
++
++	if (strcmp (method, NM_SETTING_IP6_CONFIG_METHOD_AUTO) != 0) {
++		nm_log_warn (LOGD_IP6, "(%s): unhandled WWAN IPv6 method '%s'; will fail",
++		             nm_device_get_iface (device), method);
++		*reason = NM_DEVICE_STATE_REASON_IP_CONFIG_UNAVAILABLE;
++		return NM_ACT_STAGE_RETURN_FAILURE;
++	}
++
+ 	return nm_modem_stage3_ip6_config_start (NM_DEVICE_MODEM_GET_PRIVATE (device)->modem,
+-	                                         device,
+-	                                         NM_DEVICE_CLASS (nm_device_modem_parent_class),
++	                                         nm_device_get_act_request (device),
+ 	                                         reason);
+ }
+ 
+@@ -516,8 +610,10 @@ nm_device_modem_new (NMModem *modem)
+ 
+ 	/* If the data port is known, set it as the IP interface immediately */
+ 	data_port = nm_modem_get_data_port (modem);
+-	if (data_port)
++	if (data_port) {
+ 		nm_device_set_ip_iface (device, data_port);
++		nm_device_ipv6_sysctl_set (device, "disable_ipv6", "1");
++	}
+ 
+ 	return device;
+ }
+@@ -539,6 +635,7 @@ set_modem (NMDeviceModem *self, NMModem
+ 	g_signal_connect (modem, NM_MODEM_PPP_FAILED, G_CALLBACK (ppp_failed), self);
+ 	g_signal_connect (modem, NM_MODEM_PREPARE_RESULT, G_CALLBACK (modem_prepare_result), self);
+ 	g_signal_connect (modem, NM_MODEM_IP4_CONFIG_RESULT, G_CALLBACK (modem_ip4_config_result), self);
++	g_signal_connect (modem, NM_MODEM_IP6_CONFIG_RESULT, G_CALLBACK (modem_ip6_config_result), self);
+ 	g_signal_connect (modem, NM_MODEM_AUTH_REQUESTED, G_CALLBACK (modem_auth_requested), self);
+ 	g_signal_connect (modem, NM_MODEM_AUTH_RESULT, G_CALLBACK (modem_auth_result), self);
+ 	g_signal_connect (modem, NM_MODEM_STATE_CHANGED, G_CALLBACK (modem_state_cb), self);
+Index: b/src/devices/wwan/nm-modem.c
+===================================================================
+--- a/src/devices/wwan/nm-modem.c
++++ b/src/devices/wwan/nm-modem.c
+@@ -62,6 +62,7 @@ typedef struct {
+ 	char *ppp_iface;
+ 	NMModemIPMethod ip4_method;
+ 	NMModemIPMethod ip6_method;
++	NMUtilsIPv6IfaceId iid;
+ 	NMModemState state;
+ 	NMModemState prev_state;  /* revert to this state if enable/disable fails */
+ 	char *device_id;
+@@ -86,6 +87,7 @@ enum {
+ 	PPP_FAILED,
+ 	PREPARE_RESULT,
+ 	IP4_CONFIG_RESULT,
++	IP6_CONFIG_RESULT,
+ 	AUTH_REQUESTED,
+ 	AUTH_RESULT,
+ 	REMOVED,
+@@ -228,6 +230,97 @@ nm_modem_get_supported_ip_types (NMModem
+ 	return NM_MODEM_GET_PRIVATE (self)->ip_types;
+ }
+ 
++/**
++ * nm_modem_get_connection_ip_type:
++ * @self: the #NMModem
++ * @connection: the #NMConnection to determine IP type to use
++ *
++ * Given a modem and a connection, determine which NMModemIpType to use
++ * when connecting.
++ *
++ * Returns: a single %NMModemIpType value
++ */
++NMModemIPType
++nm_modem_get_connection_ip_type (NMModem *self,
++                                 NMConnection *connection,
++                                 GError **error)
++{
++	NMModemPrivate *priv = NM_MODEM_GET_PRIVATE (self);
++	NMSettingIP4Config *s_ip4;
++	NMSettingIP6Config *s_ip6;
++	const char *method;
++	gboolean ip4 = TRUE, ip6 = TRUE;
++	gboolean ip4_may_fail = TRUE, ip6_may_fail = TRUE;
++
++	s_ip4 = nm_connection_get_setting_ip4_config (connection);
++	if (s_ip4) {
++		method = nm_setting_ip4_config_get_method (s_ip4);
++		if (g_strcmp0 (method, NM_SETTING_IP4_CONFIG_METHOD_DISABLED) == 0)
++			ip4 = FALSE;
++		ip4_may_fail = nm_setting_ip4_config_get_may_fail (s_ip4);
++	}
++
++	s_ip6 = nm_connection_get_setting_ip6_config (connection);
++	if (s_ip6) {
++		method = nm_setting_ip6_config_get_method (s_ip6);
++		if (g_strcmp0 (method, NM_SETTING_IP6_CONFIG_METHOD_IGNORE) == 0)
++			ip6 = FALSE;
++		ip6_may_fail = nm_setting_ip6_config_get_may_fail (s_ip6);
++	}
++
++	if (ip4 && !ip6) {
++		if (!(priv->ip_types & NM_MODEM_IP_TYPE_IPV4)) {
++			g_set_error_literal (error,
++			                     NM_MODEM_ERROR,
++			                     NM_MODEM_ERROR_CONNECTION_INCOMPATIBLE,
++			                     "Connection requested IPv4 but IPv4 is "
++			                     "unsuported by the modem.");
++			return NM_MODEM_IP_TYPE_UNKNOWN;
++		}
++		return NM_MODEM_IP_TYPE_IPV4;
++	}
++
++	if (ip6 && !ip4) {
++		if (!(priv->ip_types & NM_MODEM_IP_TYPE_IPV6)) {
++			g_set_error_literal (error,
++			                     NM_MODEM_ERROR,
++			                     NM_MODEM_ERROR_CONNECTION_INCOMPATIBLE,
++			                     "Connection requested IPv6 but IPv6 is "
++			                     "unsuported by the modem.");
++			return NM_MODEM_IP_TYPE_UNKNOWN;
++		}
++		return NM_MODEM_IP_TYPE_IPV6;
++	}
++
++	if (ip4 && ip6) {
++		/* Modem supports dual-stack */
++		if (priv->ip_types & NM_MODEM_IP_TYPE_IPV4V6)
++			return NM_MODEM_IP_TYPE_IPV4V6;
++
++		/* Both IPv4 and IPv6 requested, but modem doesn't support dual-stack;
++		 * if one method is marked "may-fail" then use the other.
++		 */
++		if (ip6_may_fail)
++			return NM_MODEM_IP_TYPE_IPV4;
++		else if (ip4_may_fail)
++			return NM_MODEM_IP_TYPE_IPV6;
++
++		g_set_error_literal (error,
++		                     NM_MODEM_ERROR,
++		                     NM_MODEM_ERROR_CONNECTION_INCOMPATIBLE,
++		                     "Connection requested both IPv4 and IPv6 "
++		                     "but dual-stack addressing is unsupported "
++		                     "by the modem.");
++		return NM_MODEM_IP_TYPE_UNKNOWN;
++	}
++
++	g_set_error_literal (error,
++	                     NM_MODEM_ERROR,
++	                     NM_MODEM_ERROR_CONNECTION_INCOMPATIBLE,
++	                     "Connection specified no IP configuration!");
++	return NM_MODEM_IP_TYPE_UNKNOWN;
++}
++
+ /*****************************************************************************/
+ /* IP method PPP */
+ 
+@@ -247,13 +340,24 @@ ppp_state_changed (NMPPPManager *ppp_man
+ }
+ 
+ static void
++set_data_port (NMModem *self, const char *new_data_port)
++{
++	NMModemPrivate *priv = NM_MODEM_GET_PRIVATE (self);
++
++	if (g_strcmp0 (priv->data_port, new_data_port) != 0) {
++		g_free (priv->data_port);
++		priv->data_port = g_strdup (new_data_port);
++		g_object_notify (G_OBJECT (self), NM_MODEM_DATA_PORT);
++	}
++}
++
++static void
+ ppp_ip4_config (NMPPPManager *ppp_manager,
+ 				const char *iface,
+ 				NMIP4Config *config,
+ 				gpointer user_data)
+ {
+ 	NMModem *self = NM_MODEM (user_data);
+-	NMModemPrivate *priv = NM_MODEM_GET_PRIVATE (self);
+ 	guint32 i, num;
+ 	guint32 bad_dns1 = htonl (0x0A0B0C0D);
+ 	guint32 good_dns1 = htonl (0x04020201);  /* GTE nameserver */
+@@ -262,9 +366,7 @@ ppp_ip4_config (NMPPPManager *ppp_manage
+ 	gboolean dns_workaround = FALSE;
+ 
+ 	/* Notify about the new data port to use */
+-	g_free (priv->ppp_iface);
+-	priv->ppp_iface = g_strdup (iface);
+-	g_object_notify (G_OBJECT (self), NM_MODEM_DATA_PORT);
++	set_data_port (self, iface);
+ 
+ 	/* Work around a PPP bug (#1732) which causes many mobile broadband
+ 	 * providers to return 10.11.12.13 and 10.11.12.14 for the DNS servers.
+@@ -306,6 +408,23 @@ ppp_ip4_config (NMPPPManager *ppp_manage
+ }
+ 
+ static void
++ppp_ip6_config (NMPPPManager *ppp_manager,
++                const char *iface,
++                const NMUtilsIPv6IfaceId *iid,
++                NMIP6Config *config,
++                gpointer user_data)
++{
++	NMModem *self = NM_MODEM (user_data);
++
++	/* Notify about the new data port to use */
++	set_data_port (self, iface);
++
++	NM_MODEM_GET_PRIVATE (self)->iid = *iid;
++
++	nm_modem_emit_ip6_config_result (self, config, NULL);
++}
++
++static void
+ ppp_stats (NMPPPManager *ppp_manager,
+ 		   guint32 in_bytes,
+ 		   guint32 out_bytes,
+@@ -323,20 +442,27 @@ ppp_stats (NMPPPManager *ppp_manager,
+ }
+ 
+ static NMActStageReturn
+-ppp_stage3_ip4_config_start (NMModem *self,
+-                             NMActRequest *req,
+-                             NMDeviceStateReason *reason)
++ppp_stage3_ip_config_start (NMModem *self,
++                            NMActRequest *req,
++                            NMDeviceStateReason *reason)
+ {
+ 	NMModemPrivate *priv = NM_MODEM_GET_PRIVATE (self);
+ 	const char *ppp_name = NULL;
+ 	GError *error = NULL;
+ 	NMActStageReturn ret;
+-	guint ip_timeout = 20;
++	guint ip_timeout = 30;
+ 
+ 	g_return_val_if_fail (NM_IS_MODEM (self), NM_ACT_STAGE_RETURN_FAILURE);
+ 	g_return_val_if_fail (NM_IS_ACT_REQUEST (req), NM_ACT_STAGE_RETURN_FAILURE);
+ 	g_return_val_if_fail (reason !=	NULL, NM_ACT_STAGE_RETURN_FAILURE);
+ 
++	/* If we're already running PPP don't restart it; for example, if both
++	 * IPv4 and IPv6 are requested, IPv4 gets started first, but we use the
++	 * same pppd for both v4 and v6.
++	 */
++	if (priv->ppp_manager)
++		return NM_ACT_STAGE_RETURN_POSTPONE;
++
+ 	if (NM_MODEM_GET_CLASS (self)->get_user_pass) {
+ 		NMConnection *connection = nm_act_request_get_connection (req);
+ 
+@@ -346,7 +472,7 @@ ppp_stage3_ip4_config_start (NMModem *se
+ 	}
+ 
+ 	/* Check if ModemManager requested a specific IP timeout to be used. If 0 reported,
+-	 * use the default one (20s) */
++	 * use the default one (30s) */
+ 	if (priv->mm_ip_timeout > 0) {
+ 		nm_log_info (LOGD_PPP, "using modem-specified IP timeout: %u seconds",
+ 		             priv->mm_ip_timeout);
+@@ -361,6 +487,9 @@ ppp_stage3_ip4_config_start (NMModem *se
+ 		g_signal_connect (priv->ppp_manager, "ip4-config",
+ 		                  G_CALLBACK (ppp_ip4_config),
+ 		                  self);
++		g_signal_connect (priv->ppp_manager, "ip6-config",
++		                  G_CALLBACK (ppp_ip6_config),
++		                  self);
+ 		g_signal_connect (priv->ppp_manager, "stats",
+ 		                  G_CALLBACK (ppp_stats),
+ 		                  self);
+@@ -405,7 +534,7 @@ nm_modem_stage3_ip4_config_start (NMMode
+ 	priv = NM_MODEM_GET_PRIVATE (self);
+ 	switch (priv->ip4_method) {
+ 	case NM_MODEM_IP_METHOD_PPP:
+-		ret = ppp_stage3_ip4_config_start (self, req, reason);
++		ret = ppp_stage3_ip_config_start (self, req, reason);
+ 		break;
+ 	case NM_MODEM_IP_METHOD_STATIC:
+ 		ret = NM_MODEM_GET_CLASS (self)->static_stage3_ip4_config_start (self, req, reason);
+@@ -445,15 +574,82 @@ nm_modem_ip4_pre_commit (NMModem *modem,
+ 
+ /*****************************************************************************/
+ 
++void
++nm_modem_emit_ip6_config_result (NMModem *self,
++                                 NMIP6Config *config,
++                                 GError *error)
++{
++	NMModemPrivate *priv = NM_MODEM_GET_PRIVATE (self);
++	guint i, num;
++	gboolean do_slaac = TRUE;
++
++	if (error) {
++		g_signal_emit (self, signals[IP6_CONFIG_RESULT], 0, NULL, FALSE, error);
++		return;
++	}
++
++	if (config) {
++		/* If the IPv6 configuration only included a Link-Local address, then
++		 * we have to run SLAAC to get the full IPv6 configuration.
++		 */
++		num = nm_ip6_config_get_num_addresses (config);
++		g_assert (num > 0);
++		for (i = 0; i < num; i++) {
++			const NMPlatformIP6Address * addr = nm_ip6_config_get_address (config, i);
++
++			if (IN6_IS_ADDR_LINKLOCAL (&addr->address)) {
++				if (!priv->iid.id)
++					priv->iid.id = ((guint64 *)(&addr->address.s6_addr))[1];
++			} else
++				do_slaac = FALSE;
++		}
++	}
++	g_assert (config || do_slaac);
++
++	g_signal_emit (self, signals[IP6_CONFIG_RESULT], 0, config, do_slaac, NULL);
++}
++
++static NMActStageReturn
++stage3_ip6_config_request (NMModem *self, NMDeviceStateReason *reason)
++{
++	*reason = NM_DEVICE_STATE_REASON_IP_CONFIG_UNAVAILABLE;
++	return NM_ACT_STAGE_RETURN_FAILURE;
++}
++
+ NMActStageReturn
+ nm_modem_stage3_ip6_config_start (NMModem *self,
+-                                  NMDevice *device,
+-                                  NMDeviceClass *device_class,
++                                  NMActRequest *req,
+                                   NMDeviceStateReason *reason)
+ {
+-	/* FIXME: We don't support IPv6 on modems quite yet... */
+-	nm_device_activate_schedule_ip6_config_timeout (device);
+-	return NM_ACT_STAGE_RETURN_POSTPONE;
++	NMModemPrivate *priv;
++	NMActStageReturn ret;
++
++	g_return_val_if_fail (self != NULL, NM_ACT_STAGE_RETURN_FAILURE);
++	g_return_val_if_fail (NM_IS_MODEM (self), NM_ACT_STAGE_RETURN_FAILURE);
++	g_return_val_if_fail (req != NULL, NM_ACT_STAGE_RETURN_FAILURE);
++	g_return_val_if_fail (NM_IS_ACT_REQUEST (req), NM_ACT_STAGE_RETURN_FAILURE);
++	g_return_val_if_fail (reason != NULL, NM_ACT_STAGE_RETURN_FAILURE);
++
++	priv = NM_MODEM_GET_PRIVATE (self);
++	switch (priv->ip6_method) {
++	case NM_MODEM_IP_METHOD_PPP:
++		ret = ppp_stage3_ip_config_start (self, req, reason);
++		break;
++	case NM_MODEM_IP_METHOD_STATIC:
++	case NM_MODEM_IP_METHOD_AUTO:
++		/* Both static and DHCP/Auto retrieve a base IP config from the modem
++		 * which in the static case is the full config, and the DHCP/Auto case
++		 * is just the IPv6LL address to use for SLAAC.
++		 */
++		ret = NM_MODEM_GET_CLASS (self)->stage3_ip6_config_request (self, reason);
++		break;
++	default:
++		nm_log_err (LOGD_MB, "unknown IP method %d", priv->ip6_method);
++		ret = NM_ACT_STAGE_RETURN_FAILURE;
++		break;
++	}
++
++	return ret;
+ }
+ 
+ /*****************************************************************************/
+@@ -779,6 +975,15 @@ nm_modem_owns_port (NMModem *self, const
+ 	return FALSE;
+ }
+ 
++gboolean
++nm_modem_get_iid (NMModem *self, NMUtilsIPv6IfaceId *out_iid)
++{
++	g_return_val_if_fail (NM_IS_MODEM (self), FALSE);
++
++	*out_iid = NM_MODEM_GET_PRIVATE (self)->iid;
++	return TRUE;
++}
++
+ /*****************************************************************************/
+ 
+ void
+@@ -978,6 +1183,7 @@ nm_modem_class_init (NMModemClass *klass
+ 	object_class->finalize = finalize;
+ 
+ 	klass->act_stage1_prepare = act_stage1_prepare;
++	klass->stage3_ip6_config_request = stage3_ip6_config_request;
+ 	klass->deactivate = deactivate;
+ 
+ 	/* Properties */
+@@ -1108,6 +1314,27 @@ nm_modem_class_init (NMModemClass *klass
+ 		              NULL, NULL, NULL,
+ 		              G_TYPE_NONE, 2, G_TYPE_OBJECT, G_TYPE_POINTER);
+ 
++	/**
++	 * NMModem::ip6-config-result:
++	 * @modem: the #NMModem  on which the signal is emitted
++	 * @config: the #NMIP6Config to apply to the modem's data port
++	 * @do_slaac: %TRUE if IPv6 SLAAC should be started
++	 * @error: a #GError if any error occurred during IP configuration
++	 *
++	 * This signal is emitted when IPv6 configuration has completed or failed.
++	 * If @error is set the configuration failed.  If @config is set, then
++	 * the details should be applied to the data port before any further
++	 * configuration (like SLAAC) is done.  @do_slaac indicates whether SLAAC
++	 * should be started after applying @config to the data port.
++	 */
++	signals[IP6_CONFIG_RESULT] =
++		g_signal_new (NM_MODEM_IP6_CONFIG_RESULT,
++		              G_OBJECT_CLASS_TYPE (object_class),
++		              G_SIGNAL_RUN_FIRST,
++		              G_STRUCT_OFFSET (NMModemClass, ip6_config_result),
++		              NULL, NULL, NULL,
++		              G_TYPE_NONE, 3, G_TYPE_OBJECT, G_TYPE_BOOLEAN, G_TYPE_POINTER);
++
+ 	signals[PREPARE_RESULT] =
+ 		g_signal_new (NM_MODEM_PREPARE_RESULT,
+ 		              G_OBJECT_CLASS_TYPE (object_class),
+Index: b/src/devices/wwan/nm-modem.h
+===================================================================
+--- a/src/devices/wwan/nm-modem.h
++++ b/src/devices/wwan/nm-modem.h
+@@ -55,6 +55,7 @@ G_BEGIN_DECLS
+ #define NM_MODEM_PPP_FAILED        "ppp-failed"
+ #define NM_MODEM_PREPARE_RESULT    "prepare-result"
+ #define NM_MODEM_IP4_CONFIG_RESULT "ip4-config-result"
++#define NM_MODEM_IP6_CONFIG_RESULT "ip6-config-result"
+ #define NM_MODEM_AUTH_REQUESTED    "auth-requested"
+ #define NM_MODEM_AUTH_RESULT       "auth-result"
+ #define NM_MODEM_REMOVED           "removed"
+@@ -150,6 +151,12 @@ typedef struct {
+ 	                                                    NMActRequest *req,
+ 	                                                    NMDeviceStateReason *reason);
+ 
++	/* Request the IP6 config; when the config returns the modem
++	 * subclass should emit the ip6_config_result signal.
++	 */
++	NMActStageReturn (*stage3_ip6_config_request) (NMModem *self,
++	                                               NMDeviceStateReason *reason);
++
+ 	void (*set_mm_enabled)                     (NMModem *self, gboolean enabled);
+ 
+ 	void (*disconnect)                         (NMModem *self, gboolean warn);
+@@ -164,6 +171,10 @@ typedef struct {
+ 
+ 	void (*prepare_result)    (NMModem *self, gboolean success, NMDeviceStateReason reason);
+ 	void (*ip4_config_result) (NMModem *self, NMIP4Config *config, GError *error);
++	void (*ip6_config_result) (NMModem *self,
++	                           NMIP6Config *config,
++	                           gboolean do_slaac,
++	                           GError *error);
+ 
+ 	void (*auth_requested)    (NMModem *self);
+ 	void (*auth_result)       (NMModem *self, GError *error);
+@@ -182,6 +193,7 @@ const char *nm_modem_get_uid          (N
+ const char *nm_modem_get_control_port (NMModem *modem);
+ const char *nm_modem_get_data_port    (NMModem *modem);
+ const char *nm_modem_get_driver       (NMModem *modem);
++gboolean    nm_modem_get_iid          (NMModem *modem, NMUtilsIPv6IfaceId *out_iid);
+ 
+ gboolean    nm_modem_owns_port        (NMModem *modem, const char *iface);
+ 
+@@ -210,8 +222,7 @@ NMActStageReturn nm_modem_stage3_ip4_con
+                                                    NMDeviceStateReason *reason);
+ 
+ NMActStageReturn nm_modem_stage3_ip6_config_start (NMModem *modem,
+-                                                   NMDevice *device,
+-                                                   NMDeviceClass *device_class,
++                                                   NMActRequest *req,
+                                                    NMDeviceStateReason *reason);
+ 
+ void nm_modem_ip4_pre_commit (NMModem *modem, NMDevice *device, NMIP4Config *config);
+@@ -242,6 +253,15 @@ NMModemIPType nm_modem_get_supported_ip_
+ /* For the modem-manager only */
+ void          nm_modem_emit_removed (NMModem *self);
+ 
++NMModemIPType nm_modem_get_connection_ip_type (NMModem *self,
++                                               NMConnection *connection,
++                                               GError **error);
++
++/* For subclasses */
++void nm_modem_emit_ip6_config_result (NMModem *self,
++                                      NMIP6Config *config,
++                                      GError *error);
++
+ G_END_DECLS
+ 
+ #endif /* NM_MODEM_H */
+Index: b/src/devices/wwan/wwan-exports.ver
+===================================================================
+--- a/src/devices/wwan/wwan-exports.ver
++++ b/src/devices/wwan/wwan-exports.ver
+@@ -11,6 +11,7 @@ global:
+ 	nm_modem_get_control_port;
+ 	nm_modem_get_data_port;
+ 	nm_modem_get_driver;
++	nm_modem_get_iid;
+ 	nm_modem_get_path;
+ 	nm_modem_get_secrets;
+ 	nm_modem_get_state;

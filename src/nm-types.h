@@ -23,4 +23,7 @@
 
 typedef struct _NMDevice NMDevice;
 
+/* utils */
+typedef struct _NMUtilsIPv6IfaceId   NMUtilsIPv6IfaceId;
+
 #endif  /* NM_TYPES_H */

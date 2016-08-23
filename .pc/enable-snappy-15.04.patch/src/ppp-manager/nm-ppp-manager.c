@@ -53,7 +53,6 @@
 #include "nm-dbus-manager.h"
 #include "nm-logging.h"
 #include "nm-posix-signals.h"
-#include "snappy.h"
 
 static void impl_ppp_manager_need_secrets (NMPPPManager *manager,
                                            DBusGMethodInvocation *context);
@@ -973,16 +972,7 @@ create_pppd_cmd_line (NMPPPManager *self,
 	nm_cmd_line_add_string (cmd, priv->dbus_path);
 
 	nm_cmd_line_add_string (cmd, "plugin");
-
-	if (get_snap_app_path()) {
-		gchar *plugin_path = g_strdup_printf("%s%s",
-					get_snap_app_path(),
-					NM_PPPD_PLUGIN);
-		nm_cmd_line_add_string (cmd, plugin_path);
-		g_free(plugin_path);
-	} else {
-		nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
-	}
+	nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
 
 	return cmd;
 }

@@ -1,0 +1,20 @@
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Subject: Port ofono modem support to IP4/6 support; we only support IPv4.
+
+---
+ src/devices/wwan/nm-modem-ofono.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: b/src/devices/wwan/nm-modem-ofono.c
+===================================================================
+--- a/src/devices/wwan/nm-modem-ofono.c
++++ b/src/devices/wwan/nm-modem-ofono.c
+@@ -490,7 +490,7 @@ nm_modem_ofono_new (const char *path)
+ 	                                 NM_MODEM_PATH, path,
+ 	                                 NM_MODEM_UID, (path + 1),
+ 	                                 NM_MODEM_CONTROL_PORT, "ofono", /* mandatory */
+-	                                 NM_MODEM_IP_METHOD, MM_MODEM_IP_METHOD_STATIC,
++	                                 NM_MODEM_IP4_METHOD, MM_MODEM_IP_METHOD_STATIC,
+ 	                                 NM_MODEM_STATE, NM_MODEM_STATE_INITIALIZING,
+ 	                                 NULL);
+ }

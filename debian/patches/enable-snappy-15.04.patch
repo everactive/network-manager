@@ -615,3 +615,33 @@ Index: nm-snappy-support/src/settings/plugins/keyfile/writer.c
  }
  
  gboolean
+Index: nm-snappy-support/src/ppp-manager/nm-ppp-manager.c
+===================================================================
+--- nm-snappy-support.orig/src/ppp-manager/nm-ppp-manager.c
++++ nm-snappy-support/src/ppp-manager/nm-ppp-manager.c
+@@ -53,6 +53,7 @@
+ #include "nm-dbus-manager.h"
+ #include "nm-logging.h"
+ #include "nm-posix-signals.h"
++#include "snappy.h"
+ 
+ static void impl_ppp_manager_need_secrets (NMPPPManager *manager,
+                                            DBusGMethodInvocation *context);
+@@ -972,7 +973,16 @@ create_pppd_cmd_line (NMPPPManager *self
+ 	nm_cmd_line_add_string (cmd, priv->dbus_path);
+ 
+ 	nm_cmd_line_add_string (cmd, "plugin");
+-	nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
++
++	if (get_snap_app_path()) {
++		gchar *plugin_path = g_strdup_printf("%s%s",
++					get_snap_app_path(),
++					NM_PPPD_PLUGIN);
++		nm_cmd_line_add_string (cmd, plugin_path);
++		g_free(plugin_path);
++	} else {
++		nm_cmd_line_add_string (cmd, NM_PPPD_PLUGIN);
++	}
+ 
+ 	return cmd;
+ }
