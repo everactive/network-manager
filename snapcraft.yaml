@@ -264,9 +264,9 @@ parts:
     plugin: x-custom
     after:
       - networkmanager
-    source: git+ssh://git.launchpad.net/~phablet-team/plano/+git/modemmanager-snappy-vivid
+    source: https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/modem-manager
     source-type: git
-    source-branch: plano
+    source-branch: modem-manager/vivid/1.4.0
     custom-cmds:
       - debian/rules -j4 build
       - make DESTDIR=$SNAPCRAFT_PART_INSTALL_DIR install
