@@ -18,5 +18,5 @@ $SNAP/usr/sbin/NetworkManager \
     --config=$SNAP/etc/NetworkManager/NetworkManager.conf \
     --intern-config=$SNAP/var/lib/NetworkManager/NetworkManager-intern.conf \
     --system-config-dir=$SNAP/usr/lib/NetworkManager/conf.d \
-    --log-level=DEBUG \
+    --log-level=INFO \
     --no-daemon
