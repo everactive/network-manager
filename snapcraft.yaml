@@ -115,6 +115,8 @@ parts:
       - --with-dhclient=no
       - --with-dnsmasq=no
       - --with-systemd-journal=no
+      # Removes dependency on libicudata which weights 25M
+      - --with-libsoup=no
       # We want to support ModemManager
       - --with-modem-manager-1=yes
 
