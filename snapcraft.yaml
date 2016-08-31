@@ -149,7 +149,7 @@ parts:
       rdepends:
         - lib64/*
         - lib/*/
-        - usr/lib/*/
+        - usr/lib/*
       unwanted:
         - -etc/dbus-1/*
         - -lib*/ld-linux-*.so.*
