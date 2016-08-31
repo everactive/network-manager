@@ -15,8 +15,6 @@ slots:
 
 plugs:
   nmcli: network-manager
-  modem-manager: modem-manager
-  ppp: ppp
 
 apps:
   nmcli:
