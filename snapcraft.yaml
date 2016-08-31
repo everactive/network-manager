@@ -190,8 +190,6 @@ parts:
         - -usr/lib/*/NetworkManager/*.la
         - -usr/lib/pppd/*/nm-pppd-plugin.la
         - -usr/lib/systemd/*
-        # Takes more than 25M
-        - -usr/lib/*/libicudata.so.*
         # We don't use dhclient so we don't need this helper
         - -usr/lib/NetworkManager/nm-dhcp-helper
         # Things we don't support yet and don't have to ship
