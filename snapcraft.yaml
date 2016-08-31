@@ -112,12 +112,97 @@ parts:
       - --disable-teamdctl
       - --disable-polkit
       - --disable-vala
+      - --disable-config-plugin-ibft
       - --with-dhcpcd=no
       - --with-dhclient=no
       - --with-dnsmasq=no
-      - --with-modem-manager-1=yes
       - --with-systemd-journal=no
+      # We want to support ModemManager
+      - --with-modem-manager-1=yes
 
+    # snap:
+    #   - -usr/lib/systemd
+    #   - -lib/systemd
+
+    # We don't want that anything from our staged packages ends
+    # up in the resulting snap. We only need them to build
+    # NetworkManager. All runtime dependencies are pulled in with
+    # the rdepends part below. The only left items specified
+    # here are the results of the network manager build.
+    filesets:
+      binaries:
+        - usr/bin/nm-online
+        - usr/bin/nmcli
+        - usr/bin/nmtui
+        - usr/bin/nmtui-connect
+        - usr/bin/nmtui-hostname
+        - usr/bin/nmtui-edit
+        - usr/lib/*/NetworkManager
+        - usr/lib/pppd/2.4.5/nm-pppd-plugin.so
+        - usr/lib/NetworkManager
+        - usr/sbin/NetworkManager
+        - usr/lib/*/libnm-*
+      configs:
+        - etc/NetworkManager/*
+        - etc/dbus-1/system.d/*
+      rdepends:
+        - lib64/*
+        - lib/*/
+        - usr/lib/*/
+      unwanted:
+        - -etc/dbus-1/*
+        - -lib*/ld-linux-*.so.*
+        - -lib/udev/*
+        - -usr/bin/mmcli
+        - -usr/include/libmm-glib/
+        - -usr/lib/dconf/*
+        - -usr/lib/dbus-1.0/*
+        - -usr/lib/tmpfiles.d/*
+        - -usr/lib/*/libmm-glib.so*
+        - -usr/lib/*/ModemManager/
+        - -usr/sbin/ModemManager
+        - -usr/share/icons/hicolor/22x22/apps/ModemManager.png
+        - -usr/lib/*/gobject-introspection
+        - -usr/lib/*/pkgconfig
+        - -usr/lib/pkgconfig
+        - -usr/lib/*/perl/
+        - -usr/lib/*/perl5/
+        - -usr/lib/python2.7/
+        - -usr/lib/python3.4/
+        - -usr/lib/python3/
+        - -usr/lib/gcc/
+        - -usr/lib/ldscripts/
+        - -usr/lib/policykit-1
+        - -usr/lib/valgrind/
+        - -usr/lib/*/dbus-1.0/
+        - -usr/lib/*/girepository-1.0/
+        - -usr/lib/*/gconv/
+        - -usr/lib/girepository-1.0/
+        - -usr/lib/compat-ld/
+        - -usr/lib/dbus-1.0/dbus-daemon-launch-helper
+        - -usr/lib/dpkg/
+        - -lib/udev
+        - -lib/systemd
+        - -lib/ifupdown
+        - -lib/lsb
+        - -usr/lib/*.a
+        - -usr/lib/*/*.a
+        - -usr/lib/*.la
+        - -usr/lib/*/*.la
+        - -usr/lib/*/NetworkManager/*.la
+        - -usr/lib/pppd/*/nm-pppd-plugin.la
+        - -usr/lib/systemd/*
+        # Takes more than 25M
+        - -usr/lib/*/libicudata.so.*
+        # We don't use dhclient so we don't need this helper
+        - -usr/lib/NetworkManager/nm-dhcp-helper
+        # Things we don't support yet and don't have to ship
+        - -usr/lib/NetworkManager/libnm-device-plugin-adsl.so
+        - -usr/lib/NetworkManager/libnm-device-plugin-bluetooth.so
+        - -usr/lib/NetworkManager/libnm-settings-plugin-ibft.so
     snap:
-      - -usr/lib/systemd
-      - -lib/systemd
+      - $binaries
+      - $configs
+      - $rdepends
+      - $unwanted
+
