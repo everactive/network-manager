@@ -115,7 +115,10 @@ parts:
       - --with-dhclient=no
       - --with-dnsmasq=no
       - --with-systemd-journal=no
-      # Removes dependency on libicudata which weights 25M
+      # Removes dependency on libicudata which weights 25M. Also libsoup
+      # is only used to verify a domain in the DNS resolve process has a
+      # valid format. A pretty heavy requirement to depend here on libsoup
+      # for such a small task.
       - --with-libsoup=no
       # We want to support ModemManager
       - --with-modem-manager-1=yes
