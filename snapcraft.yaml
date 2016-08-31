@@ -61,7 +61,6 @@ parts:
       - libgudev-1.0-dev
       - libgirepository1.0-dev
       - gobject-introspection
-      - libsoup2.4-dev
       - libglib2.0-doc
       - libmm-glib-dev
       - libndp-dev
@@ -93,7 +92,6 @@ parts:
       - libnl-route-3-200
       - libpam-systemd
       - libreadline6
-      - libsoup2.4-1
       - libsystemd0
       - libuuid1
       - lsb-base
