@@ -188,7 +188,7 @@ parts:
         - -usr/lib/*/*.la
         - -usr/lib/*/*.o
         - -usr/lib/*/systemd-shim
-        - -usr/lib/*/systemd-shim-cgroup-release-agent#
+        - -usr/lib/*/systemd-shim-cgroup-release-agent
     snap:
       - $binaries
       - $configs
