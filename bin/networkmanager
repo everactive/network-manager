@@ -6,17 +6,24 @@ set -x
 mkdir -p $SNAP_DATA/conf/system-connections
 mkdir -p $SNAP_DATA/run
 
+# Copy config into place
+#
+# TODO: if/when snappy grows support for provisioning
+# files into $SNAP_DATA, this code should be removed
+# in favor of the new mechanism.
+if [ ! -e $SNAP_DATA/NetworkManager.conf ]; then
+    cp $SNAP/etc/NetworkManager/NetworkManager.conf $SNAP_DATA
+fi
+
 # A directory where users can place any additional configuration
 # files for NetworkManager
-mkdir -p $SNAP_USER_DATA/conf.d
+mkdir -p $SNAP_DATA/conf.d
 
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 
 # TODO drop DEBUG
 $SNAP/usr/sbin/NetworkManager \
-    --config-dir=$SNAP_USER/conf.d/ \
-    --config=$SNAP/etc/NetworkManager/NetworkManager.conf \
-    --intern-config=$SNAP/var/lib/NetworkManager/NetworkManager-intern.conf \
-    --system-config-dir=$SNAP/usr/lib/NetworkManager/conf.d \
-    --log-level=DEBUG \
+    --config-dir=$SNAP_DATA/conf.d/ \
+    --config=$SNAP_DATA/NetworkManager.conf \
+    --log-level=INFO \
     --no-daemon
