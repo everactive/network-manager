@@ -15,8 +15,6 @@ slots:
 
 plugs:
   nmcli: network-manager
-  modem-manager: modem-manager
-  ppp: ppp
 
 apps:
   nmcli:
@@ -63,7 +61,6 @@ parts:
       - libgudev-1.0-dev
       - libgirepository1.0-dev
       - gobject-introspection
-      - libsoup2.4-dev
       - libglib2.0-doc
       - libmm-glib-dev
       - libndp-dev
@@ -95,7 +92,6 @@ parts:
       - libnl-route-3-200
       - libpam-systemd
       - libreadline6
-      - libsoup2.4-1
       - libsystemd0
       - libuuid1
       - lsb-base
@@ -112,12 +108,91 @@ parts:
       - --disable-teamdctl
       - --disable-polkit
       - --disable-vala
+      - --disable-config-plugin-ibft
       - --with-dhcpcd=no
       - --with-dhclient=no
       - --with-dnsmasq=no
-      - --with-modem-manager-1=yes
       - --with-systemd-journal=no
+      # Removes dependency on libicudata which weights 25M. Also libsoup
+      # is only used to verify a domain in the DNS resolve process has a
+      # valid format and to check if a valid internet connection is available.
+      - --with-libsoup=no
+      # We want to support ModemManager
+      - --with-modem-manager-1=yes
 
+    # Filter files pulled in by stage-packages so they aren't
+    # included in the final snap. We only need them to build
+    # NetworkManager. All runtime dependencies are pulled in with
+    # the rdepends part below. The only left items specified
+    # here are the results of the network manager build.
+    filesets:
+      binaries:
+        - usr/bin/nmcli
+        - usr/lib/*/NetworkManager
+        - usr/lib/pppd/2.4.5/nm-pppd-plugin.so
+        - usr/lib/NetworkManager
+        - usr/sbin/NetworkManager
+        - usr/lib/*/libnm-*
+      configs:
+        - etc/NetworkManager/*
+      docs:
+        - usr/share/doc
+      rdepends:
+        - lib64/*
+        - lib/*/
+        - usr/lib/*
+      unwanted:
+        # We don't want anything in usr/share but the doc folder
+        # to carry all copyright information
+        - -usr/share/bash-completion
+        - -usr/share/bug
+        - -usr/share/dbus-1
+        - -usr/share/gir-1.0
+        - -usr/share/glib-2.0
+        - -usr/share/gtk-doc
+        - -usr/share/lintian
+        - -usr/share/locale
+        - -usr/share/man
+        - -usr/share/pam-configs
+        - -usr/share/polkit-1
+        - -usr/share/upstart
+
+        # We don't use dhclient so we don't need this helper
+        - -usr/lib/NetworkManager/nm-dhcp-helper
+        # Things we don't support yet and don't have to ship
+        - -usr/lib/NetworkManager/libnm-device-plugin-adsl.so
+        - -usr/lib/NetworkManager/libnm-device-plugin-bluetooth.so
+        - -usr/lib/NetworkManager/libnm-settings-plugin-ibft.so
+
+        # Unwanted content coming from the stage debian packages
+        - -etc/
+        # Contains many libraries which are already present in usr/lib/
+        - -lib/
+        - -usr/include/
+        - -usr/etc
+        - -usr/sbin/invoke-rc.d
+        - -usr/sbin/service
+        - -usr/sbin/update-rc.d
+        - -usr/lib/dbus-1.0/
+        - -usr/lib/tmpfiles.d/
+        - -usr/lib/*/pkgconfig
+        - -usr/lib/pkgconfig
+        - -usr/lib/gcc/
+        - -usr/lib/*/gconv/
+        - -usr/lib/girepository-1.0/
+        - -usr/lib/systemd/
+        - -usr/lib/udev/
+        - -usr/lib/*.a
+        - -usr/lib/*/*.a
+        - -usr/lib/*.la
+        - -usr/lib/*/*.la
+        - -usr/lib/*/*.o
+        - -usr/lib/*/systemd-shim
+        - -usr/lib/*/systemd-shim-cgroup-release-agent
     snap:
-      - -usr/lib/systemd
-      - -lib/systemd
+      - $binaries
+      - $configs
+      - $docs
+      - $rdepends
+      - $unwanted
+
