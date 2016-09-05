@@ -7,10 +7,8 @@ set -x
 cp $SNAP_APP_PATH/etc/dbus-1/system.d/org.freedesktop.ModemManager1.conf \
     /etc/dbus-1/system.d/$SNAP_APP.conf
 
-# We need a specific udev rule in place in order to tag all
-# devices we might be interested in with a property so we
-# can iterate them on startup.
-cp $SNAP_APP_PATH/conf/80-mm-candidate.rules /etc/udev/rules.d/
+# Copy around mm udev rules
+cp $SNAP_APP_PATH/conf/*.rules /etc/udev/rules.d/
 # Reload all device information so that our new rule gets applied
 udevadm trigger
 
@@ -33,6 +31,5 @@ $SNAP_APP_PATH/usr/sbin/ModemManager \
     "$@"
 
 # Cleanup everything we copied into the system
-rm /etc/udev/rules.d/80-mm-candidate.rules \
-    /etc/udev/rules.d/77-mm-telit.rules
+rm /etc/udev/rules.d/*-mm-*rules
 udevadm trigger
