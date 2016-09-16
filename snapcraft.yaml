@@ -73,7 +73,7 @@ parts:
       bin/dnsmasq: bin/dnsmasq
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
       conf/dnsmasq-dbus.conf: conf/dnsmasq-dbus.conf
-      conf/80-mm-candidate.rules: conf/80-mm-candidate.rules
+      conf/*.rules: conf/
 
   networkmanager:
     plugin: x-custom
