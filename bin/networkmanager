@@ -18,6 +18,17 @@ if [ -e $SNAP_DATA/NetworkManager.conf ]; then
     NM_CONF="$SNAP_DATA/NetworkManager.conf"
 fi
 
+# If netplan is not configured to render by default to NetworkManager
+# configuration files we disable management of any ethernet device
+# as this will clash with any configuration netplan puts in place
+# for networkd.
+if [ ! -e "/etc/netplan/00-default-nm-renderer.conf" ] ; then
+    if [ ! -e "$SNAP_DATA/conf.d/disable-ethernet.conf" ] ; then
+        echo "[keyfile]" > $SNAP_DATA/conf.d/disable-ethernet.conf
+        echo "unmanaged-devices+=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/disable-ethernet.conf
+    fi
+fi
+
 # A directory where users can place any additional configuration
 # files for NetworkManager
 mkdir -p $SNAP_DATA/conf.d
