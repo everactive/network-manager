@@ -9,13 +9,13 @@ mkdir -p $SNAP_DATA/run
 # Create DHCP lease directory
 mkdir -p /run/NetworkManager/dhcp
 
-# Copy config into place
-#
-# TODO: if/when snappy grows support for provisioning
-# files into $SNAP_DATA, this code should be removed
-# in favor of the new mechanism.
-if [ ! -e $SNAP_DATA/NetworkManager.conf ]; then
-    cp $SNAP/etc/NetworkManager/NetworkManager.conf $SNAP_DATA
+# Select which config we're going to use. We offer our users
+# to provide their own configuration file in $SNAP_DATA but
+# will fallback if no one exists to the default one we ship
+# in $SNAP
+NM_CONF="$SNAP/etc/NetworkManager/NetworkManager.conf"
+if [ -e $SNAP_DATA/NetworkManager.conf ]; then
+    NM_CONF="$SNAP_DATA/NetworkManager.conf"
 fi
 
 # A directory where users can place any additional configuration
@@ -26,7 +26,6 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 
 $SNAP/usr/sbin/NetworkManager \
     --config-dir=$SNAP_DATA/conf.d/ \
-    --system-config-dir=/run/NetworkManager/system-connections \
-    --config=$SNAP_DATA/NetworkManager.conf \
+    --config=$NM_CONF \
     --log-level=INFO \
     --no-daemon
