@@ -24,9 +24,9 @@ mkdir -p $SNAP_DATA/conf.d
 
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 
-# TODO drop DEBUG
 $SNAP/usr/sbin/NetworkManager \
     --config-dir=$SNAP_DATA/conf.d/ \
+    --system-config-dir=/run/NetworkManager/system-connections \
     --config=$SNAP_DATA/NetworkManager.conf \
     --log-level=INFO \
     --no-daemon
