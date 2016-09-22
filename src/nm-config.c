@@ -38,6 +38,7 @@
 #define DEFAULT_SYSTEM_CONFIG_DIR       NMLIBDIR  "/conf.d"
 #define DEFAULT_NO_AUTO_DEFAULT_FILE    NMSTATEDIR "/no-auto-default.state"
 #define DEFAULT_INTERN_CONFIG_FILE      NMSTATEDIR "/NetworkManager-intern.conf"
+#define RUN_CONFIG_DIR                NMRUNDIR "/conf.d"
 
 static const char *get_no_auto_default_file_path()
 {
@@ -907,6 +908,7 @@ read_entire_config (const NMConfigCmdLineOptions *cli,
 	GKeyFile *keyfile;
 	gs_unref_ptrarray GPtrArray *system_confs = NULL;
 	gs_unref_ptrarray GPtrArray *confs = NULL;
+	gs_unref_ptrarray GPtrArray *run_confs = NULL;
 	guint i;
 	gs_free char *o_config_main_file = NULL;
 	GString *str;
@@ -928,6 +930,7 @@ read_entire_config (const NMConfigCmdLineOptions *cli,
 
 	system_confs = _get_config_dir_files (system_config_dir);
 	confs = _get_config_dir_files (config_dir);
+	run_confs = _get_config_dir_files (RUN_CONFIG_DIR);
 
 	for (i = 0; i < system_confs->len; ) {
 		const char *filename = system_confs->pdata[i];
@@ -939,6 +942,22 @@ read_entire_config (const NMConfigCmdLineOptions *cli,
 		}
 
 		if (!read_config (keyfile, FALSE, system_config_dir, filename, error)) {
+			g_key_file_free (keyfile);
+			return NULL;
+		}
+		i++;
+	}
+
+	for (i = 0; i < run_confs->len; ) {
+		const char *filename = run_confs->pdata[i];
+
+		/* if a same named file exists in config_dir, skip it. */
+		if (_nm_utils_strv_find_first ((char **) confs->pdata, confs->len, filename) >= 0) {
+			g_ptr_array_remove_index (run_confs, i);
+			continue;
+		}
+
+		if (!read_config (keyfile, FALSE, RUN_CONFIG_DIR, filename, error)) {
 			g_key_file_free (keyfile);
 			return NULL;
 		}
