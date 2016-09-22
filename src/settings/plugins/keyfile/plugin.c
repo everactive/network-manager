@@ -386,6 +386,8 @@ _sort_paths (const char **f1, const char **f2, GHashTable *paths)
 	return strcmp (*f1, *f2);
 }
 
+#define NM_CONFIG_KEYFILE_PATH_RUNTIME "/run/NetworkManager/system-connections"
+
 static void
 read_connections (NMSettingsPlugin *config)
 {
@@ -420,6 +422,22 @@ read_connections (NMSettingsPlugin *config)
 		g_ptr_array_add (filenames, g_build_filename (nm_keyfile_plugin_get_path (), item, NULL));
 	}
 	g_dir_close (dir);
+
+	/* Now add files from /run too, unless they have a file in /etc */
+	dir = g_dir_open (NM_CONFIG_KEYFILE_PATH_RUNTIME, 0, &error);
+	if (dir) {
+		while ((item = g_dir_read_name (dir))) {
+			g_autofree char *etc_file = g_build_filename (nm_keyfile_plugin_get_path (), item, NULL);
+			if (nm_keyfile_plugin_utils_should_ignore_file (item) || g_access (etc_file, F_OK) == 0)
+				continue;
+			g_ptr_array_add (filenames, g_build_filename (NM_CONFIG_KEYFILE_PATH_RUNTIME, item, NULL));
+		}
+		g_dir_close (dir);
+	} else {
+		nm_log_dbg (LOGD_SETTINGS, "keyfile: cannot read directory " NM_CONFIG_KEYFILE_PATH_RUNTIME ": %s",
+		            error->message);
+		g_clear_error (&error);
+	}
 
 	/* While reloading, we don't replace connections that we already loaded while
 	 * iterating over the files.
