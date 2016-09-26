@@ -24,7 +24,7 @@ apps:
     command: bin/networkmanager
     daemon: simple
     slots: [service]
-    plugs: [modem-manager, ppp]
+    plugs: [modem-manager, ppp, network-setup-observe]
 
 parts:
   networkmanager-common:
