@@ -31,6 +31,17 @@ if [ ! -e "/etc/netplan/00-default-nm-renderer.yaml" ] ; then
         echo "[keyfile]" > $SNAP_DATA/conf.d/disable-ethernet.conf
         echo "unmanaged-devices+=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/disable-ethernet.conf
     fi
+else
+    if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
+        # If we're running as the only network management service
+        # and are configured via netplan on first boot then we should
+        # not try to auto configure ethernet ports as this will lead
+        # to a mismatch between the console-conf UI and the actual
+        # configuration (e.g. the console-conf UI will show a manual
+        # IP confiugartion where network-manager actually used DHCP).
+        echo "[main]" > $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+        echo "no-auto-default=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+    fi
 fi
 
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
