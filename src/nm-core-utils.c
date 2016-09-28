@@ -2629,7 +2629,7 @@ nm_utils_secret_key_read (gsize *out_key_len, GError **error)
 	 * access the returned memory. */
 	*out_key_len = 0;
 
-	secret_key_path = g_strdup_printf("%s/sceret_key", nm_utils_get_state_dir());
+	secret_key_path = g_strdup_printf("%s/secret_key", nm_utils_get_state_dir());
 
 	/* Let's try to load a saved secret key first. */
 	if (g_file_get_contents (secret_key_path, (char **) &secret_key, &key_len, NULL)) {
