@@ -398,8 +398,7 @@ lease_to_ip4_config (const char *iface,
 static char *
 get_leasefile_path (const char *iface, const char *uuid, gboolean ipv6)
 {
-	return g_strdup_printf ("%s/internal%s-%s-%s.lease",
-							nm_utils_get_state_dir(),
+	return g_strdup_printf ("/run/NetworkManager/dhcp/internal%s-%s-%s.lease",
 	                        ipv6 ? "6" : "",
 	                        uuid,
 	                        iface);
