@@ -6,6 +6,9 @@ set -x
 mkdir -p $SNAP_DATA/conf/system-connections
 mkdir -p $SNAP_DATA/run
 
+# Create DHCP lease directory
+mkdir -p /run/NetworkManager/dhcp
+
 # Copy config into place
 #
 # TODO: if/when snappy grows support for provisioning
