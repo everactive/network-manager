@@ -9,24 +9,43 @@ mkdir -p $SNAP_DATA/run
 # Create DHCP lease directory
 mkdir -p /run/NetworkManager/dhcp
 
-# Copy config into place
-#
-# TODO: if/when snappy grows support for provisioning
-# files into $SNAP_DATA, this code should be removed
-# in favor of the new mechanism.
-if [ ! -e $SNAP_DATA/NetworkManager.conf ]; then
-    cp $SNAP/etc/NetworkManager/NetworkManager.conf $SNAP_DATA
+# Select which config we're going to use. We offer our users
+# to provide their own configuration file in $SNAP_DATA but
+# will fallback if no one exists to the default one we ship
+# in $SNAP
+NM_CONF="$SNAP/etc/NetworkManager/NetworkManager.conf"
+if [ -e $SNAP_DATA/NetworkManager.conf ]; then
+    NM_CONF="$SNAP_DATA/NetworkManager.conf"
 fi
 
 # A directory where users can place any additional configuration
 # files for NetworkManager
 mkdir -p $SNAP_DATA/conf.d
 
+# If netplan is not configured to render by default to NetworkManager
+# configuration files we disable management of any ethernet device
+# as this will clash with any configuration netplan puts in place
+# for networkd.
+if [ ! -e "/etc/netplan/00-default-nm-renderer.yaml" ] ; then
+    if [ ! -e "$SNAP_DATA/conf.d/disable-ethernet.conf" ] ; then
+        echo "[keyfile]" > $SNAP_DATA/conf.d/disable-ethernet.conf
+        echo "unmanaged-devices+=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/disable-ethernet.conf
+    fi
+else
+    if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
+        # If we're running as the only network management service
+        # and are configured via netplan on first boot then we should
+        # not try to auto configure ethernet ports as this is up to
+        # netplan and will be the same for networkd.
+        echo "[main]" > $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+        echo "no-auto-default=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+    fi
+fi
+
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 
-# TODO drop DEBUG
 $SNAP/usr/sbin/NetworkManager \
     --config-dir=$SNAP_DATA/conf.d/ \
-    --config=$SNAP_DATA/NetworkManager.conf \
+    --config=$NM_CONF \
     --log-level=INFO \
     --no-daemon
