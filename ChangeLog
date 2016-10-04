@@ -1,0 +1,26 @@
+2016-10-04 Simon Fels <simon.fels@canonical.com>
+
+ * Refine comment about not auto configuring ethernet ports
+ * Set grade property to stable
+ * Prevent ethernet ports from being auto configured when netplan is used
+ * Use new network-setup-observe interface
+ * Fix netplan nm renderer detection
+ * Ignore ethernet devices conditionally
+ * Do not copy default configuration in place but use one conditionally
+ * Don't ignore ethernet devices
+ * Look into directory netplan puts configuration files in too
+ * bin/networkmanager: create DHCP lease directory at startup
+ * Strip MAINTAINERS .snap suffix
+ * Add MAINTAINERS.snap
+ * Drop superflous character
+ * Cleanup after review comments
+ * conf: add rc-manager=resolvconf
+ * Add libnm* back
+ * Also drop libsoup from stage/build packages
+ * Explain why we don't want libsoup included
+ * Drop support for libsoupd which brings in libicudata
+ * We can't strip libicudata out
+ * Drop unneeded alias for modem-manager/ppp plugs
+ * Disable certain features we don't need and remove unwanted things from the snap
+ * Update config parameters
+ * Change --log-level to INFO (LP: #1602439)
