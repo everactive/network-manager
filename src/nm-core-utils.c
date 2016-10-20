@@ -2657,7 +2657,7 @@ nm_utils_secret_key_read (gsize *out_key_len, GError **error)
 		key_mask = umask (0077);
 		if (read (urandom, secret_key, key_len) == key_len) {
 			if (!g_file_set_contents (secret_key_path, (char *) secret_key, key_len, error)) {
-				g_prefix_error (error, "Can't write " NMSTATEDIR "/secret_key: ");
+				g_prefix_error (error, "Can't write %s/secret_key: ", secret_key_path);
 				key_len = 0;
 			}
 		} else {
