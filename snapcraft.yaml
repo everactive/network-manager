@@ -40,7 +40,11 @@ parts:
 
     source: https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
     source-type: git
-    source-branch: network-manager/xenial/1.2.2
+    # For development you can directly build from the xenial branch if
+    # needed. Otherwise use the tag to the latest version which will be
+    # used by the published snap.
+    # source-branch: network-manager/xenial/1.2.2
+    source-tag: network-manager-xenial-1.2.2-1
 
     build-packages:
       - intltool
