@@ -22,6 +22,10 @@ fi
 # files for NetworkManager
 mkdir -p $SNAP_DATA/conf.d
 
+# State dir where network-manager stores several things like the
+# secret key used for IPv6
+mkdir -p $SNAP_DATA/state
+
 # If netplan is not configured to render by default to NetworkManager
 # configuration files we disable management of any ethernet device
 # as this will clash with any configuration netplan puts in place
