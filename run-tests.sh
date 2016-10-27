@@ -63,7 +63,7 @@ fi
 
 
 # Make sure we have a base image we use for testing
-if [ ! -e $HOME/.spread/qemu/$image_name ] || [ $force_new_image -eq 1 ] ; then
+if [ ! -e $SPREAD_QEMU_PATH/$image_name ] || [ $force_new_image -eq 1 ] ; then
 	echo "INFO: Creating new qemu test image ..."
 	(cd tests/image ; sudo ./create-image.sh $channel)
 	mkdir -p $SPREAD_QEMU_PATH
