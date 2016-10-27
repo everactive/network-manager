@@ -27,6 +27,7 @@ execute: |
             while ! systemctl status snap.network-manager.networkmanager ; do
                 sleep 1
             done
+            sleep 1
             # But network-manager should not use eth0 anymore
             network-manager.nmcli d | grep 'eth0.*unmanaged'
 
