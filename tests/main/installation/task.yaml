@@ -1,8 +1,5 @@
 summary: Test network-manager snap installation was successful
 
-environment:
-    SNAP_NAME: network-manager
-
 execute: |
     # Service should be up an running
     systemctl status snap.network-manager.networkmanager

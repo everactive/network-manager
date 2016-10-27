@@ -46,7 +46,7 @@ fi
 
 # If we don't install network-manager here we get up with
 # a system without any network connectivity after reboot.
-snap install $SNAP_INSTALL_OPTS network-manager
+snap install $SNAP_INSTALL_OPTS $SNAP_NAME
 
 # Snapshot of the current snapd state for a later restore
 if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then

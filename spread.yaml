@@ -19,6 +19,7 @@ project: network-manager
 environment:
     PROJECT_PATH: /home/network-manager
     TESTSLIB: $PROJECT_PATH/tests/lib
+    SNAP_NAME: network-manager
     # Allow the host to pass the channel to use for the test rim
     SNAP_CHANNEL: $(HOST:echo $SNAP_CHANNEL)
 
