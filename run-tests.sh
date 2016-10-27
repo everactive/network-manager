@@ -30,14 +30,14 @@ channel=candidate
 spread_opts=
 force_new_image=0
 
-while [ "$1" != '' ]; do
+while [ -n "$1" ]; do
 	case "$1" in
 		--help)
 			show_help
 			exit
 			;;
 		--channel=*)
-			channel=$(echo "$1" | cut -d= -f 2)
+			channel="${arg#*=}"
 			shift
 			;;
 		--debug)

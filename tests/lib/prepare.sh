@@ -12,7 +12,7 @@ if [ $SPREAD_REBOOT -ge 1 ] ; then
 fi
 
 echo "Wait for firstboot change to be ready"
-while ! snap changes | grep "Done"; do
+while ! snap changes | grep -q "Done"; do
 	snap changes || true
 	snap change 1 || true
 	sleep 1
@@ -21,7 +21,7 @@ done
 echo "Ensure fundamental snaps are still present"
 . $TESTSLIB/snap-names.sh
 for name in $gadget_name $kernel_name $core_name; do
-	if ! snap list | grep $name ; then
+	if ! snap list | grep -q $name ; then
 		echo "Not all fundamental snaps are available, all-snap image not valid"
 		echo "Currently installed snaps:"
 		snap list
@@ -40,7 +40,7 @@ network:
 EOF
 
 SNAP_INSTALL_OPTS=
-if [ ! -z "$SNAP_CHANNEL" ] ; then
+if [ -n "$SNAP_CHANNEL" ] ; then
 	SNAP_INSTALL_OPTS="--$SNAP_CHANNEL"
 fi
 

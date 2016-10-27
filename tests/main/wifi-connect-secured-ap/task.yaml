@@ -28,4 +28,4 @@ execute: |
 
     # Connect to the AP and ensure the connection was established
     network-manager.nmcli d wifi connect $WIFI_SSID password $WIFI_PASSPHRASE
-    network-manager.nmcli d | grep wlan1 | grep connected
+    network-manager.nmcli d | grep 'wlan1.*connected'
