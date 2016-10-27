@@ -1,3 +1,7 @@
+2016-10-27 Simon Fels <simon.fels@canonical.com>
+
+ * Allow people to get ethernet managed back by NetworkManager
+
 2016-10-20 Simon Fels <simon.fels@canonical.com>
 
  * Create state directory on startup if not present
