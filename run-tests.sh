@@ -55,12 +55,19 @@ while [ -n "$1" ]; do
 	esac
 done
 
+SPREAD_QEMU_PATH="$HOME/.spread/qemu"
+if [ `which spread` = /snap/bin/spread ] ; then
+	current_version=`readlink /snap/spread/current`
+	SPREAD_QEMU_PATH="$HOME/snap/spread/$current_version/.spread/qemu/"
+fi
+
+
 # Make sure we have a base image we use for testing
 if [ ! -e $HOME/.spread/qemu/$image_name ] || [ $force_new_image -eq 1 ] ; then
 	echo "INFO: Creating new qemu test image ..."
 	(cd tests/image ; sudo ./create-image.sh $channel)
-	mkdir -p $HOME/.spread/qemu
-	mv tests/image/ubuntu-core-16.img $HOME/.spread/qemu/$image_name
+	mkdir -p $SPREAD_QEMU_PATH
+	mv tests/image/ubuntu-core-16.img $SPREAD_QEMU_PATH/$image_name
 fi
 
 # We currently only run spread tests but we could do other things

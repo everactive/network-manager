@@ -36,7 +36,9 @@ Now you have everything to run the test suite.
   $ ./run-tests
 
 The script will create an image via ubuntu-image and make it available
-to spread by copying it to ~/.spread/qemu
+to spread by copying it to ~/.spread/qemu or ~/snap/spread/<version>/.spread/qemu
+depending on if you're using a local spread version or the one from the
+snap.
 
 If you want to see more verbose debugging output of spread run
 
