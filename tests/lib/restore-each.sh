@@ -2,11 +2,11 @@
 
 . $TESTSLIB/snap-names.sh
 
-# Remove all snaps not being the core, gadget or kernel snap
+# Remove all snaps not being the core, gadget, kernel or network-manager snap
 for snap in /snap/*; do
 	snap="${snap:6}"
 	case "$snap" in
-		"bin" | "$gadget_name" | "$kernel_name" | "$core_name" )
+		"bin" | "$gadget_name" | "$kernel_name" | "$core_name" | "network-manager" )
 			;;
 		*)
 			snap remove "$snap"

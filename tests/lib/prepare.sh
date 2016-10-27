@@ -32,13 +32,6 @@ done
 echo "Kernel has a store revision"
 snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
 
-# Snapshot of the current snapd state for a later restore
-if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then
-	systemctl stop snapd.service snapd.socket
-	tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd
-	systemctl start snapd.socket
-fi
-
 # Configure netplan to use NetworkManager from now on
 mkdir -p /etc/netplan
 cat << EOF > /etc/netplan/00-default-nm-renderer.yaml
@@ -54,6 +47,13 @@ fi
 # If we don't install network-manager here we get up with
 # a system without any network connectivity after reboot.
 snap install $SNAP_INSTALL_OPTS network-manager
+
+# Snapshot of the current snapd state for a later restore
+if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then
+	systemctl stop snapd.service snapd.socket
+	tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd
+	systemctl start snapd.socket
+fi
 
 # We need to reboot the system in order to get NetworkManager
 # configured as the main network management service.
