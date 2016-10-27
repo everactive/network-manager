@@ -51,7 +51,7 @@ snap install $SNAP_INSTALL_OPTS network-manager
 # Snapshot of the current snapd state for a later restore
 if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then
 	systemctl stop snapd.service snapd.socket
-	tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd
+	tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd /etc/netplan
 	systemctl start snapd.socket
 fi
 
