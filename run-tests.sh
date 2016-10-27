@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -ex
+set -e
 
 show_help() {
     echo "Usage: run-tests.sh [OPTIONS]"
@@ -55,7 +55,7 @@ while [ -n "$1" ]; do
 	esac
 done
 
-# Make sure we have an base image we use for testing
+# Make sure we have a base image we use for testing
 if [ ! -e $HOME/.spread/qemu/$image_name ] || [ $force_new_image -eq 1 ] ; then
 	echo "INFO: Creating new qemu test image ..."
 	(cd tests/image ; sudo ./create-image.sh $channel)

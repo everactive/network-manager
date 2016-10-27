@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -ex
+set -e
 
 if [ $(id -u) -ne 0 ] ; then
 	echo "ERROR: needs to be executed as root"
@@ -89,7 +89,7 @@ mkdir $tmp_mount/system-data/var/lib/devmode-firstboot
 cat << 'EOF' > $tmp_mount/system-data/var/lib/devmode-firstboot/run.sh
 #!/bin/bash
 
-set -ex
+set -e
 
 # Don't start again if we're already done
 if [ -e /writable/system-data/var/lib/devmode-firstboot/complete ] ; then
