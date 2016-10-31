@@ -1,0 +1,30 @@
+summary: Verify ethernet is auto-connected when no default netplan configuration exists
+
+prepare: |
+    cp /etc/netplan/00-snapd-config.yaml /etc/netplan/00-snapd-config.yaml.orig
+
+restore: |
+    cp /etc/netplan/00-snapd-config.yaml.orig /etc/netplan/00-snapd-config.yaml
+
+restore: |
+    case "$SPREAD_REBOOT" in
+        0)
+            rm /etc/netplan/00-snapd-config.yaml
+            rm /var/snap/network-manager/current/conf.d/disable-ethernet.conf
+            REBOOT
+            ;;
+        1)
+            systemctl status snap.network-manager.networkmanager
+            network-manager.nmcli d | grep 'eth0.*connected'
+            networkctl status eth0 | grep 'State: n/a'
+
+            # FIXME try enabling wake-on-lan via
+            # $ nmcli c modify <con-name> 802-3-ethernet.wake-on-lan magic
+            # which should work now.
+            ;;
+        *)
+            ;;
+    esac
+
+execute: |
+    systemctl restart snap.network-manager.networkmanager
