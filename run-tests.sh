@@ -29,6 +29,7 @@ image_name=ubuntu-core-16.img
 channel=candidate
 spread_opts=
 force_new_image=0
+snap=
 
 while [ -n "$1" ]; do
 	case "$1" in
@@ -36,8 +37,12 @@ while [ -n "$1" ]; do
 			show_help
 			exit
 			;;
+		--snap=*)
+			snap="${1#*=}"
+			shift
+			;;
 		--channel=*)
-			channel="${arg#*=}"
+			channel="${1#*=}"
 			shift
 			;;
 		--debug)
@@ -61,7 +66,6 @@ if [ `which spread` = /snap/bin/spread ] ; then
 	SPREAD_QEMU_PATH="$HOME/snap/spread/$current_version/.spread/qemu/"
 fi
 
-
 # Make sure we have a base image we use for testing
 if [ ! -e $SPREAD_QEMU_PATH/$image_name ] || [ $force_new_image -eq 1 ] ; then
 	echo "INFO: Creating new qemu test image ..."
@@ -70,7 +74,19 @@ if [ ! -e $SPREAD_QEMU_PATH/$image_name ] || [ $force_new_image -eq 1 ] ; then
 	mv tests/image/ubuntu-core-16.img $SPREAD_QEMU_PATH/$image_name
 fi
 
+if [ -n "$snap" ] ; then
+	mv $SPREAD_QEMU_PATH/$image_name $SPREAD_QEMU_PATH/$image_name.orig
+	(cd tests/image ; sudo ./create-image.sh $channel $snap)
+	mkdir -p $SPREAD_QEMU_PATH
+	mv tests/image/$image_name $SPREAD_QEMU_PATH/$image_name
+fi
+
 # We currently only run spread tests but we could do other things
 # here as well like running our snap-lintian tool etc.
 export SNAP_CHANNEL=$channel
-exec spread $spread_opts
+spread $spread_opts
+
+if [ -n "$snap" ] ; then
+	rm $SPREAD_QEMU_PATH/$image_name
+	mv $SPREAD_QEMU_PATH/$image_name.orig $SPREAD_QEMU_PATH/$image_name
+fi
