@@ -1,0 +1,52 @@
+summary: Dynamically switch the netplan renderer
+
+execute: |
+    case "$SPREAD_REBOOT" in
+        0)
+            # On first boot we use NetworkManager via netplan and make sure
+            # we have eth0 connected and can access the internet
+            test -e /etc/netplan/00-default-nm-renderer.yaml
+            network-manager.nmcli d | grep 'eth0.*connected'
+            networkctl status eth0 | grep 'State: n/a'
+
+            # Now switch to the default netplan renderer and reboot the
+            # device to check next that we come up with networkd managing
+            # the ethernet port
+            rm -f /etc/netplan/00-default-nm-renderer.yaml
+            REBOOT
+            ;;
+        1)
+            # Now on the second boot we verify that the ethernet port
+            # is managed by networkd and NetworkManager ignores it
+            test ! -e /etc/netplan/00-default-nm-renderer.yaml
+
+            # We're ok with eth0 being marked as routable here
+            networkctl | grep 'eth0.*routable'
+
+            # Give NetworkManager a bit to come up after the reboot
+            while ! systemctl status snap.network-manager.networkmanager ; do
+                sleep 1
+            done
+            sleep 1
+            # But network-manager should not use eth0 anymore
+            network-manager.nmcli d | grep 'eth0.*unmanaged'
+
+            # Now we switch back to the NetworkManager backend for netplan
+            echo "network:" > /etc/netplan/00-default-nm-renderer.yaml
+            echo "  renderer: NetworkManager" >> /etc/netplan/00-default-nm-renderer.yaml
+            REBOOT
+            ;;
+        2)
+            # We should be back to NetworkManager taking control over
+            # eth0 and networkd ignoring it.
+            test -e /etc/netplan/00-default-nm-renderer.yaml
+            # Give NetworkManager a bit to come up after the reboot
+            while ! systemctl status snap.network-manager.networkmanager ; do
+                sleep 1
+            done
+            network-manager.nmcli d | grep 'eth0.*connected'
+            networkctl status eth0 | grep 'State: n/a'
+            ;;
+        *)
+            ;;
+    esac
