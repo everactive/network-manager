@@ -43,6 +43,8 @@ else
     fi
 
     if [ ! -e /etc/netplan/00-snapd-config.yaml ] || [ -n "`cat /etc/netplan/00-snapd-config.yaml`" ] ; then
+        rm -f $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+    else
         if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
             # If we're running as the only network management service
             # and are configured via netplan on first boot then we should
