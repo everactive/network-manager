@@ -44,7 +44,7 @@ If you want to see more verbose debugging output of spread run
 
  $ ./run-tests --debug
 
-If you want to not build the network-manager snap from source but test one
+If you do not want to build the network-manager snap from source but test one
 from a specific channel start testing with
 
  $ ./run-tests --channel=beta --test-from-channel
