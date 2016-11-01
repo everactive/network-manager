@@ -14,6 +14,12 @@ for snap in /snap/*; do
 	esac
 done
 
+# Cleanup all configuration files from NetworkManager so that we have
+# a fresh start for the next test
+rm -rf /var/snap/network-manager/common/*
+rm -rf /var/snap/network-manager/current/*
+systemctl restart snap.network-manager.networkmanager
+
 # Ensure we have the same state for snapd as we had before
 systemctl stop snapd.service snapd.socket
 rm -rf /var/lib/snapd/*

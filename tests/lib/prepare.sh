@@ -32,13 +32,6 @@ done
 echo "Kernel has a store revision"
 snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
 
-# Configure netplan to use NetworkManager from now on
-mkdir -p /etc/netplan
-cat << EOF > /etc/netplan/00-default-nm-renderer.yaml
-network:
-  renderer: NetworkManager
-EOF
-
 SNAP_INSTALL_OPTS=
 if [ -n "$SNAP_CHANNEL" ] ; then
 	SNAP_INSTALL_OPTS="--$SNAP_CHANNEL"
