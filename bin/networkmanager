@@ -42,7 +42,7 @@ else
         rm -f $SNAP_DATA/conf.d/disable-ethernet.conf
     fi
 
-    if [ ! -e /etc/netplan/00-snapd-config.yaml ] || [ -n "`cat /etc/netplan/00-snapd-config.yaml`" ] ; then
+    if [ ! -e /etc/netplan/00-snapd-config.yaml ] || [ -s /etc/netplan/00-snapd-config.yaml ] ; then
         rm -f $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
     else
         if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
