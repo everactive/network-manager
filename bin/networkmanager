@@ -42,7 +42,7 @@ else
         rm -f $SNAP_DATA/conf.d/disable-ethernet.conf
     fi
 
-    # If we the snapd configuration for netplan is not present or empty
+    # If the snapd configuration for netplan is not present or empty
     # we will start managing all ethernet ports automatically. Because
     # of that we need to remove any previously created configuration files
     # which prevented us from doing that.
