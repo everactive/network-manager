@@ -6,6 +6,7 @@ execute: |
         0)
             # On the first boot all ethernet ports are managed by networkd
             networkctl | grep 'eth0.*routable'
+            wait_for_network_manager
             network-manager.nmcli d | grep 'eth0.*unmanaged'
             switch_netplan_to_network_manager
             ;;
@@ -13,6 +14,7 @@ execute: |
             # On second boot we use NetworkManager via netplan and make sure
             # we have eth0 connected and can access the internet
             test -e /etc/netplan/00-default-nm-renderer.yaml
+            wait_for_network_manager
             network-manager.nmcli d | grep 'eth0.*connected'
             networkctl status eth0 | grep 'State: n/a'
 
@@ -31,10 +33,7 @@ execute: |
             networkctl | grep 'eth0.*routable'
 
             # Give NetworkManager a bit to come up after the reboot
-            while ! systemctl status snap.network-manager.networkmanager ; do
-                sleep 1
-            done
-            sleep 1
+            wait_for_network_manager
             # But network-manager should not use eth0 anymore
             network-manager.nmcli d | grep 'eth0.*unmanaged'
 
@@ -48,9 +47,7 @@ execute: |
             # eth0 and networkd ignoring it.
             test -e /etc/netplan/00-default-nm-renderer.yaml
             # Give NetworkManager a bit to come up after the reboot
-            while ! systemctl status snap.network-manager.networkmanager ; do
-                sleep 1
-            done
+            wait_for_network_manager
             network-manager.nmcli d | grep 'eth0.*connected'
             networkctl status eth0 | grep 'State: n/a'
             ;;

@@ -17,3 +17,10 @@ switch_netplan_to_networkd() {
 
 	rm /etc/netplan/00-default-nm-renderer.yaml
 }
+
+wait_for_network_manager() {
+	while ! systemctl status snap.network-manager.networkmanager ; do
+		sleep 1
+	done
+	sleep 1
+}

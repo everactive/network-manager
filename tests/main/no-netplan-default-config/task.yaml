@@ -19,7 +19,7 @@ execute: |
         1)
             # We should be automatically connected now and not via a configuration
             # generated from netplan
-            systemctl status snap.network-manager.networkmanager
+            wait_for_network_manager
             network-manager.nmcli d | grep 'eth0.*connected'
             networkctl status eth0 | grep 'State: n/a'
             network-manager.nmcli c show --active | grep eth0 | grep -v netplan
