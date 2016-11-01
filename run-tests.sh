@@ -29,8 +29,8 @@ show_help() {
     echo "  --help                 Show this help message and exit"
     echo "  --channel              Select another channel to build the base image from (default: $channel)"
     echo "  --debug                Enable verbose debugging output"
-	echo "  --test-from-channel    Pull network-manager snap from the specified channel instead of building it from source"
-	echo "  --force-new-image      Force generating a new image used for testing"
+    echo "  --test-from-channel    Pull network-manager snap from the specified channel instead of building it from source"
+    echo "  --force-new-image      Force generating a new image used for testing"
 }
 
 while [ -n "$1" ]; do
