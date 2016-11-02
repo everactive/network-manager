@@ -12,7 +12,7 @@ execute: |
             switch_netplan_to_network_manager
             REBOOT
             ;;
-        2)
+        1)
             test -e /etc/netplan/00-default-nm-renderer.yaml
 
             # Give NetworkManager a bit to come up after the reboot
@@ -26,10 +26,13 @@ execute: |
             switch_netplan_to_networkd
             REBOOT
             ;;
-        3)
+        2)
+            wait_for_network_manager
+
             # networkd manages eth0 and NetworkManager does not
             networkctl | grep 'eth0.*routable'
             network-manager.nmcli d | grep 'eth0.*unmanaged'
+            ;;
         *)
             ;;
     esac
