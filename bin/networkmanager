@@ -1,6 +1,5 @@
 #!/bin/sh
-set -e
-set -x
+set -ex
 
 # Create all necessary directories we need at runtime
 mkdir -p $SNAP_DATA/conf/system-connections
@@ -25,6 +24,7 @@ mkdir -p $SNAP_DATA/conf.d
 # State dir where network-manager stores several things like the
 # secret key used for IPv6
 mkdir -p $SNAP_DATA/state
+mkdir -p $SNAP_DATA/state/dhcp
 
 # If netplan is not configured to render by default to NetworkManager
 # configuration files we disable management of any ethernet device
@@ -59,6 +59,13 @@ else
         fi
     fi
 fi
+
+# HACK: Until we've fixed probert to look in $SNAP_DATA/state/dhcp or
+# somewhere else for our lease files we use inotifywatch to monitor
+# our lease files and copy all over when something has changed. This
+# background process gets stopped when our systemd service unit gets
+# stopped.
+$SNAP/bin/dhcp-lease-mover &
 
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 

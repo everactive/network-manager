@@ -32,8 +32,24 @@ parts:
     plugin: copy
     files:
       bin/networkmanager: bin/networkmanager
+      bin/dhcp-lease-mover: bin/dhcp-lease-mover
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
       data/copyright: usr/share/doc/network-manager/copyright
+
+  inotify-tools:
+    plugin: nil
+    stage-packages:
+      - libinotifytools0
+      - inotify-tools
+    filesets:
+      wanted:
+        - usr/share/doc/inotify-tools/copyright
+        - usr/bin/inotifywait
+        - usr/share/doc/libinotifytools0/copyright
+        - usr/lib/libinotifytools.so.0.4.1
+        - usr/lib/libinotifytools.so.0
+    snap:
+      - $wanted
 
   networkmanager:
     plugin: autotools
