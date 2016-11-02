@@ -1,0 +1,35 @@
+summary: Dynamically switch the netplan renderer
+
+execute: |
+    . $TESTSLIB/utilities.sh
+    case "$SPREAD_REBOOT" in
+        0)
+            # networkd manages eth0 and NetworkManager does not
+            networkctl | grep 'eth0.*routable'
+            network-manager.nmcli d | grep 'eth0.*unmanaged'
+
+            # Now we switch back to the NetworkManager backend for netplan
+            switch_netplan_to_network_manager
+            REBOOT
+            ;;
+        2)
+            test -e /etc/netplan/00-default-nm-renderer.yaml
+
+            # Give NetworkManager a bit to come up after the reboot
+            wait_for_network_manager
+
+            # NetworkManager now controls eth0 and networkd does not
+            network-manager.nmcli d | grep 'eth0.*connected'
+            networkctl status eth0 | grep 'State: n/a'
+
+            # And switch back to networkd
+            switch_netplan_to_networkd
+            REBOOT
+            ;;
+        3)
+            # networkd manages eth0 and NetworkManager does not
+            networkctl | grep 'eth0.*routable'
+            network-manager.nmcli d | grep 'eth0.*unmanaged'
+        *)
+            ;;
+    esac
