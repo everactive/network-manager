@@ -24,3 +24,9 @@ wait_for_network_manager() {
 	done
 	sleep 1
 }
+
+stop_after_first_reboot() {
+	if [ $SPREAD_REBOOT -eq 1 ] ; then
+		exit 0
+	fi
+}

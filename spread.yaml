@@ -53,13 +53,15 @@ suites:
         systems:
             - ubuntu-core-16
         prepare: |
-            . $TESTSLIB/prepare.sh
             . $TESTSLIB/utilities.sh
+            stop_after_first_reboot
+            . $TESTSLIB/prepare.sh
             switch_netplan_to_network_manager
             REBOOT
         restore-each: |
             . $TESTSLIB/restore-each.sh
         restore: |
             . $TESTSLIB/utilities.sh
+            stop_after_first_reboot
             switch_netplan_to_networkd
             REBOOT
