@@ -36,12 +36,32 @@ path: /home/network-manager
 exclude:
   - .git
 
+prepare: |
+  . $TESTSLIB/prepare-all.sh
+
 suites:
     tests/main/:
-        summary: Full-system tests for NetworkManager being the main network management service
+        summary: Full-system tests for NetworkManager without ethernet support
         systems:
             - ubuntu-core-16
         prepare: |
             . $TESTSLIB/prepare.sh
         restore-each: |
             . $TESTSLIB/restore-each.sh
+    tests/full/:
+        summary: Full-system tests for NetworkManager being the only network management service
+        systems:
+            - ubuntu-core-16
+        prepare: |
+            . $TESTSLIB/prepare.sh
+            # Switch to NetworkManager as netplan renderer
+            . $TESTSLIB/utilities.sh
+            switch_netplan_to_network_manager
+            REBOOT
+        restore-each: |
+            . $TESTSLIB/restore-each.sh
+        restore: |
+            # Switch back to networkd so the system can be reused
+            . $TESTSLIB/utilities.sh
+            switch_netplan_to_networkd
+            REBOOT
