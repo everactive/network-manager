@@ -27,7 +27,7 @@ if [ -n "$SNAP_CHANNEL" ] ; then
 	snap install --$SNAP_CHANNEL network-manager
 else
 	# Install prebuilt network-manager snap
-	snap install --dangerous network-manager_*_amd64.snap
+	snap install --dangerous /home/network-manager/network-manager_*_amd64.snap
 	# As we have a snap which we build locally its unasserted and therefor
 	# we don't have any snap-declarations in place and need to manually
 	# connect all plugs.
