@@ -32,21 +32,32 @@ done
 echo "Kernel has a store revision"
 snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
 
-# Configure netplan to use NetworkManager from now on
-mkdir -p /etc/netplan
-cat << EOF > /etc/netplan/00-default-nm-renderer.yaml
-network:
-  renderer: NetworkManager
-EOF
-
-SNAP_INSTALL_OPTS=
+# If we don't install network-manager here we get a system
+# without any network connectivity after reboot.
 if [ -n "$SNAP_CHANNEL" ] ; then
-	SNAP_INSTALL_OPTS="--$SNAP_CHANNEL"
+	snap install --$SNAP_CHANNEL network-manager
+else
+	# Setup classic snap and build the network-manager snap in there
+	snap install --devmode --beta classic
+	cat <<-EOF > /home/test/build-snap.sh
+	#!/bin/sh
+	set -ex
+	apt update
+	apt install -y --force-yes snapcraft
+	cd /home/network-manager
+	snapcraft clean
+	snapcraft
+	snap install --dangerous network-manager_*_amd64.snap
+	# As we have a snap which we build locally its unasserted and therefor
+	# we don't have any snap-declarations in place and need to manually
+	# connect all plugs.
+	snap connect network-manager:nmcli network-manager:service
+	snap connect network-manager:network-setup-observe
+	snap connect network-manager:ppp
+	EOF
+	chmod +x /home/test/build-snap.sh
+	sudo classic /home/test/build-snap.sh
 fi
-
-# If we don't install network-manager here we get up with
-# a system without any network connectivity after reboot.
-snap install $SNAP_INSTALL_OPTS $SNAP_NAME
 
 # Snapshot of the current snapd state for a later restore
 if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then

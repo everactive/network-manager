@@ -42,13 +42,21 @@ else
         rm -f $SNAP_DATA/conf.d/disable-ethernet.conf
     fi
 
-    if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
-        # If we're running as the only network management service
-        # and are configured via netplan on first boot then we should
-        # not try to auto configure ethernet ports as this is up to
-        # netplan and will be the same for networkd.
-        echo "[main]" > $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
-        echo "no-auto-default=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+    # If the snapd configuration for netplan is not present or empty
+    # we will start managing all ethernet ports automatically. Because
+    # of that we need to remove any previously created configuration files
+    # which prevented us from doing that.
+    if [ ! -e /etc/netplan/00-snapd-config.yaml ] || [ -s /etc/netplan/00-snapd-config.yaml ] ; then
+        rm -f $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+    else
+        if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
+            # If we're running as the only network management service
+            # and are configured via netplan on first boot then we should
+            # not try to auto configure ethernet ports as this is up to
+            # netplan and will be the same for networkd.
+            echo "[main]" > $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+            echo "no-auto-default=interface-name:eth*,interface-name:enx*" >> $SNAP_DATA/conf.d/no-auto-default-ethernet.conf
+        fi
     fi
 fi
 

@@ -1,8 +1,10 @@
 summary: Test network-manager snap installation was successful
 
 execute: |
+    . $TESTSLIB/utilities.sh
+
     # Service should be up an running
-    systemctl status snap.network-manager.networkmanager
+    wait_for_network_manager
 
     # .. and nmcli should be able to reach NetworkManager
     network-manager.nmcli g
