@@ -1,13 +1,47 @@
-2016-10-27 Simon Fels <simon.fels@canonical.com>
+2016-10-27 Simon Fels <simon.fels@canonical.com> - 1.2.2-9
+ 
+ * One more review change
+ * Changes according to review comments
+ * Correctly check if a file is empty or not
+ * Use correct indentation via spaces
+ * Work when /usr/lib/snapd/generate-network-conf exists or not
+ * Remove guard to prevent automatic ethernet configuration for no-netplan scenario
+ * Explain how to test a snap from a specific channel of the store
+ * Extend run-tests command documentation
+ * Move wait-for-nm code into a common utility function
+ * Add missing utilities.sh file
+ * Extend no-netplan-default-config test and name file correctly
+ * Build snap on suite preparation
+ * Switch per test to network-manager as default netplan renderer
+ * Check continously for network-manager service until it comes up
+ * Correctly test for no default netplan configuration
+ * Extend test infrastructure to run local snap
+ * Test system without default netplan config
+ * Manage ethernet connections automatically when netplan does not
+ * (morphis/spread-tests, spread-tests) Fix spread qemu path
+ * Split out actual snap name as variable
+ * Add small timeout before checking NetworkManager status
+ * Drop executable bits from sourced shell scripts
+ * Detect which spread version we're running
+ * Add test case to verify netplan renderer switch works
+ * Preserve netplan configuration as well accross test runs
+ * Add chapter to README explaining how to use the tests
+ * Address more review comments
+ * Respect review comments
+ * Add tests to verifiy WiFi connection to WPA2 secured AP
+ * Don't remove network-manager snap from the image on restore
+ * Add initial spread testing infrastructure
+
+2016-10-27 Simon Fels <simon.fels@canonical.com> - 1.2.2-8
 
  * Allow people to get ethernet managed back by NetworkManager
 
-2016-10-20 Simon Fels <simon.fels@canonical.com>
+2016-10-20 Simon Fels <simon.fels@canonical.com> - 1.2.2-7
 
  * Create state directory on startup if not present
  * [SNAPPY] Print out correct path for the secret key
 
-2016-10-04 Simon Fels <simon.fels@canonical.com>
+2016-10-04 Simon Fels <simon.fels@canonical.com> - 1.2.2-6
 
  * Refine comment about not auto configuring ethernet ports
  * Set grade property to stable
