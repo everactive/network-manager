@@ -24,7 +24,10 @@ snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
 # If we don't install network-manager here we get a system
 # without any network connectivity after reboot.
 if [ -n "$SNAP_CHANNEL" ] ; then
-	snap install --$SNAP_CHANNEL network-manager
+	# Don't reinstall if we have it installed already
+	if ! snap list | grep network-manager ; then
+		snap install --$SNAP_CHANNEL network-manager
+	fi
 else
 	# Install prebuilt network-manager snap
 	snap install --dangerous /home/network-manager/network-manager_*_amd64.snap

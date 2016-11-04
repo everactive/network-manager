@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# We don't have to build a snap when we should use one from a
+# channel
+if [ -n "$SNAP_CHANNEL" ] ; then
+	exit 0
+fi
+
 # Setup classic snap and build the network-manager snap in there
 snap install --devmode --beta classic
 cat <<-EOF > /home/test/build-snap.sh
