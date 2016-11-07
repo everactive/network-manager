@@ -1,0 +1,32 @@
+summary: Verify that the DHCP leases are moved to the correct location
+
+execute: |
+    . $TESTSLIB/utilities.sh
+    case "$SPREAD_REBOOT" in
+        0)
+            switch_netplan_to_network_manager
+            REBOOT
+            ;;
+        1)
+            # Now we have network-manager also with ethernet support
+            test -e /run/NetworkManager/dhcp
+            test -e /var/snap/network-manager/current/state/dhcp
+
+            num_leases=`ls -1 /var/snap/network-manager/current/state/dhcp | wc -l`
+            num_public_leases=`ls -1 /run/NetworkManager/dhcp | wc -l`
+            test $num_leases -eq $num_public_leases
+
+            # Create a new lease file and ensure it gets copied over
+            test ! -e /run/NetworkManager/dhcp/temp.lease
+            touch /var/snap/network-manager/current/state/dhcp/temp.lease
+            sleep 2
+            test -e /run/NetworkManager/dhcp/temp.lease
+            # Ensure that the lease is also removed from /run again when it
+            # gets removed from SNAP_DATA
+            rm /var/snap/network-manager/current/state/dhcp/temp.lease
+            sleep 2
+            test ! -e /var/snap/network-manager/current/state/dhcp/temp.lease
+            ;;
+        *)
+            ;;
+    esac
