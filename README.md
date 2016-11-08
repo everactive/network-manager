@@ -73,3 +73,9 @@ want it to test it from a specific channel run
 ```
  $ SNAP_CHANNEL=candidate spread tests/main/installation
 ```
+
+And if you want to run an entire suite
+
+```
+ $ spread tests/main/
+```
