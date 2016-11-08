@@ -1,8 +1,12 @@
 summary: Verify correct DNS setup
 
 execute: |
+    . $TESTSLIB/utilities.sh
     case $SPREAD_REBOOT in
         0)
+            # For correct timing if the device has just booted
+            wait_for_network_manager
+
             # Precondition is a existing network connection
             network-manager.nmcli d | grep 'eth0.*connected'
 
