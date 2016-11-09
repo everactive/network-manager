@@ -18,7 +18,11 @@ done
 # a fresh start for the next test
 rm -rf /var/snap/network-manager/common/*
 rm -rf /var/snap/network-manager/current/*
-systemctl restart snap.network-manager.networkmanager
+systemctl stop snap.network-manager.networkmanager
+
+# Drop any generated or modified netplan configuration files. The original
+# ones will be restored below.
+rm -f /etc/netplan/*
 
 # Ensure we have the same state for snapd as we had before
 systemctl stop snapd.service snapd.socket
@@ -26,3 +30,10 @@ rm -rf /var/lib/snapd/*
 $(cd / && tar xzf $SPREAD_PATH/snapd-state.tar.gz)
 rm -rf /root/.snap
 systemctl start snapd.service snapd.socket
+
+# Make sure the original netplan configuration is applied and active
+netplan generate
+netplan apply
+
+# Bringup NetworkManager again now that the system is restored
+systemctl start snap.network-manager.networkmanager

@@ -10,14 +10,13 @@ execute: |
     . $TESTSLIB/utilities.sh
     case "$SPREAD_REBOOT" in
         0)
-            # Remove all configuration files from netplan and network-manager
-            # to simulate a fresh start and switch to NetworkManager backend
+            # Remove all configuration files from netplan to get a system
+            # without generated configuration files from netplan
             if [ -e /usr/lib/snapd/generate-network-conf ] ; then
                 echo "" > /etc/netplan/00-snapd-config.yaml
             else
                 rm /etc/netplan/00-snapd-config.yaml
             fi
-            switch_netplan_to_network_manager
             REBOOT
             ;;
         1)

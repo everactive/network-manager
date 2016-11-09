@@ -97,6 +97,14 @@ ln -sf /etc/systemd/system/devmode-firstboot.service \
 	$tmp_mount/system-data/etc/systemd/system/multi-user.target.wants/devmode-firstboot.service
 
 mkdir $tmp_mount/system-data/var/lib/devmode-firstboot
+cat << EOF > $tmp_mount/system-data/var/lib/devmode-firstboot/00-snapd-config.yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+EOF
+
 cat << 'EOF' > $tmp_mount/system-data/var/lib/devmode-firstboot/run.sh
 #!/bin/bash
 
@@ -129,6 +137,8 @@ if [ -n "$(snap known system-user)" ]; then
 	echo "Trying to create known user"
 	snap create-user --known --sudoer
 fi
+
+cp /writable/system-data/var/lib/devmode-firstboot/00-snapd-config.yaml /writable/system-data/etc/netplan
 
 # Enable console-conf again
 rm /writable/system-data/var/lib/console-conf/complete
