@@ -79,3 +79,21 @@ And if you want to run an entire suite
 ```
  $ spread tests/main/
 ```
+
+## Available test suites
+
+Currently we have two test suites
+
+ * main
+ * full
+
+The 'main' suite covers testing of network-manager when its installed on
+any Ubuntu Core device from the store without configuring the system
+further to allow NetworkManager to control also all ethernet connections.
+
+The 'full' suite configures netplan in the prepare part to use NetworkManager
+as default backend so that it becomes the only network connection
+management service in the system.
+
+Depending on the nature of a test case the right test suite should be
+picked.
