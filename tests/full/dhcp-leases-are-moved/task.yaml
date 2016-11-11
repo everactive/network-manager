@@ -1,7 +1,11 @@
 summary: Verify that the DHCP leases are moved to the correct location
 
 execute: |
-    # Now we have network-manager also with ethernet support
+    . $TESTSLIB/utilities.sh
+
+    wait_for_network_manager
+
+    # We should have a single lease for eth0 at this point
     test -e /run/NetworkManager/dhcp
     test -e /var/snap/network-manager/current/state/dhcp
 

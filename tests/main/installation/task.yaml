@@ -7,7 +7,7 @@ execute: |
     wait_for_network_manager
 
     # .. and nmcli should be able to reach NetworkManager
-    network-manager.nmcli g
+    /snap/bin/network-manager.nmcli g
 
     # Ensure all necessary plugs/slots are connected
     snap interfaces | grep -Pzq ":network-setup-observe +network-manager"

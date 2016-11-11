@@ -8,7 +8,7 @@ execute: |
             wait_for_network_manager
 
             # Precondition is a existing network connection
-            network-manager.nmcli d | grep 'eth0.*connected'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
 
             # We get a default nameserver from the gateway
             if [ "$SPREAD_BACKEND" = "qemu" ] ; then
@@ -26,14 +26,14 @@ execute: |
             REBOOT
             ;;
         1)
-            network-manager.nmcli d | grep 'eth0.*connected'
-            network-manager.nmcli d | grep -v netplan
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
+            /snap/bin/network-manager.nmcli d | grep -v netplan
 
-            connection=`network-manager.nmcli -m multiline -f UUID c show --active | xargs | cut -d' ' -f 2`
-            network-manager.nmcli c modify $connection ipv4.dns 8.8.8.8
+            connection=`/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | xargs | cut -d' ' -f 2`
+            /snap/bin/network-manager.nmcli c modify $connection ipv4.dns 8.8.8.8
             # We need to bring up the connection again here to get the DNS
             # server really applied to the system.
-            network-manager.nmcli c up $connection
+            /snap/bin/network-manager.nmcli c up $connection
 
             # Give system a moment to settle
             sleep 1

@@ -23,17 +23,17 @@ execute: |
             # We should be automatically connected now and not via a configuration
             # generated from netplan
             wait_for_network_manager
-            network-manager.nmcli d | grep 'eth0.*connected'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
             networkctl status eth0 | grep 'State: n/a'
-            network-manager.nmcli c show --active | grep eth0 | grep -v netplan
+            /snap/bin/network-manager.nmcli c show --active | grep eth0 | grep -v netplan
 
             # We should only have a single active configuration
-            test `network-manager.nmcli -m multiline -f UUID c show --active | wc -l` -eq 1
+            test `/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | wc -l` -eq 1
 
             # Verify that we can modify the automatically created connection
-            connection=$(network-manager.nmcli -m multiline -f UUID c show --active | xargs | cut -d' ' -f 2)
-            network-manager.nmcli c modify $connection 802-3-ethernet.wake-on-lan magic
-            wol_value=$(network-manager.nmcli -f 802-3-ethernet.wake-on-lan c show $connection | xargs | cut -d':' -f 2)
+            connection=$(/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | xargs | cut -d' ' -f 2)
+            /snap/bin/network-manager.nmcli c modify $connection 802-3-ethernet.wake-on-lan magic
+            wol_value=$(/snap/bin/network-manager.nmcli -f 802-3-ethernet.wake-on-lan c show $connection | xargs | cut -d':' -f 2)
             test "$wol_value" = " 64 (magic)"
             ;;
         *)
