@@ -29,7 +29,7 @@ execute: |
             /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
             /snap/bin/network-manager.nmcli d | grep -v netplan
 
-            connection=`/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | xargs | cut -d' ' -f 2`
+            connection=$(/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | awk '{print$2;exit}')
             /snap/bin/network-manager.nmcli c modify $connection ipv4.dns 8.8.8.8
             # We need to bring up the connection again here to get the DNS
             # server really applied to the system.
@@ -38,7 +38,7 @@ execute: |
             # Give system a moment to settle
             sleep 1
 
-            cat /etc/resolv.conf | grep 'nameserver 8.8.8.8'
+            grep 'nameserver 8.8.8.8' /etc/resolv.conf
             address=`python3 -c 'import socket; print(socket.gethostbyname("ubuntu.com"))'  2> /dev/null || echo "invalid"`
             [ "$address" != "invalid" ] && [[ $address =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]
             ;;
