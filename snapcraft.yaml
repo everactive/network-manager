@@ -17,6 +17,10 @@ slots:
 plugs:
   nmcli: network-manager
 
+hooks:
+    configure:
+      plugs: [nmcli]
+
 apps:
   nmcli:
     command: usr/bin/nmcli
