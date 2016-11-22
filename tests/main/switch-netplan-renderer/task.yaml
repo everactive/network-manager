@@ -6,7 +6,7 @@ execute: |
         0)
             # networkd manages eth0 and NetworkManager does not
             networkctl | grep 'eth0.*routable'
-            network-manager.nmcli d | grep 'eth0.*unmanaged'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
 
             # Now we switch back to the NetworkManager backend for netplan
             switch_netplan_to_network_manager
@@ -19,7 +19,7 @@ execute: |
             wait_for_network_manager
 
             # NetworkManager now controls eth0 and networkd does not
-            network-manager.nmcli d | grep 'eth0.*connected'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
             networkctl status eth0 | grep 'State: n/a'
 
             # And switch back to networkd
@@ -31,7 +31,7 @@ execute: |
 
             # networkd manages eth0 and NetworkManager does not
             networkctl | grep 'eth0.*routable'
-            network-manager.nmcli d | grep 'eth0.*unmanaged'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
             ;;
         *)
             ;;

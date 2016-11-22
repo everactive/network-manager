@@ -4,4 +4,4 @@ execute: |
     . $TESTSLIB/utilities.sh
     networkctl | grep 'eth0.*routable'
     wait_for_network_manager
-    network-manager.nmcli d | grep 'eth0.*unmanaged'
+    /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
