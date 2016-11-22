@@ -31,7 +31,7 @@ execute: |
             test `/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | wc -l` -eq 1
 
             # Verify that we can modify the automatically created connection
-            connection=$(/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | xargs | cut -d' ' -f 2)
+            connection=$(/snap/bin/network-manager.nmcli -m multiline -f UUID c show --active | awk '{print$2;exit}')
             /snap/bin/network-manager.nmcli c modify $connection 802-3-ethernet.wake-on-lan magic
             wol_value=$(/snap/bin/network-manager.nmcli -f 802-3-ethernet.wake-on-lan c show $connection | xargs | cut -d':' -f 2)
             test "$wol_value" = " 64 (magic)"
