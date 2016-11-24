@@ -21,6 +21,12 @@ fi
 # files for NetworkManager
 mkdir -p $SNAP_DATA/conf.d
 
+# Enable wake-on-lan by default until we have a configuration
+# hook to do that.
+if [ ! -e $SNAP_DATA/conf.d/enable-wol.conf ] ; then
+    cp $SNAP/conf/enable-wol.conf $SNAP_DATA/conf.d/
+fi
+
 # State dir where network-manager stores several things like the
 # secret key used for IPv6
 mkdir -p $SNAP_DATA/state
