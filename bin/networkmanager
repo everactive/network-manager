@@ -21,12 +21,6 @@ fi
 # files for NetworkManager
 mkdir -p $SNAP_DATA/conf.d
 
-# Enable wake-on-lan by default until we have a configuration
-# hook to do that.
-if [ ! -e $SNAP_DATA/conf.d/enable-wol.conf ] ; then
-    cp $SNAP/conf/enable-wol.conf $SNAP_DATA/conf.d/
-fi
-
 # State dir where network-manager stores several things like the
 # secret key used for IPv6
 mkdir -p $SNAP_DATA/state
@@ -65,6 +59,11 @@ else
         fi
     fi
 fi
+
+# Run all hooks to let them do their stuff
+for hook in `ls -1 $SNAP/hooks/` ; do
+    /bin/bash -x $SNAP/hooks/$hook
+done
 
 # HACK: Until we've fixed probert to look in $SNAP_DATA/state/dhcp or
 # somewhere else for our lease files we use inotifywatch to monitor
