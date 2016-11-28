@@ -35,7 +35,7 @@ parts:
       bin/dhcp-lease-mover: bin/dhcp-lease-mover
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
       data/copyright: usr/share/doc/network-manager/copyright
-      hooks/wol-by-default.sh: hooks/wol-by-default.sh
+      startup-hooks/99-wol-by-default.sh: startup-hooks/99-wol-by-default.sh
 
   inotify-tools:
     plugin: nil
