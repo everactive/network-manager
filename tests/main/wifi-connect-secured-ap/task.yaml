@@ -11,11 +11,11 @@ execute: |
     modprobe mac80211_hwsim radios=2
 
     # Setup the AP on wlan1
-    wifi-ap.config set wifi.interface wlan1
-    wifi-ap.config set wifi.ssid $WIFI_SSID
-    wifi-ap.config set wifi.security wpa2
-    wifi-ap.config set wifi.security-passphrase $WIFI_PASSPHRASE
-    wifi-ap.config set disabled 0
+    /snap/bin/wifi-ap.config set wifi.interface wlan1
+    /snap/bin/wifi-ap.config set wifi.ssid $WIFI_SSID
+    /snap/bin/wifi-ap.config set wifi.security wpa2
+    /snap/bin/wifi-ap.config set wifi.security-passphrase $WIFI_PASSPHRASE
+    /snap/bin/wifi-ap.config set disabled 0
     systemctl restart snap.wifi-ap.backend
     # AP needs a bit to appear and be visible for NetworkManager
     /snap/bin/network-manager.nmcli d wifi rescan

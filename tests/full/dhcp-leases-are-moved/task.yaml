@@ -5,13 +5,23 @@ execute: |
 
     wait_for_network_manager
 
-    # We should have a single lease for eth0 at this point
+    # We should have a single lease for eth0 at this point but give
+    # NetworkManager some time to do its job
     test -e /run/NetworkManager/dhcp
     test -e /var/snap/network-manager/current/state/dhcp
-
-    num_leases=`ls -1 /var/snap/network-manager/current/state/dhcp | wc -l`
-    num_public_leases=`ls -1 /run/NetworkManager/dhcp | wc -l`
-    test $num_leases -eq $num_public_leases
+    n=0
+    state_ok=0
+    while [ $n -lt 10 ] ; do
+        num_leases=`ls -1 /var/snap/network-manager/current/state/dhcp | wc -l`
+        num_public_leases=`ls -1 /run/NetworkManager/dhcp | wc -l`
+        if [ $num_leases -eq $num_public_leases ]; then
+            state_ok=1
+            break
+        fi
+        sleep 0.5
+        let n=n+1
+    done
+    test $state_ok -eq 1
 
     # Create a new lease file and ensure it gets copied over
     test ! -e /run/NetworkManager/dhcp/temp.lease
