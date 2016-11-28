@@ -4,6 +4,8 @@ execute: |
     . $TESTSLIB/utilities.sh
     case "$SPREAD_REBOOT" in
         0)
+            wait_for_network_manager
+
             # networkd manages eth0 and NetworkManager does not
             networkctl | grep 'eth0.*routable'
             /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
