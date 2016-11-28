@@ -67,6 +67,13 @@ fi
 # stopped.
 $SNAP/bin/dhcp-lease-mover &
 
+# Run available startup hooks to have a point to store custom
+# logic outside of this script. More of the things from above
+# should be moved into these.
+for hook in $SNAP/startup-hooks/* ; do
+    [ -x "$hook" ] && /bin/sh -x "$hook"
+done
+
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 
 $SNAP/usr/sbin/NetworkManager \
