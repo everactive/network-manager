@@ -61,8 +61,8 @@ else
 fi
 
 # Run all hooks to let them do their stuff
-for hook in `ls -1 $SNAP/hooks/` ; do
-    /bin/bash -x $SNAP/hooks/$hook
+for hook in $SNAP/hooks/* ; do
+    [ -x "$hook" ] && /bin/sh -x "$hook"
 done
 
 # HACK: Until we've fixed probert to look in $SNAP_DATA/state/dhcp or
