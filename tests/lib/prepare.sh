@@ -29,14 +29,11 @@ if [ -n "$SNAP_CHANNEL" ] ; then
 		snap install --$SNAP_CHANNEL network-manager
 	fi
 else
-	# Install prebuilt network-manager snap
+	# Need first install from store to get all necessary assertions into
+	# place. Second local install will then bring in our locally built
+	# snap.
+	snap install network-manager
 	snap install --dangerous /home/network-manager/network-manager_*_amd64.snap
-	# As we have a snap which we build locally its unasserted and therefor
-	# we don't have any snap-declarations in place and need to manually
-	# connect all plugs.
-	snap connect network-manager:nmcli network-manager:service
-	snap connect network-manager:network-setup-observe
-	snap connect network-manager:ppp
 fi
 
 # Snapshot of the current snapd state for a later restore
