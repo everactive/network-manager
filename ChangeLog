@@ -1,3 +1,41 @@
+2016-11-28 Simon Fels <simon.fels@canonical.com> - 1.2.2-10
+
+ * Rename hooks to startup-hooks to make clear they are different from snap hooks
+ * Make wake-on-lan hook executable
+ * Respect review comments
+ * Delete unwanted temporary file
+ * Add spread test for WoL enablement
+ * Move WoL enablement into a startup hook
+ * Add conf file to enable WoL by default for all ethernet connections
+ * Use absolute path for wifi-ap executables
+ * Wait for NetworkManager to be fully up and running
+ * Make DHCP lease mover test a bit more robust
+ * Let the assertion do the slot/plug connections
+ * tests: use prebuilt snap if available
+ * Bump network-manager version
+ * Respect review comments
+ * Add hostname test case
+ * Respect review comments
+ * Use absolute path for all snap binaries as spread removes /snap/bin from PATH
+ * Explain the difference between our different test suites
+ * Add IPv6 router advertisement test case
+ * Ensure NetworkManager has started when we start testing the DNS setup
+ * Add test case to verify static IP configuration
+ * Add test case to verify immutable netplan configuration files
+ * Add DNS setup verification test
+ * Add first test case to verify basic IPv6 address assignment
+ * Extend README to explain how to run an entire suite via spread
+ * Create static netplan configuration file as part of our image
+ * Fix testing for a channel
+ * Extend README and correct formatting
+ * Fix failing test cases
+ * Stop prepare/restore steps after first reboot
+ * Drop useless comments
+ * Use correct path for snap we install
+ * Bring back netplan renderer switch test
+ * Rework test setup so we have two different suites
+ * Move dhcp lease files back into SNAP_DATA but keep a copy of them in /run
+
 2016-10-27 Simon Fels <simon.fels@canonical.com> - 1.2.2-9
  
  * One more review change
