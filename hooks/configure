@@ -1,6 +1,4 @@
 #!/bin/bash
-set -x
-
 wifi_powersave_default="disable"
 wifi_powersave_conf_path=$SNAP_DATA/conf.d/wifi-powersave.conf
 
@@ -9,14 +7,12 @@ switch_wifi_powersave() {
   # for the meaning of the different values for the wifi.powersave option.
   case $1 in
     enable)
-      rm -f $wifi_powersave_conf_path
       cat << EOF > $wifi_powersave_conf_path
 [connection]
 wifi.powersave = 3
 EOF
       ;;
     disable)
-      rm -f $wifi_powersave_conf_path
       cat << EOF > $wifi_powersave_conf_path
 [connection]
 wifi.powersave = 2
@@ -29,8 +25,9 @@ EOF
 }
 
 wifi_powersave="`snapctl get wifi.powersave`"
-if [ -n $wifi_powersave ]; then
+if [ -n "$wifi_powersave" ]; then
   switch_wifi_powersave $wifi_powersave
 else
+  snapctl set wifi.powersave=$wifi_powersave_default
   switch_wifi_powersave $wifi_powersave_default
 fi
