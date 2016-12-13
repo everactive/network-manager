@@ -58,6 +58,7 @@ suites:
             # Force snapd state to be regenerated so that it also preserves
             # the netplan renderer switch configuration file.
             rm -f /home/network-manager/snapd-state.tar.gz
+            rm -f /home/network-manager/nm-state.tar.gz
             switch_netplan_to_network_manager
             . $TESTSLIB/prepare.sh
             REBOOT
