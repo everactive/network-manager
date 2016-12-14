@@ -22,21 +22,21 @@ done
 echo "Kernel has a store revision"
 snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
 
+# Remove any existing state archive from other test suites
+rm -f /home/network-manager/snapd-state.tar.gz
+rm -f /home/network-manager/nm-state.tar.gz
+
 snap_install network-manager
 
 # Snapshot of the current snapd state for a later restore
-if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then
-	systemctl stop snapd.service snapd.socket
-	tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd /etc/netplan
-	systemctl start snapd.socket
-fi
+systemctl stop snapd.service snapd.socket
+tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd /etc/netplan
+systemctl start snapd.socket
 
 # And also snapshot NetworkManager's state
-if [ ! -f $SPREAD_PATH/nm-state.tar.gz ]; then
-	systemctl stop snap.network-manager.networkmanager
-	tar czf $SPREAD_PATH/nm-state.tar.gz /var/snap/network-manager
-	systemctl start snap.network-manager.networkmanager
-fi
+systemctl stop snap.network-manager.networkmanager
+tar czf $SPREAD_PATH/nm-state.tar.gz /var/snap/network-manager
+systemctl start snap.network-manager.networkmanager
 
 # Make sure the original netplan configuration is applied and active
 netplan generate

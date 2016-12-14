@@ -55,10 +55,6 @@ suites:
         prepare: |
             . $TESTSLIB/utilities.sh
             stop_after_first_reboot
-            # Force snapd state to be regenerated so that it also preserves
-            # the netplan renderer switch configuration file.
-            rm -f /home/network-manager/snapd-state.tar.gz
-            rm -f /home/network-manager/nm-state.tar.gz
             switch_netplan_to_network_manager
             . $TESTSLIB/prepare.sh
             REBOOT
@@ -68,8 +64,4 @@ suites:
             . $TESTSLIB/utilities.sh
             stop_after_first_reboot
             switch_netplan_to_networkd
-            # Need to drop the state here as it includes the netplan config
-            # which configures us to use NetworkManager as renderer. The
-            # prepare script run for the next suite will regenerate it.
-            rm -f /home/network-manager/snapd-state.tar.gz
             REBOOT
