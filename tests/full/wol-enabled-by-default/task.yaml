@@ -44,7 +44,7 @@ execute: |
             # We can sadly only verify that the value was correctly applied when
             # we're running the tests on a real device. QEMU doesn't support setting
             # the WoL value of the ethernet network device.
-            if [ ! cat /proc/cpuinfo | grep QEMU ] ; then
+            if [ -z "`cat /proc/cpuinfo | grep QEMU`" ] ; then
                 # Get the tools snap to have the ethtool tool available
                 snap install --devmode --edge se-test-tools
                 snap connect se-test-tools:network core

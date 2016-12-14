@@ -1,4 +1,5 @@
 #!/bin/bash
+. $TESTSLIB/utilities.sh
 
 echo "Wait for firstboot change to be ready"
 while ! snap changes | grep -q "Done"; do
@@ -21,27 +22,25 @@ done
 echo "Kernel has a store revision"
 snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
 
-# If we don't install network-manager here we get a system
-# without any network connectivity after reboot.
-if [ -n "$SNAP_CHANNEL" ] ; then
-	# Don't reinstall if we have it installed already
-	if ! snap list | grep network-manager ; then
-		snap install --$SNAP_CHANNEL network-manager
-	fi
-else
-	# Need first install from store to get all necessary assertions into
-	# place. Second local install will then bring in our locally built
-	# snap.
-	snap install network-manager
-	snap install --dangerous /home/network-manager/network-manager_*_amd64.snap
-fi
+# Remove any existing state archive from other test suites
+rm -f /home/network-manager/snapd-state.tar.gz
+rm -f /home/network-manager/nm-state.tar.gz
+
+snap_install network-manager
 
 # Snapshot of the current snapd state for a later restore
-if [ ! -f $SPREAD_PATH/snapd-state.tar.gz ] ; then
-	systemctl stop snapd.service snapd.socket
-	tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd /etc/netplan
-	systemctl start snapd.socket
-fi
+systemctl stop snapd.service snapd.socket
+tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd /etc/netplan
+systemctl start snapd.socket
+
+# And also snapshot NetworkManager's state
+systemctl stop snap.network-manager.networkmanager
+tar czf $SPREAD_PATH/nm-state.tar.gz /var/snap/network-manager
+systemctl start snap.network-manager.networkmanager
+
+# Make sure the original netplan configuration is applied and active
+netplan generate
+netplan apply
 
 # For debugging dump all snaps and connected slots/plugs
 snap list
