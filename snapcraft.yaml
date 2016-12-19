@@ -135,6 +135,7 @@ parts:
       - --with-dhclient=no
       - --with-dnsmasq=no
       - --with-systemd-journal=no
+      - --with-session-tracking=no
       # Removes dependency on libicudata which weights 25M. Also libsoup
       # is only used to verify a domain in the DNS resolve process has a
       # valid format and to check if a valid internet connection is available.
