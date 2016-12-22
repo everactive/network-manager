@@ -1,0 +1,80 @@
+summary: Verify suspend/resume tracking works reliable
+
+restore: |
+    rmmod mac80211_hwsim
+
+execute: |
+    # Install necessary test-tools, we need inotify-tools in this case
+    snap install --edge se-test-tools
+
+    # Get two connected wifi network interfaces wlan0 and wlan1
+    modprobe mac80211_hwsim radios=2
+
+    # FIXME: take the one from edge for now as that is the one which
+    # has automatic setup capabilities
+    snap install --edge wifi-ap
+
+    /snap/bin/network-manager.nmcli d wifi rescan
+    while ! /snap/bin/network-manager.nmcli d wifi | grep Ubuntu ; do
+        /snap/bin/network-manager.nmcli d wifi rescan
+        sleep 1
+    done
+
+    /snap/bin/network-manager.nmcli d wifi connect Ubuntu
+
+    # Override the existing systemd-suspend service unit with a customized
+    # one to prevent the device from entering real suspend. The service unit
+    # will block as long as no new files gets created inside the specified
+    # directory inotifywait listens for changes on.
+    cat <<-EOF > $PROJECT_PATH/systemd-suspend.service
+    [Unit]
+    Description=Suspend
+    Documentation=man:systemd-suspend.service(8)
+    DefaultDependencies=no
+    [Service]
+    Type=oneshot
+    ExecStart=/bin/sh -c '/snap/bin/se-test-tools.inotifywait -e create /home/network-manager/systemd-suspend'
+    EOF
+    mkdir -p /home/network-manager/systemd-suspend
+    mount -o bind,ro $PROJECT_PATH/systemd-suspend.service /lib/systemd/system/systemd-suspend.service
+    systemctl daemon-reload
+
+    # NetworkManager should have an inhibit lock in place by default
+    systemd-inhibit --list | grep "NetworkManager needs to turn off networks"
+
+    service=snap.network-manager.networkmanager
+
+    # Flush the syslog so that we can reliable grep it once we triggered
+    # the system suspend
+    journalctl --flush -u $service
+
+    # Kick off the actual suspend in background so that we can continue
+    # verifying the correct state left by the system before it would
+    # normally enter a sleep state.
+    systemctl suspend --no-block &
+
+    # The easiest way to ensure NetworkManager did the right thing is
+    # by going through its log output and verifying it prints out
+    # what we expect.
+    journalctl --no-pager -u $service | grep 'manager: sleep requested'
+    journalctl --no-pager -u $service | grep 'manager: sleeping...'
+    journalctl --no-pager -u $service | grep "device (wlan1): state change: activated -> unmanaged (reason 'sleeping')"
+    journalctl --no-pager -u $service | grep 'manager: NetworkManager state is now ASLEEP'
+
+    # Connection should be reported as disconnected
+    /snap/bin/network-manager.nmcli d | grep -v 'wlan1.*connected'
+    # .. and interface should be disabled
+    ifconfig | grep -v wlan1
+
+    # Now we wakeup the system again and verify NetworkManager
+    # is correctly setting up the ethernet port again.
+    journalctl --flush -u $service
+    touch $PROJECT_PATH/systemd-suspend/wakeup
+
+    journalctl --no-pager -u $service | grep 'manager: wake requested (sleeping: yes  enabled: yes)'
+    journalctl --no-pager -u $service | grep 'manager: NetworkManager state is now CONNECTED_LOCAL'
+    journalctl --no-pager -u $service | grep 'manager: NetworkManager state is now CONNECTED_GLOBAL'
+    journalctl --no-pager -u $service | grep 'device (wlan1): Activation: successful, device activated.'
+
+    ifconfig | grep wlan1
+    /snap/bin/network-manager.nmcli d | grep -v 'wlan1.*connected'

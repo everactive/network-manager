@@ -4,6 +4,9 @@ environment:
     WIFI_SSID: Ubuntu
     WIFI_PASSPHRASE: Test1234
 
+restore: |
+    rmmod mac80211_hwsim
+
 execute: |
     snap install wifi-ap
 
