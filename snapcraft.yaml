@@ -28,6 +28,12 @@ apps:
     plugs: [modem-manager, ppp, network-setup-observe]
 
 parts:
+  hooks:
+    plugin: dump
+    source: hooks
+    organize:
+      configure: meta/hooks/configure
+
   networkmanager-common:
     plugin: copy
     files:

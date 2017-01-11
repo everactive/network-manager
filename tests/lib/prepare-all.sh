@@ -31,12 +31,6 @@ apt install -y --force-yes snapcraft
 cd /home/network-manager
 snapcraft clean
 snapcraft
-# If we have any hooks we need to copy them in place as long as
-# snapcraft does not support them
-if [ -d hooks ]; then
-	cp -r hooks prime/meta
-	snapcraft snap prime
-fi
 EOF
 chmod +x /home/test/build-snap.sh
 sudo classic /home/test/build-snap.sh
