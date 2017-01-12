@@ -19,6 +19,7 @@ EOF
       ;;
     *)
       echo "WARNING: invalid value '$1' supplied for wifi.powersave configuration option"
+      exit 1
       ;;
   esac
 }
