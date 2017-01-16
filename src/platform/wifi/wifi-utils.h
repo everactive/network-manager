@@ -26,6 +26,7 @@
 
 #include "nm-default.h"
 #include "nm-dbus-interface.h"
+#include "nm-setting-wireless.h"
 
 typedef struct WifiData WifiData;
 
@@ -65,6 +66,7 @@ gboolean wifi_utils_get_wowlan (WifiData *data);
 
 gboolean wifi_utils_set_powersave (WifiData *data, guint32 powersave);
 
+gboolean wifi_utils_set_wake_on_wlan (WifiData *data, NMSettingWirelessWakeOnWLan wowl, const char *password);
 
 /* OLPC Mesh-only functions */
 guint32 wifi_utils_get_mesh_channel (WifiData *data);
