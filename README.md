@@ -112,3 +112,32 @@ management service in the system.
 
 Depending on the nature of a test case the right test suite should be
 picked.
+
+## Documentation
+
+All documentation is available in the docs/ subdirectory. It uses markdown
+and the documentation-builder (<https://github.com/CanonicalLtd/documentation-builder>)
+to generate HTML based documentation.
+
+To generate the HTML pages install the documentation build snap first
+
+```
+ $ snap install documentation-build
+ $ snap connect documentation-build:home core
+```
+
+then enter the docs/ subdirectory and run the builder
+
+```
+ $ cd docs
+ $ documentation-builder
+```
+
+It will generate all documentation as HTML in the a build/ subdirectory. Open
+it via
+
+```
+ $ google-chrome build/index.html
+```
+
+for example.
