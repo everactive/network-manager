@@ -205,6 +205,8 @@ NmcOutputField nmc_fields_setting_wireless[] = {
 	SETTING_FIELD (NM_SETTING_WIRELESS_SEEN_BSSIDS),               /* 13 */
 	SETTING_FIELD (NM_SETTING_WIRELESS_HIDDEN),                    /* 14 */
 	SETTING_FIELD (NM_SETTING_WIRELESS_POWERSAVE),                 /* 15 */
+	SETTING_FIELD (NM_SETTING_WIRELESS_WAKE_ON_WLAN),              /* 16 */
+	SETTING_FIELD (NM_SETTING_WIRELESS_WAKE_ON_WLAN_PASSWORD),     /* 17 */
 	{NULL, NULL, 0, NULL, FALSE, FALSE, 0}
 };
 #define NMC_FIELDS_SETTING_WIRELESS_ALL     "name"","\
@@ -222,7 +224,9 @@ NmcOutputField nmc_fields_setting_wireless[] = {
                                             NM_SETTING_WIRELESS_MTU","\
                                             NM_SETTING_WIRELESS_SEEN_BSSIDS","\
                                             NM_SETTING_WIRELESS_HIDDEN"," \
-                                            NM_SETTING_WIRELESS_POWERSAVE
+                                            NM_SETTING_WIRELESS_POWERSAVE"," \
+                                            NM_SETTING_WIRELESS_WAKE_ON_WLAN"," \
+                                            NM_SETTING_WIRELESS_WAKE_ON_WLAN_PASSWORD
 
 /* Available fields for NM_SETTING_WIRELESS_SECURITY_SETTING_NAME */
 NmcOutputField nmc_fields_setting_wireless_security[] = {
@@ -1901,6 +1905,24 @@ nmc_property_wireless_get_mac_address_randomization (NMSetting *setting, NmcProp
 		return g_strdup_printf (_("unknown"));
 }
 
+static char *
+nmc_property_wireless_get_wake_on_wlan (NMSetting *setting, NmcPropertyGetType get_type)
+{
+	NMSettingWireless *s_wireless = NM_SETTING_WIRELESS (setting);
+	NMSettingWirelessWakeOnWLan wowl;
+	gs_free char *str = NULL;
+	char *ret;
+
+	wowl = nm_setting_wireless_get_wake_on_wlan (s_wireless);
+	str = nm_utils_enum_to_str (nm_setting_wireless_wake_on_wlan_get_type (), wowl);
+
+	if (get_type == NMC_PROPERTY_GET_PARSABLE) {
+		ret = str;
+		str = NULL;
+		return ret;
+	} else
+		return g_strdup_printf ("%s (%u)", str, wowl);
+}
 
 /* --- NM_SETTING_WIRELESS_SECURITY_SETTING_NAME property get functions --- */
 DEFINE_GETTER (nmc_property_wifi_sec_get_key_mgmt, NM_SETTING_WIRELESS_SECURITY_KEY_MGMT)
@@ -5013,6 +5035,39 @@ nmc_property_wireless_set_mac_address_randomization (NMSetting *setting,
 	return TRUE;
 }
 
+static gboolean
+nmc_property_wireless_set_wake_on_wlan (NMSetting *setting, const char *prop, const char *val, GError **error)
+{
+	NMSettingWirelessWakeOnWLan wowl;
+	gs_free const char **options = NULL;
+	gs_free char *options_str = NULL;
+	long int t;
+	gboolean ret;
+
+	if (nmc_string_to_int_base (val, 0, TRUE,
+	                            NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT,
+	                            NM_SETTING_WIRELESS_WAKE_ON_WLAN_LAST,
+	                            &t))
+		wowl = (NMSettingWirelessWakeOnWLan) t;
+	else {
+		ret = nm_utils_enum_from_str (nm_setting_wireless_wake_on_wlan_get_type (),
+		                              val,
+		                              (int *) &wowl,
+		                              NULL);
+		if (!ret) {
+			options = nm_utils_enum_get_values (nm_setting_wireless_wake_on_wlan_get_type (),
+			                                    NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT,
+			                                    NM_SETTING_WIRELESS_WAKE_ON_WLAN_LAST);
+			options_str = g_strjoinv (",", (char **) options);
+			g_set_error (error, 1, 0, _("invalid option '%s', use one of [%s]"), val, options_str);
+			return FALSE;
+		}
+	}
+
+	g_object_set (setting, prop, (guint) wowl, NULL);
+	return TRUE;
+}
+
 /* --- NM_SETTING_WIRELESS_SECURITY_SETTING_NAME property setter functions --- */
 /* 'key-mgmt' */
 static const char *wifi_sec_valid_key_mgmts[] = { "none", "ieee8021x", "wpa-none", "wpa-psk", "wpa-eap", NULL };
@@ -7202,6 +7257,13 @@ nmc_properties_init (void)
 	                    NULL,
 	                    NULL,
 	                    NULL);
+	nmc_add_prop_funcs (GLUE (WIRELESS, WAKE_ON_WLAN),
+	                    nmc_property_wireless_get_wake_on_wlan,
+	                    nmc_property_wireless_set_wake_on_wlan,
+	                    NULL,
+	                    NULL,
+	                    NULL,
+	                    NULL);
 
 	/* Add editable properties for NM_SETTING_WIRELESS_SECURITY_SETTING_NAME */
 	nmc_add_prop_funcs (GLUE (WIRELESS_SECURITY, KEY_MGMT),
@@ -8064,6 +8126,7 @@ setting_wireless_details (NMSetting *setting, NmCli *nmc,  const char *one_prop,
 	set_val_str (arr, 13, nmc_property_wireless_get_seen_bssids (setting, NMC_PROPERTY_GET_PRETTY));
 	set_val_str (arr, 14, nmc_property_wireless_get_hidden (setting, NMC_PROPERTY_GET_PRETTY));
 	set_val_str (arr, 15, nmc_property_wireless_get_powersave (setting, NMC_PROPERTY_GET_PRETTY));
+	set_val_str (arr, 16, nmc_property_wireless_get_wake_on_wlan (setting, NMC_PROPERTY_GET_PRETTY));
 	g_ptr_array_add (nmc->output_data, arr);
 
 	print_data (nmc);  /* Print all data */
