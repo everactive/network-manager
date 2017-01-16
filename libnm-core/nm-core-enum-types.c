@@ -1053,6 +1053,33 @@ nm_wep_key_type_get_type (void)
   return g_define_type_id__volatile;
 }
 GType
+nm_setting_wireless_wake_on_wlan_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+
+  if (g_once_init_enter (&g_define_type_id__volatile))
+    {
+      static const GFlagsValue values[] = {
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_ANY, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_ANY", "any" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_DISCONNECT, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_DISCONNECT", "disconnect" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_MAGIC, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_MAGIC", "magic" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_GTK_REKEY_FAILURE, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_GTK_REKEY_FAILURE", "gtk-rekey-failure" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_EAP_IDENTITY_REQUEST, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_EAP_IDENTITY_REQUEST", "eap-identity-request" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_4WAY_HANDSHAKE, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_4WAY_HANDSHAKE", "4way-handshake" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_RFKILL_RELEASE, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_RFKILL_RELEASE", "rfkill-release" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_TCP, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_TCP", "tcp" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT", "default" },
+        { NM_SETTING_WIRELESS_WAKE_ON_WLAN_IGNORE, "NM_SETTING_WIRELESS_WAKE_ON_WLAN_IGNORE", "ignore" },
+        { 0, NULL, NULL }
+      };
+      GType g_define_type_id =
+        g_flags_register_static (g_intern_static_string ("NMSettingWirelessWakeOnWLan"), values);
+      g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+    }
+
+  return g_define_type_id__volatile;
+}
+GType
 nm_setting_wireless_powersave_get_type (void)
 {
   static volatile gsize g_define_type_id__volatile = 0;

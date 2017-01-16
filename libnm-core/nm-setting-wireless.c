@@ -60,6 +60,8 @@ typedef struct {
 	gboolean hidden;
 	guint32 powersave;
 	NMSettingMacRandomization mac_address_randomization;
+	guint32 wowl;
+	char *wowl_password;
 } NMSettingWirelessPrivate;
 
 enum {
@@ -79,6 +81,8 @@ enum {
 	PROP_HIDDEN,
 	PROP_POWERSAVE,
 	PROP_MAC_ADDRESS_RANDOMIZATION,
+	PROP_WAKE_ON_WLAN,
+	PROP_WAKE_ON_WLAN_PASSWORD,
 
 	LAST_PROP
 };
@@ -850,6 +854,43 @@ nm_setting_wireless_get_security (NMSetting    *setting,
 		return NULL;
 }
 
+/**
+ * nm_setting_wireless_get_wake_on_wlan:
+ * @setting: the #NMSettingWireless
+ *
+ * Returns the Wake-on-WLAN options enabled for the connection
+ *
+ * Returns: the Wake-on-WLAN options
+ *
+ * Since: 1.2
+ */
+NMSettingWirelessWakeOnWLan
+nm_setting_wireless_get_wake_on_wlan (NMSettingWireless *setting)
+{
+	g_return_val_if_fail (NM_IS_SETTING_WIRELESS (setting), NM_SETTING_WIRELESS_WAKE_ON_WLAN_NONE);
+
+	return NM_SETTING_WIRELESS_GET_PRIVATE (setting)->wowl;
+}
+
+/**
+ * nm_setting_wired_get_wake_on_lan_password:
+ * @setting: the #NMSettingWireless
+ *
+ * Returns the Wake-on-WLAN password. This only applies to
+ * %NM_SETTING_WIRELESS_WAKE_ON_WLAN_MAGIC.
+ *
+ * Returns: the Wake-on-WLAN setting password, or %NULL if there is no password.
+ *
+ * Since: 1.2
+ */
+const char *
+nm_setting_wireless_get_wake_on_wlan_password (NMSettingWireless *setting)
+{
+	g_return_val_if_fail (NM_IS_SETTING_WIRELESS (setting), NULL);
+
+	return NM_SETTING_WIRELESS_GET_PRIVATE (setting)->wowl_password;
+}
+
 static void
 clear_blacklist_item (char **item_p)
 {
@@ -957,6 +998,13 @@ set_property (GObject *object, guint prop_id,
 	case PROP_MAC_ADDRESS_RANDOMIZATION:
 		priv->mac_address_randomization = g_value_get_uint (value);
 		break;
+	case PROP_WAKE_ON_WLAN:
+		priv->wowl = g_value_get_uint (value);
+		break;
+	case PROP_WAKE_ON_WLAN_PASSWORD:
+		g_free (priv->wowl_password);
+		priv->wowl_password = g_value_dup_string (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -1015,6 +1063,12 @@ get_property (GObject *object, guint prop_id,
 		break;
 	case PROP_MAC_ADDRESS_RANDOMIZATION:
 		g_value_set_uint (value, nm_setting_wireless_get_mac_address_randomization (setting));
+		break;
+	case PROP_WAKE_ON_WLAN:
+		g_value_set_uint (value, nm_setting_wireless_get_wake_on_wlan (setting));
+		break;
+	case PROP_WAKE_ON_WLAN_PASSWORD:
+		g_value_set_string (value, nm_setting_wireless_get_wake_on_wlan_password (setting));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1431,4 +1485,35 @@ nm_setting_wireless_class_init (NMSettingWirelessClass *setting_class)
 	_nm_setting_class_add_dbus_only_property (parent_class, "security",
 	                                          G_VARIANT_TYPE_STRING,
 	                                          nm_setting_wireless_get_security, NULL);
+
+	/**
+	 * NMSettingWireless:wake-on-wlan:
+	 *
+	 * The #NMSettingWirelessWakeOnWLan options to enable. Not all devices support all options.
+	 *
+	 * Since: 1.2
+	 **/
+	g_object_class_install_property
+		(object_class, PROP_WAKE_ON_WLAN,
+		 g_param_spec_uint (NM_SETTING_WIRELESS_WAKE_ON_WLAN, "", "",
+		                    0, G_MAXUINT32, NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT,
+		                    G_PARAM_CONSTRUCT |
+		                    G_PARAM_READWRITE |
+		                    G_PARAM_STATIC_STRINGS));
+
+	/**
+	 * NMSettingWireless:wake-on-wlan-password:
+	 *
+	 * If specified, the password used with magic-packet-based
+	 * Wake-on-LAN, represented as a MAC address.  If %NULL,
+	 * no password will be required.
+	 *
+	 * Since: 1.2
+	 **/
+	g_object_class_install_property
+		(object_class, PROP_WAKE_ON_WLAN_PASSWORD,
+		 g_param_spec_string (NM_SETTING_WIRELESS_WAKE_ON_WLAN_PASSWORD, "", "",
+		                      NULL,
+		                      G_PARAM_READWRITE |
+		                      G_PARAM_STATIC_STRINGS));
 }
