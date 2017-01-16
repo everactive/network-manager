@@ -1,0 +1,11 @@
+navigation:
+  - title: Introduction
+    children:
+      - title: About NetworkManager
+        location: index.md
+  - title: Reference
+    children:
+      - title: Configuration
+        children:
+          - title: Wake on WLAN
+            location: reference/configuration/wowlan.md
