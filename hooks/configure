@@ -34,17 +34,29 @@ switch_wifi_wake_on_wlan() {
     disabled)
       value=0
       ;;
-    global)
-      value=1
-      ;;
     any)
       value=2
+      ;;
+    disconnect)
+      value=4
       ;;
     magic)
       value=8
       ;;
-    all)
-      value=510
+    gtk-rekey-failure)
+      value=16
+      ;;
+    eap-identity-request)
+      value=32
+      ;;
+    4way-handshake)
+      value=64
+      ;;
+    rfkill-release)
+      value=128
+      ;;
+    tcp)
+      value=256
       ;;
     *)
       echo "ERROR: Invalid value provided for wifi.wake-on-wlan"
