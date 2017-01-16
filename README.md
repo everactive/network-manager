@@ -6,17 +6,6 @@ This is the snap to package the NetworkManager management service.
 
 All implemented hooks are stored inside the hooks directory.
 
-As snapcraft has no support as of today (09/12/2016) to include
-hooks in a snap this always needs to be done manually. For this
-
-$ snapcraft
-$ cp -r hooks prime/meta/
-$ snapcraft snap prime
-
-does the job. Please note that none of the snaps available from the
-store will have these hooks included until snapcraft receives
-support for hooks.
-
 ## Running tests
 
 We have a set of spread (https://github.com/snapcore/spread) tests which
