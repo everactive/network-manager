@@ -8,18 +8,22 @@ restore: |
     rmmod mac80211_hwsim
 
 execute: |
-    snap install wifi-ap
-
-    # Get two connected wifi network interfaces wlan0 and wlan1
+    # Get two connected wifi network interfaces wlan0 and wlan1 and
+    # give the system soem time to settle
     modprobe mac80211_hwsim radios=2
+    sleep 1
 
-    # Setup the AP on wlan1
-    /snap/bin/wifi-ap.config set wifi.interface wlan1
+    snap install wifi-ap
+    # FIXME: until the wifi-ap utility is clever enough to retry
+    # connecting with the service we need to add a short sleep here
+    sleep 0.5
+
+    # Setup the AP on wlan0
+    /snap/bin/wifi-ap.config set wifi.interface wlan0
     /snap/bin/wifi-ap.config set wifi.ssid $WIFI_SSID
     /snap/bin/wifi-ap.config set wifi.security wpa2
     /snap/bin/wifi-ap.config set wifi.security-passphrase $WIFI_PASSPHRASE
-    /snap/bin/wifi-ap.config set disabled 0
-    systemctl restart snap.wifi-ap.backend
+
     # AP needs a bit to appear and be visible for NetworkManager
     /snap/bin/network-manager.nmcli d wifi rescan
     while ! /snap/bin/network-manager.nmcli d wifi | grep Ubuntu ; do
@@ -31,4 +35,4 @@ execute: |
 
     # Connect to the AP and ensure the connection was established
     /snap/bin/network-manager.nmcli d wifi connect $WIFI_SSID password $WIFI_PASSPHRASE
-    /snap/bin/network-manager.nmcli d | grep 'wlan0.*connected'
+    /snap/bin/network-manager.nmcli d | grep 'wlan1.*connected'
