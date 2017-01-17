@@ -39,6 +39,12 @@ exclude:
 prepare: |
   . $TESTSLIB/prepare-all.sh
 
+# Default is 15 min but we use a higher one here as we build the entire
+# network-manager snap inside the global prepare step so we need quite
+# some time. Once we can reuse artifacts from other builds we can change
+# this back to the default.
+kill-timeout: 30m
+
 suites:
     tests/main/:
         summary: Full-system tests for NetworkManager without ethernet support

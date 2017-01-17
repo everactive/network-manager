@@ -18,7 +18,7 @@ execute: |
     # connecting with the service we need to add a short sleep here
     sleep 0.5
 
-    # Setup the AP on wlan1
+    # Setup the AP on wlan0
     /snap/bin/wifi-ap.config set wifi.interface wlan0
     /snap/bin/wifi-ap.config set wifi.ssid $WIFI_SSID
     /snap/bin/wifi-ap.config set wifi.security wpa2
