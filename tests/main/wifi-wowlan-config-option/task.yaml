@@ -30,14 +30,22 @@ execute: |
     # Test all other possible keys for the wifi.wake-on-wlan option
     snap set network-manager wifi.wake-on-wlan=disabled
     grep "^wifi.wake-on-wlan=0$" $WIFI_WOWL_CONF_PATH
-    snap set network-manager wifi.wake-on-wlan=global
-    grep "^wifi.wake-on-wlan=1$" $WIFI_WOWL_CONF_PATH
     snap set network-manager wifi.wake-on-wlan=any
     grep "^wifi.wake-on-wlan=2$" $WIFI_WOWL_CONF_PATH
+    snap set network-manager wifi.wake-on-wlan=disconnect
+    grep "^wifi.wake-on-wlan=4$" $WIFI_WOWL_CONF_PATH
     snap set network-manager wifi.wake-on-wlan=magic
     grep "^wifi.wake-on-wlan=8$" $WIFI_WOWL_CONF_PATH
-    snap set network-manager wifi.wake-on-wlan=all
-    grep "^wifi.wake-on-wlan=510$" $WIFI_WOWL_CONF_PATH
+    snap set network-manager wifi.wake-on-wlan=gtk-rekey-failure
+    grep "^wifi.wake-on-wlan=16$" $WIFI_WOWL_CONF_PATH
+    snap set network-manager wifi.wake-on-wlan=eap-identity-request
+    grep "^wifi.wake-on-wlan=32$" $WIFI_WOWL_CONF_PATH
+    snap set network-manager wifi.wake-on-wlan=4way-handshake
+    grep "^wifi.wake-on-wlan=64$" $WIFI_WOWL_CONF_PATH
+    snap set network-manager wifi.wake-on-wlan=rfkill-release
+    grep "^wifi.wake-on-wlan=128$" $WIFI_WOWL_CONF_PATH
+    snap set network-manager wifi.wake-on-wlan=tcp
+    grep "^wifi.wake-on-wlan=256$" $WIFI_WOWL_CONF_PATH
 
     # Not setting any concrete value should remove the configuration
     snap set network-manager wifi.wake-on-wlan-password=
