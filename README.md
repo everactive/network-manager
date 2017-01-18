@@ -106,13 +106,13 @@ picked.
 
 All documentation is available in the docs/ subdirectory. It uses markdown
 and the documentation-builder (<https://github.com/CanonicalLtd/documentation-builder>)
-to generate HTML based documentation.
+to generate HTML-based documentation.
 
-To generate the HTML pages install the documentation build snap first
+To generate the HTML pages install the documentation-builder snap first
 
 ```
- $ snap install documentation-build
- $ snap connect documentation-build:home core
+ $ snap install documentation-builder
+ $ snap connect documentation-builder:home core
 ```
 
 then enter the docs/ subdirectory and run the builder
@@ -122,7 +122,7 @@ then enter the docs/ subdirectory and run the builder
  $ documentation-builder
 ```
 
-It will generate all documentation as HTML in the a build/ subdirectory. Open
+It will generate all documentation as HTML in the build/ subdirectory. Open
 it via
 
 ```
