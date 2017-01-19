@@ -2418,6 +2418,45 @@ set_powersave (NMDevice *device)
 	                                powersave == NM_SETTING_WIRELESS_POWERSAVE_ENABLE);
 }
 
+static gboolean
+wake_on_wlan_enable (NMDevice *device)
+{
+	NMSettingWirelessWakeOnWLan wowl;
+	NMSettingWireless *s_wireless;
+	const char *password = NULL;
+	gs_free char *value = NULL;
+
+	s_wireless = (NMSettingWireless *) nm_device_get_applied_setting (device, NM_TYPE_SETTING_WIRELESS);
+	if (s_wireless) {
+		wowl = nm_setting_wireless_get_wake_on_wlan (s_wireless);
+		password = nm_setting_wireless_get_wake_on_wlan_password (s_wireless);
+		if (wowl != NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT)
+			goto found;
+	}
+
+	value = nm_config_data_get_connection_default (NM_CONFIG_GET_DATA,
+	                                               "wireless.wake-on-wlan",
+	                                               device);
+
+	if (value) {
+		wowl = _nm_utils_ascii_str_to_int64 (value, 10,
+		                                    NM_SETTING_WIRELESS_WAKE_ON_WLAN_NONE,
+		                                    G_MAXINT32,
+		                                    NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT);
+
+		if (   NM_FLAGS_ANY (wowl, NM_SETTING_WIRELESS_WAKE_ON_WLAN_EXCLUSIVE_FLAGS)
+		    && !nm_utils_is_power_of_two (wowl)) {
+			nm_log_dbg (LOGD_WIFI, "invalid default value %u for wake-on-wlan", (guint) wowl);
+			wowl = NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT;
+		}
+		if (wowl != NM_SETTING_WIRELESS_WAKE_ON_WLAN_DEFAULT)
+			goto found;
+	}
+	wowl = NM_SETTING_WIRELESS_WAKE_ON_WLAN_IGNORE;
+found:
+	return nm_platform_wifi_set_wake_on_wlan (NM_PLATFORM_GET, nm_device_get_ifindex (device), wowl, password);
+}
+
 static NMActStageReturn
 act_stage2_config (NMDevice *device, NMDeviceStateReason *reason)
 {
@@ -2450,6 +2489,8 @@ act_stage2_config (NMDevice *device, NMDeviceStateReason *reason)
 
 	s_wireless = nm_connection_get_setting_wireless (connection);
 	g_assert (s_wireless);
+
+	wake_on_wlan_enable (device);
 
 	/* If we need secrets, get them */
 	setting_name = nm_connection_need_secrets (connection, NULL);

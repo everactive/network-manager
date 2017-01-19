@@ -32,6 +32,7 @@
 #include "nm-core-utils.h"
 #include "nm-setting-vlan.h"
 #include "nm-setting-wired.h"
+#include "nm-setting-wireless.h"
 
 #define NM_TYPE_PLATFORM            (nm_platform_get_type ())
 #define NM_PLATFORM(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NM_TYPE_PLATFORM, NMPlatform))
@@ -586,6 +587,7 @@ typedef struct {
 	void        (*wifi_set_powersave)    (NMPlatform *, int ifindex, guint32 powersave);
 	guint32     (*wifi_find_frequency)   (NMPlatform *, int ifindex, const guint32 *freqs);
 	void        (*wifi_indicate_addressing_running) (NMPlatform *, int ifindex, gboolean running);
+	gboolean    (*wifi_set_wake_on_wlan) (NMPlatform *, int ifindex, NMSettingWirelessWakeOnWLan wowl, const char *password);
 
 	guint32     (*mesh_get_channel)      (NMPlatform *, int ifindex);
 	gboolean    (*mesh_set_channel)      (NMPlatform *, int ifindex, guint32 channel);
@@ -836,6 +838,7 @@ void        nm_platform_wifi_set_mode         (NMPlatform *self, int ifindex, NM
 void        nm_platform_wifi_set_powersave    (NMPlatform *self, int ifindex, guint32 powersave);
 guint32     nm_platform_wifi_find_frequency   (NMPlatform *self, int ifindex, const guint32 *freqs);
 void        nm_platform_wifi_indicate_addressing_running (NMPlatform *self, int ifindex, gboolean running);
+gboolean    nm_platform_wifi_set_wake_on_wlan (NMPlatform *self, int ifindex, NMSettingWirelessWakeOnWLan wowl, const char *password);
 
 guint32     nm_platform_mesh_get_channel      (NMPlatform *self, int ifindex);
 gboolean    nm_platform_mesh_set_channel      (NMPlatform *self, int ifindex, guint32 channel);
