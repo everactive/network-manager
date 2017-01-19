@@ -6,17 +6,6 @@ This is the snap to package the NetworkManager management service.
 
 All implemented hooks are stored inside the hooks directory.
 
-As snapcraft has no support as of today (09/12/2016) to include
-hooks in a snap this always needs to be done manually. For this
-
-$ snapcraft
-$ cp -r hooks prime/meta/
-$ snapcraft snap prime
-
-does the job. Please note that none of the snaps available from the
-store will have these hooks included until snapcraft receives
-support for hooks.
-
 ## Running tests
 
 We have a set of spread (https://github.com/snapcore/spread) tests which
@@ -112,3 +101,32 @@ management service in the system.
 
 Depending on the nature of a test case the right test suite should be
 picked.
+
+## Documentation
+
+All documentation is available in the docs/ subdirectory. It uses markdown
+and the documentation-builder (<https://github.com/CanonicalLtd/documentation-builder>)
+to generate HTML-based documentation.
+
+To generate the HTML pages install the documentation-builder snap first
+
+```
+ $ snap install documentation-builder
+ $ snap connect documentation-builder:home core
+```
+
+then enter the docs/ subdirectory and run the builder
+
+```
+ $ cd docs
+ $ documentation-builder
+```
+
+It will generate all documentation as HTML in the build/ subdirectory. Open
+it via
+
+```
+ $ google-chrome build/index.html
+```
+
+for example.
