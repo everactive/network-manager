@@ -33,7 +33,8 @@ Both options can be set via the configuration API snap provide. See
 details.
 
 Both configuration options will affect all wireless network devices. If you
-want to change it just for a single wireless connection please read the
+want to change it just for a single wireless connection please have a look at
+the chapter [Per Connection Configuration](#per-connection-configuration) below.
 
 
 ### wifi.wake-on-wlan
@@ -55,6 +56,7 @@ This configuration option accepts the following values
  * **rfkill-release:** Release of a rfkill will cause the device to wake up.
  * **tcp:** Any incoming TCP packet will cause the device to wake up.
 
+Example:
 
 ```
  $ snap set network-manager wifi.wake-on-wlan=magic
@@ -64,7 +66,7 @@ This configuration option accepts the following values
 
 This configuration option accepts a textual value. If specified, the value will
 be used in addition to the wireless device MAC address to function as a password
-to disallows unpriviledged actors to wake up the device.
+that disallows unpriviledged actors to wake up the device.
 
 Example:
 
