@@ -26,6 +26,20 @@ mkdir -p $SNAP_DATA/conf.d
 mkdir -p $SNAP_DATA/state
 mkdir -p $SNAP_DATA/state/dhcp
 
+# Workaround the case that only the network-manager interface slot
+# side has read-write access to /etc/netplan. The configure hook
+# will create $SNAP_DATA/state/ethernet_enabled when we're supposed
+# to enable ethernet support as the user called
+#  $ snap set network-manager ethernet=enabled
+# If that file isn't present (config item has value `disabled`) we
+# drop ethernet support again.
+if [ -e $SNAP_DATA/state/ethernet_enabled ] ; then
+    echo "network:" > /etc/netplan/00-default-nm-renderer.yaml
+    echo "   renderer: NetworkManager" >> /etc/netplan/00-default-nm-renderer.yaml
+else
+    rm -f /etc/netplan/00-default-nm-renderer.yaml
+fi
+
 # If netplan is not configured to render by default to NetworkManager
 # configuration files we disable management of any ethernet device
 # as this will clash with any configuration netplan puts in place

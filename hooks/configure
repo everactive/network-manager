@@ -78,6 +78,20 @@ switch_wifi_wake_on_wlan() {
   fi
 }
 
+switch_ethernet() {
+  case "$1" in
+    true)
+      touch $SNAP_DATA/state/ethernet_enabled
+      ;;
+    false)
+      rm -f $SNAP_DATA/state/ethernet_enabled
+      ;;
+    *)
+      echo "ERROR: Invalid value provided for ethernet"
+      exit 1
+  esac
+}
+
 value="`snapctl get wifi.powersave`"
 if [ -n "$value" ]; then
   switch_wifi_powersave $value
@@ -95,4 +109,12 @@ else
   snapctl set wifi.wake-on-wlan=disabled
   snapctl set wifi.wake-on-wlan-password=
   switch_wifi_wake_on_wlan disabled ""
+fi
+
+value=`snapctl get ethernet.enable`
+if [ -n "$value" ]; then
+  switch_ethernet $value
+else
+  snapctl set ethernet.enable=false
+  switch_ethernet false
 fi
