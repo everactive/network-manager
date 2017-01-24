@@ -18,6 +18,7 @@ set -e
 
 image_name=ubuntu-core-16.img
 channel=stable
+snap=
 spread_opts=
 force_new_image=0
 test_from_channel=0
@@ -25,9 +26,13 @@ test_from_channel=0
 show_help() {
     echo "Usage: run-tests.sh [OPTIONS]"
     echo
+    echo "Uses spread to execute tests. If required or prompted can generate"
+    echo "Ubuntu Core image for testing."
+    echo
     echo "optional arguments:"
     echo "  --help                 Show this help message and exit"
     echo "  --channel              Select another channel to build the base image from (default: $channel)"
+    echo "  --snap		   Extra snap to install"
     echo "  --debug                Enable verbose debugging output"
     echo "  --test-from-channel    Pull network-manager snap from the specified channel instead of building it from source"
     echo "  --force-new-image      Force generating a new image used for testing"
@@ -41,6 +46,10 @@ while [ -n "$1" ]; do
 			;;
 		--channel=*)
 			channel=${1#*=}
+			shift
+			;;
+		--snap=*)
+			snap=${1#*=}
 			shift
 			;;
 		--test-from-channel)
@@ -70,10 +79,29 @@ fi
 
 # Make sure we have a base image we use for testing
 if [ ! -e $SPREAD_QEMU_PATH/$image_name ] || [ $force_new_image -eq 1 ] ; then
+
+	# Get the image creating scripts
+	CREATE_IMAGE_URL="https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/create-image-scripts"
+	TESTS_EXTRAS_PATH="tests-extras"
+	CREATE_IMAGE_PATH=$TESTS_EXTRAS_PATH"/create-image-scripts"
+
+	if [ -d "$TESTS_EXTRAS_PATH" ]; then
+		rm -rf $TESTS_EXTRAS_PATH
+	fi
+	echo "INFO: Fetching test image creating scripts into $TESTS_EXTRAS_PATH ..."
+	(git clone -b master $CREATE_IMAGE_URL $TESTS_EXTRAS_PATH >/dev/null 2>&1)
+	if [ $? -ne 0 ]; then
+		echo "ERROR: Failed to fetch the $CREATE_IMAGE_URL repo, exiting.."
+		exit 1
+	fi
+
 	echo "INFO: Creating new qemu test image ..."
-	(cd tests/image ; sudo ./create-image.sh $channel)
+	(cd $CREATE_IMAGE_PATH; sudo ./create-image.sh $channel $snap)
 	mkdir -p $SPREAD_QEMU_PATH
-	mv tests/image/ubuntu-core-16.img $SPREAD_QEMU_PATH/$image_name
+	mv $CREATE_IMAGE_PATH/ubuntu-core-16.img $SPREAD_QEMU_PATH/$image_name
+
+	# Not needed at this point
+	rm -rf $TESTS_EXTRAS_PATH
 fi
 
 # We currently only run spread tests but we could do other things
