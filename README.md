@@ -47,7 +47,14 @@ Now you have everything to run the test suite.
   $ ./run-tests
 ```
 
-The script will create an image via ubuntu-image and make it available
+The script will reach out to tests-extras repository and download the helper
+scripts: image creator and test runner. Next it will execute the test runner
+passing the arguments as-is.
+
+The helper scripts are tracked here:
+https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/tests-extras
+
+The test runner script will create an image via ubuntu-image and make it available
 to spread by copying it to ~/.spread/qemu or ~/snap/spread/<version>/.spread/qemu
 depending on if you're using a local spread version or the one from the
 snap.
