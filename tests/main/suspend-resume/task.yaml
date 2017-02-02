@@ -51,7 +51,8 @@ execute: |
     # Kick off the actual suspend in background so that we can continue
     # verifying the correct state left by the system before it would
     # normally enter a sleep state.
-    systemctl suspend --no-block &
+    systemctl suspend --no-block || true
+    sleep 1
 
     # The easiest way to ensure NetworkManager did the right thing is
     # by going through its log output and verifying it prints out

@@ -39,6 +39,18 @@ exclude:
 prepare: |
   . $TESTSLIB/prepare-all.sh
 
+prepare-each: |
+  # Cleanup logs so we can just dump what has happened in the debug-each
+  # step below after a test case ran.
+  journalctl --rotate
+  sleep .1
+  journalctl --vacuum-time=1ms
+  dmesg -c > /dev/null
+
+debug-each: |
+  journalctl
+  dmesg | grep DENIED || true
+
 # Default is 15 min but we use a higher one here as we build the entire
 # network-manager snap inside the global prepare step so we need quite
 # some time. Once we can reuse artifacts from other builds we can change
