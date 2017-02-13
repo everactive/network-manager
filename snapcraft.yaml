@@ -162,6 +162,11 @@ parts:
       - --with-libsoup=no
       # We want to support ModemManager
       - --with-modem-manager-1=yes
+      - --enable-tests=yes
+
+    install: |
+      # Run all tests NetworkManager ships by default
+      make check
 
     # Filter files pulled in by stage-packages so they aren't
     # included in the final snap. We only need them to build
