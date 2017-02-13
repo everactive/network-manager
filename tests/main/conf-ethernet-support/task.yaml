@@ -1,5 +1,9 @@
 summary: Verify ethernet support can be enabled via configuration option
 
+# FIXME: Can be enabled again once the network-setup-control interface landed
+# in a stable version of core/snapd.
+manual: true
+
 execute: |
     . $TESTSLIB/utilities.sh
 
