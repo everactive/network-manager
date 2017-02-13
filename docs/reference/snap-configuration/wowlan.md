@@ -5,6 +5,8 @@ table_of_contents: True
 
 # Wake on WLAN
 
+*Available since:* 1.2.2-11
+
 Wake on WLAN (called WoWLAN in the following) is a feature which allows a device
 to be woken up from standby power states to faciliate device management. It is based
 on the well well-established standard for Wake on LAN. The functionality is not entirely
