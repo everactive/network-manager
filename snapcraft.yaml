@@ -40,6 +40,11 @@ apps:
     #
     # aliases: [NetworkManager]
 
+hooks:
+  configure:
+    plugs:
+      - network-setup-control
+
 parts:
   hooks:
     plugin: dump

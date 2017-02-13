@@ -2,8 +2,16 @@ summary: Verify ethernet support can be enabled via configuration option
 
 execute: |
     . $TESTSLIB/utilities.sh
+
+    # We need to have the network-setup-control interface available as
+    # otherwise the hook can't do its job
+    snap interfaces | grep network-setup-control
+
     case "$SPREAD_REBOOT" in
         0)
+            # We should now have the interface available
+            snap interfaces | grep network-setup-control
+
             # In the default setup NetworkManager doesn't take over ethernet
             wait_for_network_manager
 
@@ -20,26 +28,22 @@ execute: |
             REBOOT
             ;;
         1)
-            # Give NetworkManager a bit to come up after the reboot
-            wait_for_network_manager
-
-            # After the first boot we're in a situation where both NetworkManager
-            # and networkd are active and taking over ethernet. This is because
-            # the hook itself currently can't change the netplan configuration
-            # and the netplan generator systemd job runs before the NetworkManager
-            # service is started so the 00-default-nm-renderer.yaml file will be
-            # only created afterwards.
-            test -e /etc/netplan/00-default-nm-renderer.yaml
-            networkctl | grep 'eth0.*routable'
-
-            REBOOT
-            ;;
-        2)
             # NetworkManager now controls eth0 and networkd does not
             /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
             # ... and we're running with the netplan configuration
             /snap/bin/network-manager.nmcli d | grep 'netplan-eth0'
             networkctl status eth0 | grep 'State: n/a'
+
+            # Now lets switch back to network by using the configuration
+            # item again and doing another reboot.
+            snap set network-manager ethernet.enable=false
+            test "`snap get network-manager ethernet.enable`" = "false"
+            REBOOT
+            ;;
+        2)
+            # networkd manages eth0 and NetworkManager does not
+            networkctl | grep 'eth0.*routable'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
             ;;
         *)
             exit 1

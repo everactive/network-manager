@@ -81,10 +81,13 @@ switch_wifi_wake_on_wlan() {
 switch_ethernet() {
   case "$1" in
     true)
-      touch $SNAP_DATA/state/ethernet_enabled
+      cat <<EOF > /etc/netplan/00-default-nm-renderer.yaml
+network:
+  renderer: NetworkManager
+EOF
       ;;
     false)
-      rm -f $SNAP_DATA/state/ethernet_enabled
+      rm -f /etc/netplan/00-default-nm-renderer.yaml
       ;;
     *)
       echo "ERROR: Invalid value provided for ethernet"
