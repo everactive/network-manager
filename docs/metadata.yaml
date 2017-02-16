@@ -13,6 +13,8 @@ navigation:
         location: exploring-network-status.md
       - title: Configuring WiFi Connections
         location: configuring-wifi-connections.md
+      - title: Configuring Cellular Connections
+        location: configuring-cellular-connections.md
       - title: Enable Ethernet Support
         location: enable-ethernet-support.md
   - title: Reference
