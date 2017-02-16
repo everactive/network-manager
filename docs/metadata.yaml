@@ -1,11 +1,35 @@
+site_title: NetworkManager documentation
+site_logo_url: https://assets.ubuntu.com/v1/c5cb0f8e-picto-ubuntu.svg
 navigation:
   - title: Introduction
     children:
       - title: About NetworkManager
         location: index.md
+  - title: Install & Configure
+    children:
+      - title: Install NetworkManager
+        location: installation.md
+      - title: Exploring Network Status
+        location: exploring-network-status.md
+      - title: Configuring WiFi Connections
+        location: configuring-wifi-connections.md
+      - title: Enable Ethernet Support
+        location: enable-ethernet-support.md
   - title: Reference
     children:
-      - title: Configuration
+      - title: Snap Configuration
         children:
           - title: Wake on WLAN
-            location: reference/configuration/wowlan.md
+            location: reference/snap-configuration/wowlan.md
+      - title: Available Commands
+        location: reference/available-commands.md
+      - title: DBUS API
+        location: reference/dbus-api.md
+  - title: Troubleshoot
+    children:
+      - title: FAQ
+        location: faq.md
+  - title: Release Notes
+    location: release-notes.md
+  - title: Report a Bug
+    location: report-bug.md

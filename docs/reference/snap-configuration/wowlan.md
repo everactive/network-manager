@@ -20,7 +20,7 @@ You can read more about the kernel side implementation on the following sites:
 
  * <https://wireless.wiki.kernel.org/en/users/documentation/wowlan>
 
-## Enable Wake on WLAN Globally
+### Enable Wake on WLAN Globally
 
 To allow users to enable or disable WoWLAN, the snap provides two configuration
 options:
@@ -28,7 +28,7 @@ options:
  * **wifi.wake-on-wlan**
  * **wifi.wake-on-wlan-password**
 
-Both options can be set via the configuration API snap provide. See
+Both options can be set via the configuration API snaps provide. See
 <https://docs.ubuntu.com/core/en/guides/build-device/config-hooks> for more
 details.
 
@@ -37,14 +37,14 @@ want to change it just for a single wireless connection please have a look at
 the chapter [Per Connection Configuration](#per-connection-configuration) below.
 
 
-### wifi.wake-on-wlan
+#### wifi.wake-on-wlan
 
 This configuration option accepts the following values
 
  * **disabled (default):** Wake on WLAN is disabled for all wireless network devices.
  * **any:** Wake on WLAN is enabled and any possible trigger will cause the system to wake up.
  * **disconnect:** If a connection to a station gets disconnected the device will be woken up.
- * **magic:** Wake on WLAN is enabled and only a received magic packet will cause the 
+ * **magic:** Wake on WLAN is enabled and only a received magic packet will cause the
  system to wake up. The magic packet has the same structure as the one
  used for Wake on LAN. For more details see <https://en.wikipedia.org/wiki/Wake-on-LAN#Magic_packet>
  The content of the magic packet can be extended with the
@@ -62,7 +62,7 @@ Example:
  $ snap set network-manager wifi.wake-on-wlan=magic
 ```
 
-### wifi.wake-on-wlan-password
+#### wifi.wake-on-wlan-password
 
 This configuration option accepts a textual value. If specified, the value will
 be used in addition to the wireless device MAC address to function as a password
@@ -73,8 +73,8 @@ Example:
 ```
  $ snap set network-manager wifi.wake-on-wlan-password=MyPassword
 ```
-
-## Per Connection Configuration
+</br>
+### Per Connection Configuration
 
 To configure WoWLAN per connection you have to use the *nmcli* utility which comes
 with the NetworkManager snap. It allows you to configure the same two options
@@ -103,8 +103,8 @@ Example:
  $ nmcli c modify my-connection wifi.wake-on-wlan 2
  $ nmcli c modify my-connection wifi.wake-on-wlan-password Test1234
 ```
-
-## Verify WoWLAN Configuration
+</br>
+### Verify WoWLAN Configuration
 
 NetworkManager will use the kernel to configure WoWLAN on the hardware level.
 The *iw* utility provides a simple way to verify the right option is configured.
