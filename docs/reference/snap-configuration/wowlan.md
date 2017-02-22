@@ -1,19 +1,19 @@
 ---
 title: Wake on WLAN
-table_of_contents: true
+table_of_contents: True
 ---
 
 # Wake on WLAN
 
 Wake on WLAN (called WoWLAN in the following) is a feature which allows a device
 to be woken up from standby power states to faciliate device management. It is based
-on the well established standard for Wake on LAN. The functionality is not entirely
+on the well well-established standard for Wake on LAN. The functionality is not entirely
 equivalent to Wake on LAN and there are some limitations.
 
 The NetworkManager snap allows its users to configure one or more triggers to allow
 the device it operates on to be woken up remotely.
 
-An important precondition for WoWLAN to work is that your kernel WiFi driver has
+An important precondition for WoWLAN to work is that your device's kernel WiFi driver has
 support for it.
 
 You can read more about the kernel side implementation on the following sites:
@@ -39,7 +39,7 @@ the chapter [Per Connection Configuration](#per-connection-configuration) below.
 
 #### wifi.wake-on-wlan
 
-This configuration option accepts the following values
+This configuration option accepts the following values:
 
  * **disabled (default):** Wake on WLAN is disabled for all wireless network devices.
  * **any:** Wake on WLAN is enabled and any possible trigger will cause the system to wake up.

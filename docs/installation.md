@@ -6,7 +6,7 @@ table_of_contents: True
 # Install NetworkManager
 
 The NetworkManager snap is currently available from the Ubuntu Store. It can
-be installed on any system that support snaps but is only recommended on
+be installed on any system that supports snaps but is only recommended on
 [Ubuntu Core](https://www.ubuntu.com/core) at the moment.
 
 You can install the snap with the following command:
@@ -17,7 +17,7 @@ You can install the snap with the following command:
 ```
 
 The snap is available from other channels (candidate, beta, edge) too but those
-are not meant for the general use. Their meaning is internal to the development
+are not meant for general use. Their meaning is internal to the development
 team of the network-manager snap.
 
 All necessary plugs and slots will be automatically connected within the
@@ -50,6 +50,9 @@ status with
 
 Now you have NetworkManager successfully installed.
 
-## Next steps
+## Next Steps
 
- * TBD
+ * [Enable Ethernet Support](enable-ethernet-support.md)
+ * [Explore Network Status](explore-network-status.md)
+ * [Configure WiFi Connections](configure-wifi-connections.md)
+ * [Configure Cellular Connections](configure-cellular-connections.md)

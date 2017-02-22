@@ -6,7 +6,7 @@ table_of_contents: False
 # FAQ
 
 This section covers some of the most commonly encountered problems and attempts
-to resolve them.
+to provide solutions for them.
 
 ## Ethernet devices are not used
 

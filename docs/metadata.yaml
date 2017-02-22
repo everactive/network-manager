@@ -9,12 +9,12 @@ navigation:
     children:
       - title: Install NetworkManager
         location: installation.md
-      - title: Exploring Network Status
-        location: exploring-network-status.md
-      - title: Configuring WiFi Connections
-        location: configuring-wifi-connections.md
-      - title: Configuring Cellular Connections
-        location: configuring-cellular-connections.md
+      - title: Explore Network Status
+        location: explore-network-status.md
+      - title: Configure WiFi Connections
+        location: configure-wifi-connections.md
+      - title: Configure Cellular Connections
+        location: configure-cellular-connections.md
       - title: Enable Ethernet Support
         location: enable-ethernet-support.md
   - title: Reference

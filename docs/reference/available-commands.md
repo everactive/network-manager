@@ -15,5 +15,5 @@ is given on linked pages.
 The nmcli command offers a command-line based way to control and manage the
 NetworkManager service.
 
-An explanatory description of the command and available options is available
+An explanatory description of the command and available options are available
 [here](https://developer.gnome.org/NetworkManager/1.2/nmcli.html)
