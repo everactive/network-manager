@@ -15,7 +15,7 @@ Found 1 modems:
 
 In this case we have just one modem, with id 0 (the number at the end of the DBus path).
 
-Show detailed informatoin about the modem:
+Show detailed information about the modem:
 
 ```
 $ modem-manager.mmcli -m 0
@@ -57,7 +57,7 @@ $ modem-manager.mmcli -m 0
   Bearers  |          paths: 'none'
 ```
 
-In this case we can see that the SIM has PIN enabled and state is ‘locked’. To enter the PIN, we need not now the SIM number id, which in this case is 0 (it is the number at the end of /org/freedesktop/ModemManager1/SIM/0). Knowing that we can send the PIN with:
+In this case we can see that the SIM has PIN enabled and state is ‘locked’. To enter the PIN, we need to know the SIM number id, which in this case is 0 (it is the number at the end of /org/freedesktop/ModemManager1/SIM/0). Knowing that we can send the PIN with:
 
 ```
 $ modem-manager.mmcli -i 0 --pin=<PIN>

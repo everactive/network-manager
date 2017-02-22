@@ -5,7 +5,7 @@ table_of_contents: False
 
 # Release Notes
 
-The version numbers mentioned on this page correspond to those release in the
+The version numbers mentioned on this page correspond to those released in the
 Ubuntu snap store.
 
 You can check with the following command which version you have currently
