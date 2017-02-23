@@ -32,6 +32,10 @@ Currently we provide support for the following high level features:
  * WWAN connectivity (together with ModemManager)
  * Ethernet connectivity
 
+ Currently we do not support the following features:
+
+  * VPN
+
 ## Upstream documentation
 
 Existing documentation from the upstream project can be found

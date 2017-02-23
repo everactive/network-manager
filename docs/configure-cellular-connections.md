@@ -58,9 +58,9 @@ $ sudo modem-manager.mmcli -m 0
 ```
 
 In this case we can see that the SIM has PIN locking enabled and its state is
-‘locked’. To enter the PIN, we need to know the SIM number id, which in this
+‘locked’. To enter the PIN, we need to know the SIM index, which in this
 case is 0 (it is the number at the end of /org/freedesktop/ModemManager1/SIM/0).
-Knowing that we can send the PIN to the SIM with:
+Once the index is known, we can enter the SIM PIN with:
 
 ```
 $ sudo modem-manager.mmcli -i 0 --pin=<PIN>

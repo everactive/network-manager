@@ -40,7 +40,7 @@ $ nmcli c modify <name> wifi-sec.key-mgmt wpa-psk wifi-sec.psk <password>
 <name> is an arbitrary name given to the connection, and <password> is the
 password for the connection (this last command can be used to change the
 password too) and the password needs have 8-63 characters or 64 characters to
-specify a full key in hexadecimal characters.. New connections have DHCP enabled
+specify a full 256-bit key in hexadecimal characters. New connections have DHCP enabled
 for both IPv4 and IPv6 by default.
 
 Once a connection has been created, NetworkManager will consider it for
