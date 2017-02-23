@@ -16,12 +16,12 @@ You can install the snap with the following command:
  network-manager 1.2.2-10 from 'canonical' installed
 ```
 
-The snap is available from other channels (candidate, beta, edge) too but those
-are not meant for general use. Their meaning is internal to the development
-team of the network-manager snap.
+Although the network-manager snap is available from other channels (candidate, beta, edge),
+only the stable version should be used for production devices. Their meaning is internal
+to the development team of the network-manager snap.
 
 All necessary plugs and slots will be automatically connected within the
-installation process. You can verify this with
+installation process. You can verify this with:
 
 ```
 $ snap interfaces network-manager
@@ -40,9 +40,9 @@ NetworkManager service is running in the background. You can check its current
 status with
 
 ```
- $ systemctl status snap.network-manager.networkmanager
- ● snap.network-manager.networkmanager.service - Service for snap application network-manager.networkmanager
-   Loaded: loaded (/etc/systemd/system/snap.network-manager.networkmanager.service; enabled; vendor preset: enabled)
+ $ systemctl status snap.networkmanager
+ ● snap.networkmanager.service - Service for snap application networkmanager
+   Loaded: loaded (/etc/systemd/system/snap.networkmanager.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2017-02-16 09:59:39 UTC; 16s ago
    Main PID: 1389 (networkmanager)
    [...]
@@ -52,7 +52,7 @@ Now you have NetworkManager successfully installed.
 
 ## Next Steps
 
- * [Enable Ethernet Support](enable-ethernet-support.md)
+ * [Enable Ethernet Support](enable-Ethernet-support.md)
  * [Explore Network Status](explore-network-status.md)
  * [Configure WiFi Connections](configure-wifi-connections.md)
  * [Configure Cellular Connections](configure-cellular-connections.md)

@@ -5,10 +5,10 @@ table_of_contents: true
 
 # Available Commands
 
-The network-manager snap comes with a few commands which can be used to control
-and manage the NetworkManager service. This page gives a short overview of the
-available commands and what they are used for. Further details about their usage
-is given on linked pages.
+The NetworkManager upstream project comes with a few commands which can be used
+to control and manage the NetworkManager service. This page gives a short overview
+of those commands which are available as part of the snap and what they are used for.
+Further details about their usage is given on linked pages.
 
 ## nmcli
 

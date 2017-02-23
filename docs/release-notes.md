@@ -17,10 +17,10 @@ name:      network-manager
 summary:   "Network management based on NeworkManager"
 publisher: canonical
 description: |
-  Network management of wired ethernet, WiFi and mobile data connection based on
+  Network management of wired Ethernet, WiFi and mobile data connection based on
   NetworkManager and ModemManager
 commands:
-  - network-manager.nmcli
+  - nmcli
 tracking:    stable
 installed:   1.2.2-10 (73) 5MB -
 [...]

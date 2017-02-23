@@ -14,19 +14,19 @@ When submitting a bug report, please attach:
 And the output of the following two commands:
 
 ```
-$ network-manager.nmcli d
-$ network-manager.nmcli c
+$ nmcli d
+$ nmcli c
 ```
 
 If there is a modem and the modem-manager snap is installed, also add the output
 of
 
 ```
-$ modem-manager.mmcli -m <N>
+$ sudo modem-manager.mmcli -m <N>
 ```
 
 With being <N> the modem number as reported by
 
 ```
-$ modem-manager.mmcli -L
+$ sudo modem-manager.mmcli -L
 ```

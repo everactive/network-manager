@@ -11,27 +11,28 @@ of NetworkManager’s connections and devices.
 Show the status of devices known to NetworkManager:
 
 ```
-$ network-manager.nmcli d
+$ nmcli d
 ```
 
 Show more information for this option:
 
 ```
-$ network-manager.nmcli d --help
+$ nmcli d --help
 ```
 
 Show the current status of each of NetworkManager’s connections:
 
 ```
-$ network-manager.nmcli c
+$ nmcli c
 ```
 
-Option “c” is for connections. As for the devices command, “--help” shows more
-information for this option. Finally, we can see the state of radio interfaces,
-including WiFi and WWAN (cellular) with:
+Command “c” is for connections but is a abbreviated form of the real command
+"connections". As for the devices command, “--help” shows more information for
+this option. Finally, we can see the state of radio interfaces, including WiFi
+and WWAN (cellular) with:
 
 ```
-$ network-manager.nmcli r
+$ nmcli r
 WIFI-HW  WIFI     WWAN-HW  WWAN    
 enabled  enabled  enabled  enabled
 ```
@@ -44,7 +45,7 @@ Observe NetworkManage activity (changes in connectivity state, devices or
 connection properties):
 
 ```
-$ network-manager.nmcli monitor
+$ nmcli monitor
 ```
 
 See nmcli connection monitor and nmcli device monitor to watch for changes in

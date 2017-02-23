@@ -12,7 +12,7 @@ to provide solutions for them.
 
 ### Possible cause: Ethernet support is disabled for NetworkManager
 
-By default the network-manager snap disables ethernet support to avoid conflicts
-with networkd/netplan which are used by default on Ubuntu Core. See
-*[Enable Ethernet Support](enable-ethernet-support.md)* for details on how to
+By default the network-manager snap disables Ethernet support to avoid conflicts
+with networkd/netplan which are used by default on Ubuntu Core 16. See
+*[Enable Ethernet Support](enable-Ethernet-support.md)* for details on how to
 enable it.

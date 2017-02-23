@@ -8,17 +8,17 @@ table_of_contents: False
 Check whether a modem was properly detected via:
 
 ```
-$ modem-manager.mmcli -L
+$ sudo modem-manager.mmcli -L
 Found 1 modems:
 	/org/freedesktop/ModemManager1/Modem/0 [description]
 ```
 
-In this case we have just one modem, with id 0 (the number at the end of the DBus path).
+In this case we have just one modem, with index 0 (the number at the end of the DBus object path).
 
 Show detailed information about the modem:
 
 ```
-$ modem-manager.mmcli -m 0
+$ sudo modem-manager.mmcli -m 0
 /org/freedesktop/ModemManager1/Modem/0 (device id '871faa978a12ccb25b9fa30d15667571ab38ed88')
   -------------------------
   Hardware |   manufacturer: 'ZTE INCORPORATED'
@@ -57,49 +57,68 @@ $ modem-manager.mmcli -m 0
   Bearers  |          paths: 'none'
 ```
 
-In this case we can see that the SIM has PIN enabled and state is ‘locked’. To enter the PIN, we need to know the SIM number id, which in this case is 0 (it is the number at the end of /org/freedesktop/ModemManager1/SIM/0). Knowing that we can send the PIN to the SIM with:
+In this case we can see that the SIM has PIN locking enabled and its state is
+‘locked’. To enter the PIN, we need to know the SIM number id, which in this
+case is 0 (it is the number at the end of /org/freedesktop/ModemManager1/SIM/0).
+Knowing that we can send the PIN to the SIM with:
 
 ```
-$ modem-manager.mmcli -i 0 --pin=<PIN>
+$ sudo modem-manager.mmcli -i 0 --pin=<PIN>
 successfully sent PIN code to the SIM
 ```
 
-Some more commands for handling the PIN are:
+Some more commands for handling SIM PINs include:
 
 ```
-$ modem-manager.mmcli -i 0 --pin=<PIN> --enable-pin
-$ modem-manager.mmcli -i 0 --pin=<PIN> --disable-pin
-$ modem-manager.mmcli -i 0 --pin=<PIN> --change-pin=<NEW_PIN>
-$ modem-manager.mmcli -i 0 --puk=<PUK>
+$ sudo modem-manager.mmcli -i 0 --pin=<PIN> --enable-pin
+$ sudo modem-manager.mmcli -i 0 --pin=<PIN> --disable-pin
+$ sudo modem-manager.mmcli -i 0 --pin=<PIN> --change-pin=<NEW_PIN>
+$ sudo modem-manager.mmcli -i 0 --puk=<PUK>
 ```
 
-Which enables PIN lock, disables PIN lock, changes the PIN code, and introduces the
-[PUK](https://en.wikipedia.org/wiki/Personal_unblocking_code) in case we have blocked
-the SIM, respectively.
+Which respectively enables PIN locking, disables PIN locking, changes the PIN code,
+and unlocks a [PUK](https://en.wikipedia.org/wiki/Personal_unblocking_code)-locked SIM.
 
-After that we can set up a cellular connection doing
-
-```
-$ network-manager.nmcli c add type gsm ifname <interface> con-name <name> apn <operator_apn>
-$ network-manager.nmcli r wwan on
-```
-
-where <interface> is the string listed as “primary port” when doing “mmcli -m <N>”, <name> is an arbitrary name used to identify the connection, and <operator_apn> is the APN name for your cellular data plan.  Note that <interface> is usually a serial port with pattern /dev/tty*, not a networking interface. The reason for ModemManager to use that instead of the networking interface is that this last one can appear/disappear dynamically while the ports do not if the hardware configuration remains unchanged. For instance, the networking interface can be ppp0, ppp1, etc., and it might be different each time it is possible to have other ppp connections with, say, VPNs.
-
-After executing these commands, NetworkManager will automatically try to bring up the cellular connection whenever ModemManager reports that the modem has registered (the state of the modem can be checked with the previously introduced command “modem-manager.mmcli -m <N>”). When done successfully, NetworkManager will create routes for the new network interface, with less priority than Ethernet or WiFi interfaces. To disable the connection, we can do:
+After that we can add a cellular connection with:
 
 ```
-$ network-manager.nmcli r wwan off
+$ nmcli c add type gsm ifname <interface> con-name <name> apn <operator_apn>
+$ nmcli r wwan on
 ```
 
-or change the autoconnect property if we need more fine-grained control:
+where <interface> is the string listed as “primary port” in the output from 'sudo mmcli -m <N>'
+(as previously described),
+<name> is an arbitrary name used to identify the connection, and <operator_apn> is
+the APN name for your cellular data plan.  Note that <interface> is usually a serial
+port with pattern /dev/tty*, not a networking interface. The reason for ModemManager
+to use that instead of the networking interface is that this last one can appear/disappear
+dynamically while the ports do not if the hardware configuration remains unchanged.
+For instance, the networking interface can be ppp0, ppp1, etc., and it might be
+different each time it is possible to have other ppp connections with, say, VPNs.
+
+After executing these commands, NetworkManager will automatically try to bring up
+the cellular connection whenever ModemManager reports that the modem has
+registered (the state of the modem can be checked with the previously introduced
+command “sudo modem-manager.mmcli -m <N>”). When done successfully, NetworkManager
+will create routes for the new network interface, with less priority than
+Ethernet or WiFi interfaces. To disable the connection, we can do:
 
 ```
-$ network-manager.nmcli c modify <name> connection.autoconnect [yes|no]
+$ nmcli r wwan off
 ```
 
-Finally, note that we can provide the PIN (so it is entered automatically) or more needed APN provisioning information when creating/modifying the WWAN connection. For instance:
+or change the autoconnect property and turn the connection off if we need more
+fine-grained control:
 
 ```
-$ network-manager.nmcli c add type gsm ifname <interface> con-name <name> apn <operator_apn> username <user> password <password> pin <PIN>
+$ nmcli c modify <name> connection.autoconnect [yes|no]
+$ nmcli c down <name>
+```
+
+Finally, note that we can provide the PIN (so it is entered automatically) or more
+needed APN provisioning information when creating/modifying the WWAN connection.
+For instance:
+
+```
+$ nmcli c add type gsm ifname <interface> con-name <name> apn <operator_apn> username <user> password <password> pin <PIN>
 ```
