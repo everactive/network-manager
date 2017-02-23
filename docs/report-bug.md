@@ -3,7 +3,7 @@ title: "Report a Bug"
 table_of_contents: False
 ---
 
-# Rebort a Bug
+# Report a Bug
 
 Bugs can be reported [here](https://bugs.launchpad.net/snappy-hwe-snaps/+filebug).
 
