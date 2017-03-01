@@ -16,7 +16,7 @@ navigation:
       - title: Configure Cellular Connections
         location: configure-cellular-connections.md
       - title: Enable Ethernet Support
-        location: enable-Ethernet-support.md
+        location: enable-ethernet-support.md
   - title: Reference
     children:
       - title: Snap Configuration

@@ -14,5 +14,5 @@ to provide solutions for them.
 
 By default the network-manager snap disables Ethernet support to avoid conflicts
 with networkd/netplan which are used by default on Ubuntu Core 16. See
-*[Enable Ethernet Support](enable-Ethernet-support.md)* for details on how to
+*[Enable Ethernet Support](enable-ethernet-support.md)* for details on how to
 enable it.
