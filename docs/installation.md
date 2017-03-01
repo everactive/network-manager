@@ -52,7 +52,7 @@ Now you have NetworkManager successfully installed.
 
 ## Next Steps
 
- * [Enable Ethernet Support](enable-Ethernet-support.md)
+ * [Enable Ethernet Support](enable-ethernet-support.md)
  * [Explore Network Status](explore-network-status.md)
  * [Configure WiFi Connections](configure-wifi-connections.md)
  * [Configure Cellular Connections](configure-cellular-connections.md)
