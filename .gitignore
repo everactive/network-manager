@@ -1,1 +1,5 @@
+parts/
+stage/
+prime/
+network-manager_*.snap
 .tests-extras
