@@ -19,10 +19,10 @@ execute: |
     sleep 0.5
 
     # Setup the AP on wlan0
-    /snap/bin/wifi-ap.config set wifi.interface wlan0
-    /snap/bin/wifi-ap.config set wifi.ssid $WIFI_SSID
-    /snap/bin/wifi-ap.config set wifi.security wpa2
-    /snap/bin/wifi-ap.config set wifi.security-passphrase $WIFI_PASSPHRASE
+    /snap/bin/wifi-ap.config set wifi.interface=wlan0
+    /snap/bin/wifi-ap.config set wifi.ssid=$WIFI_SSID
+    /snap/bin/wifi-ap.config set wifi.security=wpa2
+    /snap/bin/wifi-ap.config set wifi.security-passphrase=$WIFI_PASSPHRASE
 
     # AP needs a bit to appear and be visible for NetworkManager
     /snap/bin/network-manager.nmcli d wifi rescan
