@@ -51,5 +51,4 @@ test_arping_LDADD = $(DEVICES_LDADD)
 
 @VALGRIND_RULES@
 TESTS = \
-	test-lldp \
 	test-arping
