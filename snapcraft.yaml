@@ -1,5 +1,5 @@
 name: network-manager
-version: 1.2.2-11
+version: 1.2.2-11-dev
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
@@ -74,11 +74,7 @@ parts:
 
     source: https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
     source-type: git
-    # For development you can directly build from the xenial branch if
-    # needed. Otherwise use the tag to the latest version which will be
-    # used by the published snap.
-    # source-branch: network-manager/xenial/1.2.2
-    source-tag: network-manager-xenial-1.2.2-2
+    source-branch: network-manager/xenial/1.2.2
 
     build-packages:
       - intltool
@@ -162,6 +158,11 @@ parts:
       - --with-libsoup=no
       # We want to support ModemManager
       - --with-modem-manager-1=yes
+      - --enable-tests=yes
+
+    install: |
+      # Run all tests NetworkManager ships by default
+      make check
 
     # Filter files pulled in by stage-packages so they aren't
     # included in the final snap. We only need them to build
