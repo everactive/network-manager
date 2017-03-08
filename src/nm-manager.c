@@ -826,6 +826,12 @@ settings_startup_complete_changed (NMSettings *settings,
 	check_if_startup_complete (self);
 }
 
+static gboolean
+device_is_wake_on_lan (NMDevice *device)
+{
+	return nm_platform_link_get_wake_on_lan (NM_PLATFORM_GET, nm_device_get_ip_ifindex (device));
+}
+
 static void
 remove_device (NMManager *self,
                NMDevice *device,
@@ -847,6 +853,8 @@ remove_device (NMManager *self,
 		 * cannot be left up.
 		 */
 		if (!quitting)  /* Forced removal; device already gone */
+			unmanage = TRUE;
+		else if (device_is_wake_on_lan (device))
 			unmanage = TRUE;
 		else if (!nm_device_can_assume_active_connection (device))
 			unmanage = TRUE;
@@ -3841,12 +3849,6 @@ done:
 		g_dbus_method_invocation_take_error (context, error);
 	}
 	g_clear_object (&subject);
-}
-
-static gboolean
-device_is_wake_on_lan (NMDevice *device)
-{
-	return nm_platform_link_get_wake_on_lan (NM_PLATFORM_GET, nm_device_get_ip_ifindex (device));
 }
 
 static void
