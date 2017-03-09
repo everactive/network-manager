@@ -2435,7 +2435,7 @@ wake_on_wlan_enable (NMDevice *device)
 	}
 
 	value = nm_config_data_get_connection_default (NM_CONFIG_GET_DATA,
-	                                               "wireless.wake-on-wlan",
+	                                               "wifi.wake-on-wlan",
 	                                               device);
 
 	if (value) {
