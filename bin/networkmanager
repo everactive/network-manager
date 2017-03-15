@@ -76,7 +76,7 @@ done
 
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 
-$SNAP/usr/sbin/NetworkManager \
+exec $SNAP/usr/sbin/NetworkManager \
     --config-dir=$SNAP_DATA/conf.d/ \
     --config=$NM_CONF \
     --log-level=INFO \
