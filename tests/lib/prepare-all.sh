@@ -1,5 +1,17 @@
 #!/bin/bash
 
+cat << EOF > /etc/systemd/system/load-mac80211-hwsim.service
+[Unit]
+Description=Load mac8022_hwsim driver
+[Service]
+ExecStart=/sbin/modprobe mac80211_hwsim radios=2
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable load-mac80211-hwsim
+systemctl start load-mac80211-hwsim
+
 # We don't have to build a snap when we should use one from a
 # channel
 if [ -n "$SNAP_CHANNEL" ] ; then

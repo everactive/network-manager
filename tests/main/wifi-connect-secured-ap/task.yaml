@@ -4,15 +4,7 @@ environment:
     WIFI_SSID: Ubuntu
     WIFI_PASSPHRASE: Test1234
 
-restore: |
-    rmmod mac80211_hwsim
-
 execute: |
-    # Get two connected wifi network interfaces wlan0 and wlan1 and
-    # give the system soem time to settle
-    modprobe mac80211_hwsim radios=2
-    sleep 1
-
     snap install wifi-ap
     # FIXME: until the wifi-ap utility is clever enough to retry
     # connecting with the service we need to add a short sleep here
