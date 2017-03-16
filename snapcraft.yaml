@@ -31,7 +31,7 @@ apps:
     command: bin/networkmanager
     daemon: simple
     slots: [service]
-    plugs: [modem-manager, ppp, network-setup-observe, wpa]
+    plugs: [modem-manager, ppp, network-setup-observe, wpa, firewall-control]
     # FIXME: This will create currently a symlink inside /snap/bin
     # which points nowhere as the service isn't exposed as application
     # for the user. Instead snapd needs to gain support to handle
