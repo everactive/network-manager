@@ -1,14 +1,6 @@
 summary: Verify WiFi WoWLAN can be enabled in NetworkManager globally via a snap config option
 
-restore: |
-    rmmod mac80211_hwsim
-
 execute: |
-    # Get two connected wifi network interfaces wlan0 and wlan1 and
-    # give the system soem time to settle
-    modprobe mac80211_hwsim radios=2
-    sleep 1
-
     # Enable WoWLAN globally for all new WiFi connections
     snap set network-manager wifi.wake-on-wlan=any
 
