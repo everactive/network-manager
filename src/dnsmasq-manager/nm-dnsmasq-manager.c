@@ -114,7 +114,7 @@ nm_dnsmasq_manager_new (const char *iface)
 
 	priv = NM_DNSMASQ_MANAGER_GET_PRIVATE (manager);
 	priv->iface = g_strdup (iface);
-	priv->pidfile = g_strdup_printf (RUNSTATEDIR "/nm-dnsmasq-%s.pid", iface);
+	priv->pidfile = g_strdup_printf ("%s/nm-dnsmasq-%s.pid", nm_utils_get_run_dir(), iface);
 
 	return manager;
 }
