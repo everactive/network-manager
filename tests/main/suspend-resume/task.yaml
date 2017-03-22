@@ -1,14 +1,8 @@
 summary: Verify suspend/resume tracking works reliable
 
-restore: |
-    rmmod mac80211_hwsim
-
 execute: |
     # Install necessary test-tools, we need inotify-tools in this case
     snap install --edge se-test-tools
-
-    # Get two connected wifi network interfaces wlan0 and wlan1
-    modprobe mac80211_hwsim radios=2
 
     # FIXME: take the one from edge for now as that is the one which
     # has automatic setup capabilities
