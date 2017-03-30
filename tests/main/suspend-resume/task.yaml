@@ -13,10 +13,10 @@ execute: |
     done
 
     WIFI_PASSWORD=$(sudo wifi-ap.config get wifi.security-passphrase)
-    if [ -z $WIFI_PASSWORD ]; then
+    if [ -z "$WIFI_PASSWORD" ]; then
         /snap/bin/network-manager.nmcli d wifi connect Ubuntu
     else
-        /snap/bin/network-manager.nmcli d wifi connect Ubuntu password $WIFI_PASSWORD
+        /snap/bin/network-manager.nmcli d wifi connect Ubuntu password "$WIFI_PASSWORD"
     fi
 
     # Override the existing systemd-suspend service unit with a customized
