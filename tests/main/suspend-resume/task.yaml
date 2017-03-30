@@ -4,9 +4,7 @@ execute: |
     # Install necessary test-tools, we need inotify-tools in this case
     snap install --edge se-test-tools
 
-    # FIXME: take the one from edge for now as that is the one which
-    # has automatic setup capabilities
-    snap install --edge wifi-ap
+    snap install wifi-ap
 
     /snap/bin/network-manager.nmcli d wifi rescan
     while ! /snap/bin/network-manager.nmcli d wifi | grep Ubuntu ; do
@@ -14,7 +12,12 @@ execute: |
         sleep 1
     done
 
-    /snap/bin/network-manager.nmcli d wifi connect Ubuntu
+    WIFI_PASSWORD=$(sudo wifi-ap.config get wifi.security-passphrase)
+    if [ -z $WIFI_PASSWORD ]; then
+        /snap/bin/network-manager.nmcli d wifi connect Ubuntu
+    else
+        /snap/bin/network-manager.nmcli d wifi connect Ubuntu password $WIFI_PASSWORD
+    fi
 
     # Override the existing systemd-suspend service unit with a customized
     # one to prevent the device from entering real suspend. The service unit
