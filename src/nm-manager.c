@@ -841,8 +841,9 @@ remove_device (NMManager *self,
 	NMManagerPrivate *priv = NM_MANAGER_GET_PRIVATE (self);
 	gboolean unmanage = FALSE;
 
-	_LOGD (LOGD_DEVICE, "(%s): removing device (allow_unmanage %d, managed %d)",
-	       nm_device_get_iface (device), allow_unmanage, nm_device_get_managed (device, FALSE));
+	_LOGD (LOGD_DEVICE, "(%s): removing device (allow_unmanage %d, managed %d, wol %d)",
+	       nm_device_get_iface (device), allow_unmanage, nm_device_get_managed (device, FALSE),
+	       device_is_wake_on_lan (device));
 
 	if (allow_unmanage && nm_device_get_managed (device, FALSE)) {
 		NMActRequest *req = nm_device_get_act_request (device);
@@ -854,8 +855,8 @@ remove_device (NMManager *self,
 		 */
 		if (!quitting)  /* Forced removal; device already gone */
 			unmanage = TRUE;
-		else if (device_is_wake_on_lan (device))
-			unmanage = TRUE;
+		else if (device_is_wake_on_lan (device)) /* Leave configured if wo(w)lan and quitting */
+			unmanage = FALSE;
 		else if (!nm_device_can_assume_active_connection (device))
 			unmanage = TRUE;
 		else if (!req)
