@@ -1,9 +1,50 @@
 ---
 title: "Configure WiFi Connections"
-table_of_contents: False
+table_of_contents: True
 ---
 
 # Configure WiFi Connections
+
+This section explains how to establish a WiFi connection. It covers creating and
+modyfying connections as well as connecting directly.
+
+## Connect directly without creating a connection
+
+First, determine the name of the WiFi interface:
+
+```
+$ nmcli d
+DEVICE             TYPE      STATE         CONNECTION
+...
+wlan0              wifi      disconnected     --
+```
+
+Make sure the WiFi radio is on (which is its default state):
+
+```
+$ nmcli r wifi on
+```
+
+Then, list the available WiFi networks:
+
+```
+$ nmcli d wifi list
+*  SSID           MODE   CHAN  RATE       SIGNAL  BARS  SECURITY
+   ...
+   my_wifi      Infra  5     54 Mbit/s  89      ▂▄▆█  WPA2
+```
+
+As an example, to connect to the access point 'my_wifi', you would use the
+following command:
+
+```
+$ nmcli d wifi connect my_wifi password <password>
+```
+
+<password> is the password for the connection which needs to have 8-63
+characters or 64 hexadecimal characters to specify a full 256-bit key.
+
+## Create connection and connect
 
 First, determine the name of the WiFi interface:
 
