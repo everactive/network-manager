@@ -113,3 +113,30 @@ To delete a connection:
 ```
 $ nmcli c delete <name>
 ```
+
+## Connect to a hidden network
+
+This section describes how to connect to a hidden network using nmcli tool.
+
+A hidden network is a normal wireless network that simply does not broadcast
+it's SSID unless solicitaed. This means that it's name cannot be searched and
+must be known from some other source.
+
+As in the example above issue the following commandd to create connection
+associated with a hidden network <ssid>:
+
+```
+$ nmcli c add type wifi con-name <name> ifname wlan0 ssid <ssid>
+$ nmcli c modify <name> wifi-sec.key-mgmt wpa-psk wifi-sec.psk <password>
+```
+
+Now you can establish a connection by typing:
+
+```
+$ nmcli c up <name>
+```
+
+Similarly to the previous examples <name> is an arbitrary name given to the
+connection and <password> is te password to the network. It needs to have
+between 8-63 characters or 64 hexadecimal chcracters in order to specify a full
+256-bit key.
