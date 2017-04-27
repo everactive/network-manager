@@ -100,8 +100,11 @@ $ nmcli c show <name>
 ```
 
 The above will bring a fairly long list of text on the terminal therefore it is
-best to either use a pager or grep to make teh results manageable. For example
-for IPv4 settings one would do:
+best to either use a pager or grep to make teh results manageable.
+
+### IPv4 and IPv6 options
+
+For example for IPv4 settings one would do:
 
 ```
 $ nmcli c show <name> | grep ipv4
@@ -133,3 +136,20 @@ $ nmcli c modify <name> ipv4.dns "8.8.8.8"
 ```
 
 The rest of the settings can be modified in the same fashion.
+
+### WiFi Powersave option
+
+The WiFi powersave option can have one of the following values:
+
+| Value | Meaning                                           |
+|-------|---------------------------------------------------|
+| 0     | Default                                           |
+| 1     | Ignore, do not touch currently configured setting |
+| 2     | Disable                                           |
+| 3     | Enable                                            |
+
+Changing it is as simple as:
+
+```
+$ nmcli c modify <name> 802-11-wireless.powersave 2
+```
