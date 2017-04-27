@@ -5,10 +5,15 @@ table_of_contents: True
 
 # Edit Connections
 
-This part will show you how to use a network-manager build-in editor to modify
-the connections.
+This part will show you how to use a network-manager built-in editor to modify
+the connections as well as will provide a reference for setting some of the
+settings.
 
-Type:
+## Using Built-in Editor
+
+Aside from offering the possibility to manage and modify the network connections
+using commandline the network-manager offers a built-in, interactive editor to
+achieve the same. In order to use it type:
 
 ```
 $ nmcli connection edit
@@ -76,3 +81,55 @@ quit                                 :: exit nmcli
 ------------------------------------------------------------------------------
 nmcli> 
 ```
+
+## Change connection details
+
+This section will show how to change some of the connection details including
+IPv4 and IPv6 settings.
+
+Whatever it is going to be modified it is important to understand that it is
+possible to do it either from command line or using the editor. The advantage of
+the editor is that it shows wich options are availabe for modification in
+contrast to the command line which does not.
+
+It is possible however to learn about the available settings from command line
+by printing the connection details. Type:
+
+```
+$ nmcli c show <name>
+```
+
+The above will bring a fairly long list of text on the terminal therefore it is
+best to either use a pager or grep to make teh results manageable. For example
+for IPv4 settings one would do:
+
+```
+$ nmcli c show <name> | grep ipv4
+ipv4.method:                            auto
+ipv4.dns:
+ipv4.dns-search:
+ipv4.dns-options:                       (default)
+ipv4.addresses:
+ipv4.gateway:                           --
+ipv4.routes:
+ipv4.route-metric:                      -1
+ipv4.ignore-auto-routes:                no
+ipv4.ignore-auto-dns:                   no
+ipv4.dhcp-client-id:                    --
+ipv4.dhcp-timeout:                      0
+ipv4.dhcp-send-hostname:                yes
+ipv4.dhcp-hostname:                     --
+ipv4.dhcp-fqdn:                         --
+ipv4.never-default:                     no
+ipv4.may-fail:                          yes
+ipv4.dad-timeout:                       -1 (default)
+```
+
+Knowing the settings it is possible to alter them. For example setting up the
+DNS server would require typing:
+
+```
+$ nmcli c modify <name> ipv4.dns "8.8.8.8"
+```
+
+The rest of the settings can be modified in the same fashion.
