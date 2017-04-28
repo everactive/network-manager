@@ -29,21 +29,22 @@ link-local      *               255.255.0.0     U     1000   0        0 docker0
 192.168.122.0   *               255.255.255.0   U     0      0        0 virbr0
 ```
 
-The packets going to <Destination> are pushed through the <Gateway>. The '*' for
-the <Gateway> means that the destination network is directly connected.
+The packets going to &lt;Destination&gt; are pushed through the &lt;Gateway&gt;.
+The '*' for the &lt;Gateway&gt; means that the destination network is directly
+connected.
 
 In the example above by default all packets are routed through "netgear.aircard"
 which is the locally resolved hostname (192.168.1.1) for a router. On the other
 hand the packets directed to addresses falling under 10.0.1.0 and following will
 not.
 
-The <Metric> column translates to the number of hops required to reach the
+The &lt;Metric&gt; column translates to the number of hops required to reach the
 destination and is used to determine which route shall be preferred when there
 are more than one route available for a specific destination. Since it
 reassembles the concept of distance the lower it's value is the better.
 
-The <Metric> value can be set manually but for the defaults the following rules
-applies:
+The &lt;Metric&gt; value can be set manually but for the defaults the following
+rules applies:
 
 * The Ethernet is preferred over WiFi
 * WiFi is preferred over WWAN
@@ -61,15 +62,15 @@ To add the route type:
 $ sudo route add <destination> gw <gateway>
 ```
 
-where the <destination> is either a static IP address or a subnet or "default".
-The <gateway> is the IP address or resolvable hostname of the gateway.
-Optionally it is possble to specific the metric too:
+where the &lt;destination&gt; is either a static IP address or a subnet or
+"default". The &lt;gateway&gt; is the IP address or resolvable hostname of the
+gateway. Optionally it is possble to specific the metric too:
 
 ```
 $ sudo route add <destination> gw <gateway> metric <metric>
 ```
 
-where the <metric> is the number that fits into uint32.
+where the &lt;metric&gt; is the number that fits into uint32.
 
 To remove the route type:
 

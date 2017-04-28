@@ -41,7 +41,7 @@ following command:
 $ nmcli d wifi connect my_wifi password <password>
 ```
 
-<password> is the password for the connection which needs to have 8-63
+&lt;password&gt; is the password for the connection which needs to have 8-63
 characters or 64 hexadecimal characters to specify a full 256-bit key.
 
 ## Create connection and connect
@@ -78,7 +78,7 @@ $ nmcli c add con-name <name> ifname wlan0 type wifi ssid my_wifi
 $ nmcli c modify <name> wifi-sec.key-mgmt wpa-psk wifi-sec.psk <password>
 ```
 
-<name> is an arbitrary name given to the connection, and <password> is the
+&lt;name&gt; is an arbitrary name given to the connection, and &lt;password&gt; is the
 password for the connection (this last command can be used to change the
 password too). The password needs to have 8-63 characters or 64 hexadecimal characters to specify a full 256-bit key. New connections have DHCP enabled
 for both IPv4 and IPv6 by default.
@@ -123,7 +123,7 @@ it's SSID unless solicitaed. This means that it's name cannot be searched and
 must be known from some other source.
 
 As in the example above issue the following commandd to create connection
-associated with a hidden network <ssid>:
+associated with a hidden network &lt;ssid&gt;:
 
 ```
 $ nmcli c add type wifi con-name <name> ifname wlan0 ssid <ssid>
@@ -136,7 +136,7 @@ Now you can establish a connection by typing:
 $ nmcli c up <name>
 ```
 
-Similarly to the previous examples <name> is an arbitrary name given to the
-connection and <password> is te password to the network. It needs to have
+Similarly to the previous examples &lt;name&gt; is an arbitrary name given to the
+connection and &lt;password&gt; is te password to the network. It needs to have
 between 8-63 characters or 64 hexadecimal chcracters in order to specify a full
 256-bit key.

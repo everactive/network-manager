@@ -86,10 +86,10 @@ $ nmcli c add type gsm ifname <interface> con-name <name> apn <operator_apn>
 $ nmcli r wwan on
 ```
 
-where <interface> is the string listed as “primary port” in the output from 'sudo mmcli -m <N>'
+where &lt;interface&gt; is the string listed as “primary port” in the output from 'sudo mmcli -m &lt;N&gt;'
 (as previously described),
-<name> is an arbitrary name used to identify the connection, and <operator_apn> is
-the APN name for your cellular data plan.  Note that <interface> is usually a serial
+&lt;name&gt; is an arbitrary name used to identify the connection, and &lt;operator_apn&gt; is
+the APN name for your cellular data plan.  Note that &lt;interface&gt; is usually a serial
 port with pattern /dev/tty*, not a networking interface. The reason for ModemManager
 to use that instead of the networking interface is that this last one can appear/disappear
 dynamically while the ports do not if the hardware configuration remains unchanged.
@@ -99,7 +99,7 @@ different each time it is possible to have other ppp connections with, say, VPNs
 After executing these commands, NetworkManager will automatically try to bring up
 the cellular connection whenever ModemManager reports that the modem has
 registered (the state of the modem can be checked with the previously introduced
-command “sudo modem-manager.mmcli -m <N>”). When done successfully, NetworkManager
+command “sudo modem-manager.mmcli -m &lt;N&gt;”). When done successfully, NetworkManager
 will create routes for the new network interface, with less priority than
 Ethernet or WiFi interfaces. To disable the connection, we can do:
 

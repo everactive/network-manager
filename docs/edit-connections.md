@@ -31,7 +31,7 @@ to the nmcli console by providing the type as a parameter:
 $ nmcli connection edit type <type>
 ```
 
-where <type> must be a valid connection type such as for example 'wifi'.
+where &lt;type&gt;  must be a valid connection type such as for example 'wifi'.
 
 An attempt to edit the wifi connection type would look like:
 
@@ -98,6 +98,8 @@ by printing the connection details. Type:
 ```
 $ nmcli c show <name>
 ```
+
+where &lt;name&gt; is the connection name.
 
 The above will bring a fairly long list of text on the terminal therefore it is
 best to either use a pager or grep to make teh results manageable.
