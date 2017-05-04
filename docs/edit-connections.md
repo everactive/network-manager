@@ -6,23 +6,23 @@ table_of_contents: True
 # Edit Connections
 
 This part will show you how to use a network-manager built-in editor to modify
-the connections as well as will provide a reference for setting some of the
+the connections as well as provide a reference for setting some of the
 settings.
 
-## Using Built-in Editor
+## Using nmcli Console
 
 Aside from offering the possibility to manage and modify the network connections
-using commandline the network-manager offers a built-in, interactive editor to
-achieve the same. In order to use it type:
+using the command-line the network-manager offers a built-in, interactive
+console to achieve the same. In order to use it type:
 
 ```
 $ nmcli connection edit
 ```
 
-It will bring up an interactive connection editor. In the first step you will be
-prompted to enter connection type. The list of valid connection types will be
+It will bring up an interactive console. In the first step you will be prompted
+to enter the connection type. The list of valid connection types will be
 displayed on the screen. Once you select one you will be taken to the nmcli
-console where you have the possibility to modify it's parameters.
+console where you have the possibility to modify its parameters.
 
 Alternatively, if you know the valid connection types, you could jump straight
 to the nmcli console by providing the type as a parameter:
@@ -31,14 +31,13 @@ to the nmcli console by providing the type as a parameter:
 $ nmcli connection edit type <type>
 ```
 
-where &lt;type&gt;  must be a valid connection type such as for example 'wifi'.
+where &lt;type&gt;  must be a valid connection type such as 'wifi'.
 
 An attempt to edit the wifi connection type would look like:
 
 ```
-kzapalowicz@core16-2:~$ nmcli c edit
+$ nmcli c edit
 
-(process:2311): nmcli-CRITICAL **: check_valid_name: assertion 'val' failed
 Valid connection types: generic, 802-3-ethernet (ethernet), pppoe,
 802-11-wireless (wifi), wimax, gsm, cdma, infiniband, adsl, bluetooth, vpn,
 802-11-olpc-mesh (olpc-mesh), vlan, bond, team, bridge, bond-slave, team-slave,
@@ -82,17 +81,17 @@ quit                                 :: exit nmcli
 nmcli> 
 ```
 
-## Change connection details
+## Change Connection Details
 
 This section will show how to change some of the connection details including
 IPv4 and IPv6 settings.
 
-Whatever it is going to be modified it is important to understand that it is
-possible to do it either from command line or using the editor. The advantage of
-the editor is that it shows wich options are availabe for modification in
-contrast to the command line which does not.
+It is important to understand that every option can be modified using either the
+command-line or the editor. The advantage of the editor is that it shows wich
+options are availabe for modification in contrast to the command-line which does
+not.
 
-It is possible however to learn about the available settings from command line
+It is possible however to learn about the available settings from command-line
 by printing the connection details. Type:
 
 ```
@@ -101,10 +100,10 @@ $ nmcli c show <name>
 
 where &lt;name&gt; is the connection name.
 
-The above will bring a fairly long list of text on the terminal therefore it is
-best to either use a pager or grep to make teh results manageable.
+The above will bring a fairly long list of text on the terminal, therefore it is
+best to either use a pager or grep to make the results manageable.
 
-### IPv4 and IPv6 options
+### IPv4 and IPv6 Options
 
 For example for IPv4 settings one would do:
 
@@ -130,8 +129,7 @@ ipv4.may-fail:                          yes
 ipv4.dad-timeout:                       -1 (default)
 ```
 
-Knowing the settings it is possible to alter them. For example setting up the
-DNS server would require typing:
+For example setting up the DNS server would require typing:
 
 ```
 $ nmcli c modify <name> ipv4.dns "8.8.8.8"
@@ -139,7 +137,7 @@ $ nmcli c modify <name> ipv4.dns "8.8.8.8"
 
 The rest of the settings can be modified in the same fashion.
 
-### WiFi Powersave option
+### WiFi Powersave Option
 
 The WiFi powersave option can have one of the following values:
 

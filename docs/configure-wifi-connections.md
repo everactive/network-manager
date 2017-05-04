@@ -6,9 +6,14 @@ table_of_contents: True
 # Configure WiFi Connections
 
 This section explains how to establish a WiFi connection. It covers creating and
-modyfying connections as well as connecting directly.
+modyfying connections as well as directly connecting.
 
-## Connect directly without creating a connection
+## Establish an Implicit Connection
+
+This section will show how to directly connect to a WiFi network without
+explicitly creating a connection prior to that. Note that connecting directly
+will create an implicit connection. The naming of such will follow "SSID N"
+pattern, where N is a number.
 
 First, determine the name of the WiFi interface:
 
@@ -44,7 +49,7 @@ $ nmcli d wifi connect my_wifi password <password>
 &lt;password&gt; is the password for the connection which needs to have 8-63
 characters or 64 hexadecimal characters to specify a full 256-bit key.
 
-## Create connection and connect
+## Create Conection and Connect
 
 First, determine the name of the WiFi interface:
 
@@ -114,15 +119,15 @@ To delete a connection:
 $ nmcli c delete <name>
 ```
 
-## Connect to a hidden network
+## Connect to a Hidden Network
 
 This section describes how to connect to a hidden network using nmcli tool.
 
 A hidden network is a normal wireless network that simply does not broadcast
-it's SSID unless solicitaed. This means that it's name cannot be searched and
+it's SSID unless solicited. This means that its name cannot be searched and
 must be known from some other source.
 
-As in the example above issue the following commandd to create connection
+As in the example above issue the following command to create a connection
 associated with a hidden network &lt;ssid&gt;:
 
 ```
@@ -137,6 +142,6 @@ $ nmcli c up <name>
 ```
 
 Similarly to the previous examples &lt;name&gt; is an arbitrary name given to the
-connection and &lt;password&gt; is te password to the network. It needs to have
-between 8-63 characters or 64 hexadecimal chcracters in order to specify a full
+connection and &lt;password&gt; is the password to the network. It needs to have
+between 8-63 characters or 64 hexadecimal characters in order to specify a full
 256-bit key.
