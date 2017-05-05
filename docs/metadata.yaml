@@ -19,8 +19,10 @@ navigation:
         location: enable-ethernet-support.md
       - title: Edit Connections
         location: edit-connections.md
-      - title: Routing tables
+      - title: Routing Tables
         location: routing-tables.md
+      - title: Logging Messages
+        location: logging-messages.md
   - title: Reference
     children:
       - title: Snap Configuration
