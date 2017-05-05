@@ -18,6 +18,10 @@ $ nmcli d
 $ nmcli c
 ```
 
+It is a good idea to set the log level to DEBUG so that the verbose information
+is provided. To do this for NetworkManager please see the [Logging Messages](logging-messages.md)
+page.
+
 If there is a modem and the modem-manager snap is installed, also add the output
 of
 

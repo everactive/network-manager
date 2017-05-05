@@ -51,41 +51,50 @@ rules applies:
 
 # Editing the Routing Tables
 
-The routing table can be added or modified using the either *ip* or *route*
-tools. Both are available on the Ubunct Core.
+The routing table can be added or modified using the standard *ip* command which
+is available on Ubuntu Core.
 
-## Adding and Removing
+You can find more information on it on the following page:
 
-To add the route type:
+* <https://linux.die.net/man/8/ip?>
 
-```
-$ sudo route add <destination> gw <gateway>
-```
+Separately it is possible to modify routing information per single connection
+using the nmcli tool. The parameters such as: gateway, routes and metrics can be
+modified.
 
-where the &lt;destination&gt; is either a static IP address or a subnet or
-"default". The &lt;gateway&gt; is the IP address or resolvable hostname of the
-gateway. Optionally it is possble to specific the metric too:
+The following options are responsible:
 
 ```
-$ sudo route add <destination> gw <gateway> metric <metric>
+ipv4.gateway:
+ipv4.routes:
+ipv4.route-metric:
+
+ipv6.gateway:
+ipv6.routes:
+ipv6.route-metric:
 ```
 
-where the &lt;metric&gt; is the number that fits into uint32.
-
-To remove the route type:
+These options can be modified in a following way:
 
 ```
-$ sudo route del <destination>
+$ nmcli connection modify <name> +ipv4.routes <destination> ipv4.gateway <gateway>
+$ nmcli connection modify <name> ipv4.route-metric <metric>
 ```
 
-which will rmove the whole single entry from the routing table.
-
-## Modification
-
-The *route add* command will add a new entry to the routing table regardless if
-the new one doubles with what is in the table already. In order to modify an
-existing entry one has to type:
+Where &lt;name&gt; is the connection name. You can obtain it by listing
+available connections on the system:
 
 ```
-$ sudo ip route replace <destination> via <gateway> metric <metric>
+$ nmcli c show
 ```
+
+&lt;destination&gt; is the destination network provided as a static IP address,
+subnet or "default". &lt;gateway&gt; is the new gateway information.
+&lt;metric&gt; is the new metric information.
+
+Note that this kind of changes can be made separately for each connection thus
+it is possible to provide a fine grained control over how the packets directed
+to different networks are routed.
+
+It is also important to understand that bringing up and down connections with
+different values set for these options is in fact changing the routing table.
