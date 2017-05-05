@@ -27,6 +27,8 @@ navigation:
         children:
           - title: Wake on WLAN
             location: reference/snap-configuration/wowlan.md
+          - title: WiFi Powersave
+            location: reference/snap-configuration/wifi-powersave.md
       - title: Available Commands
         location: reference/available-commands.md
       - title: DBUS API
