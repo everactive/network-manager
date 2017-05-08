@@ -11,7 +11,7 @@ modyfying connections as well as directly connecting.
 ## Establish a Wireless Connection
 
 This section will show how to establish a wifi connection to the wireles
-network. Note that connecting directly will create implicitly a connection (that
+network. Note that directly connecting will implicitly create a connection (that
 can be seen with "nmcli c"). The naming of such will follow "SSID N" pattern,
 where N is a number.
 
