@@ -40,7 +40,7 @@ are more than one route available for a specific destination. Since it
 reassembles the concept of distance the lower it's value is the better.
 
 The &lt;Metric&gt; value can be set manually however when NetworkManager creates
-connection the following defaults are applied:
+a connection the following defaults are applied:
 
 * Ethernet is preferred over WiFi
 * WiFi is preferred over WWAN
