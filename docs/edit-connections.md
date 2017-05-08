@@ -12,7 +12,7 @@ settings.
 ## Using nmcli Console
 
 Aside from offering the possibility to manage and modify the network connections
-using the command-line the network-manager offers a built-in, interactive
+using the command-line, network-manager offers a built-in, interactive
 console to achieve the same. In order to use it type:
 
 ```
@@ -87,12 +87,12 @@ This section will show how to change some of the connection details including
 IPv4 and IPv6 settings.
 
 It is important to understand that every option can be modified using either the
-command-line or the editor. The advantage of the editor is that it shows wich
+command-line or the editor. The advantage of the editor is that it shows which
 options are availabe for modification in contrast to the command-line which does
 not.
 
-It is possible however to learn about the available settings from command-line
-by printing the connection details. Type:
+It is possible however to learn about the available settings from the
+command-line by printing the connection details. Type:
 
 ```
 $ nmcli c show <name>

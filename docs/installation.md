@@ -58,3 +58,4 @@ Now you have NetworkManager successfully installed.
  * [Configure Cellular Connections](configure-cellular-connections.md)
  * [Edit Network Connections](edit-connections.md)
  * [Routing Tables](routing-tables.md)
+ * [Logging Messages](logging-messages.md)

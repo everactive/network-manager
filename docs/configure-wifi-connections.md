@@ -11,8 +11,9 @@ modyfying connections as well as directly connecting.
 ## Establish a Wireless Connection
 
 This section will show how to establish a wifi connection to the wireles
-network. Note that connecting directly will create an implicit connection. The
-naming of such will follow "SSID N" pattern, where N is a number.
+network. Note that connecting directly will create implicitly a connection (that
+can be seen with "nmcli c"). The naming of such will follow "SSID N" pattern,
+where N is a number.
 
 First, determine the name of the WiFi interface:
 
@@ -54,8 +55,8 @@ A hidden network is a normal wireless network that simply does not broadcast
 it's SSID unless solicited. This means that its name cannot be searched and
 must be known from some other source.
 
-As in the example above issue the following command to create a connection
-associated with a hidden network &lt;ssid&gt;:
+Issue the following command to create a connection associated with a hidden
+network &lt;ssid&gt;:
 
 ```
 $ nmcli c add type wifi con-name <name> ifname wlan0 ssid <ssid>
