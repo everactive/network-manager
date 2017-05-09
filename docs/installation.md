@@ -56,3 +56,6 @@ Now you have NetworkManager successfully installed.
  * [Explore Network Status](explore-network-status.md)
  * [Configure WiFi Connections](configure-wifi-connections.md)
  * [Configure Cellular Connections](configure-cellular-connections.md)
+ * [Edit Network Connections](edit-connections.md)
+ * [Routing Tables](routing-tables.md)
+ * [Logging Messages](logging-messages.md)

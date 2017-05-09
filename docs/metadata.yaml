@@ -17,12 +17,20 @@ navigation:
         location: configure-cellular-connections.md
       - title: Enable Ethernet Support
         location: enable-ethernet-support.md
+      - title: Edit Connections
+        location: edit-connections.md
+      - title: Routing Tables
+        location: routing-tables.md
+      - title: Logging Messages
+        location: logging-messages.md
   - title: Reference
     children:
       - title: Snap Configuration
         children:
           - title: Wake on WLAN
             location: reference/snap-configuration/wowlan.md
+          - title: WiFi Powersave
+            location: reference/snap-configuration/wifi-powersave.md
       - title: Available Commands
         location: reference/available-commands.md
       - title: DBUS API
