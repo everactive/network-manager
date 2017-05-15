@@ -25,8 +25,7 @@ apps:
   nmcli:
     command: usr/bin/nmcli
     plugs: [nmcli]
-    aliases:
-      - nmcli
+    aliases: [nmcli]
   networkmanager:
     command: bin/networkmanager
     daemon: simple
@@ -39,8 +38,7 @@ apps:
     # within the systemd unit file instead for example. Until this
     # is implemented we keep the alias disabled.
     #
-    # aliases:
-    #   - NetworkManager
+    # aliases: [NetworkManager]
 
 parts:
   hooks:
