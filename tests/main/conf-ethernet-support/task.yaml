@@ -28,6 +28,8 @@ execute: |
             REBOOT
             ;;
         1)
+            wait_for_network_manager
+
             # NetworkManager now controls eth0 and networkd does not
             /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
             # ... and we're running with the netplan configuration
@@ -41,6 +43,8 @@ execute: |
             REBOOT
             ;;
         2)
+            wait_for_network_manager
+
             # networkd manages eth0 and NetworkManager does not
             networkctl | grep 'eth0.*routable'
             /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
