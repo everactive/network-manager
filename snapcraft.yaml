@@ -21,6 +21,11 @@ plugs:
     bus: system
     name: fi.w1.wpa_supplicant1
 
+hooks:
+  configure:
+    plugs:
+      - network-setup-control
+
 apps:
   nmcli:
     command: usr/bin/nmcli
