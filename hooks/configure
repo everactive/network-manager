@@ -118,6 +118,10 @@ value=`snapctl get ethernet.enable`
 if [ -n "$value" ]; then
   switch_ethernet $value
 else
-  snapctl set ethernet.enable=false
-  switch_ethernet false
+  if [ -e /etc/netplan/00-default-nm-renderer.yaml ]; then
+    value=true
+  else
+    value=false
+  fi
+  snapctl set ethernet.enable=$value
 fi
