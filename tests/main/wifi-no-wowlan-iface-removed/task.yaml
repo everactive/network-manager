@@ -3,6 +3,7 @@ summary: |
     not supported, even if enabled by NM.
 
 environment:
+    WIFI_SSID: Ubuntu
     WIFI_PASSPHRASE: Test1234
 
 execute: |
