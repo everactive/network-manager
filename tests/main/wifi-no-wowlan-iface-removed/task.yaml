@@ -2,6 +2,9 @@ summary: |
     Verify that WiFi interface is removed after NM stops if WoWLAN is
     not supported, even if enabled by NM.
 
+environment:
+    WIFI_PASSPHRASE: Test1234
+
 execute: |
     . $TESTSLIB/utilities.sh
 
@@ -24,7 +27,7 @@ execute: |
 
     # Connect to the AP and ensure the connection was established
     /snap/bin/network-manager.nmcli d wifi | grep Ubuntu
-    /snap/bin/network-manager.nmcli d wifi connect Ubuntu
+    /snap/bin/network-manager.nmcli d wifi connect Ubuntu password "$WIFI_PASSPHRASE"
     /snap/bin/network-manager.nmcli d | grep 'wlan1.*connected'
     ip address show wlan1 | grep -q inet
 
