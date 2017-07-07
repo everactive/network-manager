@@ -78,6 +78,20 @@ switch_wifi_wake_on_wlan() {
   fi
 }
 
+switch_debug_enable() {
+  DEBUG_FILE=$SNAP_DATA/config.d/.debug_enabled
+  # $1 true/false for enabling/disabling --debug flag in nm
+  if [ "$1" = "true" ]; then
+    if [ ! -f "$DEBUG_FILE" ]; then
+      touch "$DEBUG_FILE"
+    fi
+  else
+    if [ -f "$DEBUG_FILE" ]; then
+      rm -f "$DEBUG_FILE"
+    fi
+  fi
+}
+
 value="`snapctl get wifi.powersave`"
 if [ -n "$value" ]; then
   switch_wifi_powersave $value
@@ -95,4 +109,13 @@ else
   snapctl set wifi.wake-on-wlan=disabled
   snapctl set wifi.wake-on-wlan-password=
   switch_wifi_wake_on_wlan disabled ""
+fi
+
+value=$(snapctl get debug.enable)
+if [ -n "$value" ]; then
+  switch_debug_enable $value
+else
+  default=false
+  snapctl set debug.enable=$default
+  switch_debug_enable $default
 fi
