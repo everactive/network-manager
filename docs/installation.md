@@ -59,3 +59,4 @@ Now you have NetworkManager successfully installed.
  * [Edit Network Connections](edit-connections.md)
  * [Routing Tables](routing-tables.md)
  * [Logging Messages](logging-messages.md)
+ * [Enable Debug Support](reference/snap-configuration/debug.md)
