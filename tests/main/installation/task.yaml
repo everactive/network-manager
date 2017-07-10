@@ -10,6 +10,8 @@ execute: |
     /snap/bin/network-manager.nmcli g
 
     # Ensure all necessary plugs/slots are connected
-    snap interfaces | grep -Pzq ":network-setup-observe +network-manager"
-    snap interfaces | grep -Pzq ":ppp +network-manager"
+    snap interfaces | grep -Pzq ":network-setup-observe +[a-z,-]*network-manager"
+    snap interfaces | grep -Pzq ":ppp +[a-z,-]*network-manager"
+    snap interfaces | grep -Pzq ":firewall-control +[a-z,-]*network-manager"
+    snap interfaces | grep -Pzq ":network-setup-observe +[a-z,-]*network-manager"
     snap interfaces | grep -Pzq "network-manager:service +network-manager:nmcli"

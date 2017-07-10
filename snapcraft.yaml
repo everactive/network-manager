@@ -25,13 +25,12 @@ apps:
   nmcli:
     command: usr/bin/nmcli
     plugs: [nmcli]
-    aliases:
-      - nmcli
+    aliases: [nmcli]
   networkmanager:
     command: bin/networkmanager
     daemon: simple
     slots: [service]
-    plugs: [modem-manager, ppp, network-setup-observe, wpa]
+    plugs: [modem-manager, ppp, network-setup-observe, wpa, firewall-control]
     # FIXME: This will create currently a symlink inside /snap/bin
     # which points nowhere as the service isn't exposed as application
     # for the user. Instead snapd needs to gain support to handle
@@ -39,8 +38,7 @@ apps:
     # within the systemd unit file instead for example. Until this
     # is implemented we keep the alias disabled.
     #
-    # aliases:
-    #   - NetworkManager
+    # aliases: [NetworkManager]
 
 parts:
   hooks:
@@ -78,11 +76,7 @@ parts:
 
     source: https://git.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
     source-type: git
-    # For development you can directly build from the xenial branch if
-    # needed. Otherwise use the tag to the latest version which will be
-    # used by the published snap.
-    # source-branch: network-manager/xenial/1.2.2
-    source-tag: network-manager-xenial-1.2.2-10.2
+    source-branch: network-manager/xenial/1.2.2
 
     build-packages:
       - intltool
@@ -166,6 +160,11 @@ parts:
       - --with-libsoup=no
       # We want to support ModemManager
       - --with-modem-manager-1=yes
+      - --enable-tests=yes
+
+    install: |
+      # Run all tests NetworkManager ships by default
+      make check
 
     # Filter files pulled in by stage-packages so they aren't
     # included in the final snap. We only need them to build
