@@ -69,8 +69,10 @@ $SNAP/bin/dhcp-lease-mover &
 
 # Identify if we are in debug mode or not
 DEBUG_FLAG=
+LOG_LEVEL="INFO"
 if [ -f $SNAP_DATA/conf.d/.debug_enabled ]; then
     DEBUG_FLAG="--debug"
+    LOG_LEVEL="DEBUG"
 fi
 
 # Run available startup hooks to have a point to store custom
@@ -85,6 +87,6 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
 exec $SNAP/usr/sbin/NetworkManager \
     --config-dir=$SNAP_DATA/conf.d/ \
     --config=$NM_CONF \
-    --log-level=INFO \
+    --log-level=$LOG_LEVEL \
     $DEBUG_FLAG \
     --no-daemon
