@@ -5,9 +5,13 @@ execute: |
 
     snap set network-manager debug.enable=true
     test "$(snap get network-manager debug.enable)" = "true"
-    test -e /var/snap/network-manager/current/.debug_enabled
+    test -e /var/snap/network-manager/current/conf.d/.debug_enabled
     ps -ef | grep -z "NetworkManager.*\-\-debug" | grep -v grep
     journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
+
+    journalctl --rotate
+    journalctl --vacuum-time=1ms
+    dmesg -c > /dev/null
 
     snap set network-manager debug.enable=false
     test "$(snap get network-manager debug.enable)" = "false"
