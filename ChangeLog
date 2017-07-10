@@ -1,3 +1,59 @@
+2017-07-10 network-manager 1.2.2-11
+
+  [ teknoraver ]
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~teknoraver/snappy-hwe-snaps/+git/network-manager/+merge/319908
+
+  [ morphis ]
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/312898
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/313683
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/314223
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/314315
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/314409
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/314611
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/314714
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/314913
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/316201
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/317465
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/318607
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/319411
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/319430
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/320021
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/320042
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/323972
+
+  [ alfonsosanchezbeato ]
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/319062
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/321441
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/323107
+
+  [ kzapalowicz ]
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~kzapalowicz/snappy-hwe-snaps/+git/network-manager/+merge/315455
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~kzapalowicz/snappy-hwe-snaps/+git/network-manager/+merge/323381
+  * See more information in merge proposal
+    Merge-Proposal: https://code.launchpad.net/~kzapalowicz/snappy-hwe-snaps/+git/network-manager/+merge/323103
+
 2016-11-28 Simon Fels <simon.fels@canonical.com> - 1.2.2-10
 
  * Rename hooks to startup-hooks to make clear they are different from snap hooks
