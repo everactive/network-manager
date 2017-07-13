@@ -19,20 +19,28 @@ execute: |
     # Get us an AP via the wifi-ap we can use to create a connection to
     snap install wifi-ap
     # wifi-ap needs a bit of time to settle down
-    sleep 5
+    while ! wifi-ap.status | grep "ap.active: true" ; do
+        sleep .5
+    done
     /snap/bin/wifi-ap.config set wifi.interface=wlan0
     /snap/bin/wifi-ap.config set wifi.ssid=Ubuntu
     /snap/bin/wifi-ap.config set wifi.security=open
 
     # NM some times still detects the wifi as WPA2 instead of open, so we need
-    # to re-start to force it to refresh. Wait times are important here.
+    # to re-start to force it to refresh. See LP: #1704085. After that, we have
+    # to wait to make sure thw AP sends the beacon frames so wpa_supplicant
+    # detects the AP changes.
     sleep 30
     systemctl restart snap.network-manager.networkmanager.service
-    sleep 10
+    while ! systemctl is-active snap.network-manager.networkmanager.service ; do
+        sleep .5
+    done
     # Restarting NM breaks wifi-ap (it logs "Failed to set beacon parameters").
-    # Restarting wifi-ap fixes the issue.
+    # Restarting wifi-ap fixes the issue. See LP: #1704096.
     wifi-ap.status restart-ap
-    sleep 10
+    while ! wifi-ap.status | grep "ap.active: true" ; do
+        sleep .5
+    done
 
     # AP needs a bit to appear and be visible for NetworkManager
     /snap/bin/network-manager.nmcli d wifi rescan
