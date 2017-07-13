@@ -73,16 +73,16 @@ create_open_ap() {
     /snap/bin/wifi-ap.config set wifi.security=open
 
     # NM some times still detects the wifi as WPA2 instead of open, so we need
-    # to re-start to force it to refresh. See LP: #1704085. After that, we have
-    # to wait to make sure thw AP sends the beacon frames so wpa_supplicant
-    # detects the AP changes.
+    # to re-start to force it to refresh. See LP: #1704085. Before that, we have
+    # to wait to make sure the AP sends the beacon frames so wpa_supplicant
+    # detects the AP changes and reports the right environment to the new NM
+    # instance.
     sleep 30
     systemctl restart snap.network-manager.networkmanager.service
-    while ! systemctl is-active snap.network-manager.networkmanager.service ; do
-        sleep .5
+    while ! busctl status org.freedesktop.NetworkManager &> /dev/null ; do
+        sleep 0.5
     done
-    # Be safe, NM is not always fully operational after the previous loop
-    sleep 1
+
     # Restarting NM breaks wifi-ap (it logs "Failed to set beacon parameters").
     # Restarting wifi-ap fixes the issue. See LP: #1704096.
     wifi-ap.status restart-ap
