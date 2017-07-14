@@ -5,6 +5,7 @@ execute: |
 
     # Enable WoWLAN globally for all new WiFi connections
     snap set network-manager wifi.wake-on-wlan=any
+    wait_for_network_manager
 
     # Get us an AP via the wifi-ap we can use to create a connection to
     create_open_ap

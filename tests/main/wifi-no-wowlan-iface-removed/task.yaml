@@ -7,6 +7,7 @@ execute: |
 
     # Enable WoWLAN globally for all new WiFi connections
     snap set network-manager wifi.wake-on-wlan=any
+    wait_for_network_manager
 
     # Replace core wpa-supplicant with one from snap
     sudo systemctl stop wpa_supplicant.service
