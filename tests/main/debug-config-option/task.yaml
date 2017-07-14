@@ -2,6 +2,7 @@ summary: Test network-manager snap debug configuration
 
 execute: |
     test "$(snap get network-manager debug.enable)" = "false"
+    ! journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
 
     snap set network-manager debug.enable=true
     test "$(snap get network-manager debug.enable)" = "true"
@@ -16,4 +17,3 @@ execute: |
     snap set network-manager debug.enable=false
     test "$(snap get network-manager debug.enable)" = "false"
     test ! -e /var/snap/network-manager/current/.debug_enabled
-    ! journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
