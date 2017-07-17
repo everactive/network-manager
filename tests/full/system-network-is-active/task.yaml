@@ -6,4 +6,4 @@ execute: |
     test -e /etc/netplan/00-default-nm-renderer.yaml
     wait_for_network_manager
     /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
-    networkctl status eth0 | grep 'State: n/a'
+    networkctl status eth0 | grep 'State: routable'

@@ -67,6 +67,10 @@ wait_for_systemd_service() {
 
   # adding 1 to be sure we exceed the limit
   sleep_time=$((1 + $start_limit_interval / $start_limit_burst))
+
+  #TODO TRACE
+  echo "SLEEPTIME:$sleep_time"
+  
 	sleep $sleep_time
 }
 
@@ -92,36 +96,64 @@ mac_to_ipv6() {
 
 # Creates an open AP using wifi-ap with SSID Ubuntu
 create_open_ap() {
-    snap install wifi-ap
-    # wifi-ap needs a bit of time to settle down
-    while ! wifi-ap.status | MATCH "ap.active: true" ; do
-        sleep .5
-    done
-    /snap/bin/wifi-ap.config set wifi.interface=wlan0
-    /snap/bin/wifi-ap.config set wifi.ssid=Ubuntu
-    /snap/bin/wifi-ap.config set wifi.security=open
+   # prevent looping forever in status check.
+  max_iterations=20
 
-    # NM some times still detects the wifi as WPA2 instead of open, so we need
-    # to re-start to force it to refresh. See LP: #1704085. Before that, we have
-    # to wait to make sure the AP sends the beacon frames so wpa_supplicant
-    # detects the AP changes and reports the right environment to the new NM
-    # instance.
-    sleep 30
-    systemctl restart snap.network-manager.networkmanager.service
-    while ! busctl status org.freedesktop.NetworkManager &> /dev/null ; do
-        sleep 0.5
-    done
+  snap install wifi-ap
+  # wifi-ap needs a bit of time to settle down
+  i=0
+  while [ $i -lt $max_iterations ] ; do
+      if wifi-ap.status | MATCH "ap.active: true" ; then
+          break
+      fi
+      sleep 0.5
+      let i=i+1
+  done
+  test $i -lt $max_iterations
+  
+  /snap/bin/wifi-ap.config set wifi.interface=wlan0
+  /snap/bin/wifi-ap.config set wifi.ssid=Ubuntu
+  /snap/bin/wifi-ap.config set wifi.security=open
 
-    # Restarting NM breaks wifi-ap (it logs "Failed to set beacon parameters").
-    # Restarting wifi-ap fixes the issue. See LP: #1704096.
-    wifi-ap.status restart-ap
-    while ! wifi-ap.status | MATCH "ap.active: true" ; do
-        sleep .5
-    done
+  # NM some times still detects the wifi as WPA2 instead of open, so we need
+  # to re-start to force it to refresh. See LP: #1704085. Before that, we have
+  # to wait to make sure the AP sends the beacon frames so wpa_supplicant
+  # detects the AP changes and reports the right environment to the new NM
+  # instance.
+  sleep 30
+  
+  systemctl restart snap.network-manager.networkmanager.service
+  i=0
+  while [ $i -lt $max_iterations ] ; do
+      if busctl status org.freedesktop.NetworkManager &> /dev/null ; then
+          break
+      fi
+      sleep 0.5
+      let i=i+1
+  done
+  test $i -lt $max_iterations
 
-    /snap/bin/network-manager.nmcli d wifi rescan
-    while ! /snap/bin/network-manager.nmcli d wifi | MATCH Ubuntu ; do
-        /snap/bin/network-manager.nmcli d wifi rescan
-        sleep 5
-    done
+  # Restarting NM breaks wifi-ap (it logs "Failed to set beacon parameters").
+  # Restarting wifi-ap fixes the issue. See LP: #1704096.
+  wifi-ap.status restart-ap
+  i=0
+  while [ $i -lt $max_iterations ] ; do
+      if wifi-ap.status | MATCH "ap.active: true" ; then
+          break
+      fi
+      sleep 0.5
+      let i=i+1
+  done
+  test $i -lt $max_iterations
+
+  /snap/bin/network-manager.nmcli d wifi rescan
+  i=0
+  while [ $i -lt $max_iterations ] ; do
+      if network-manager.nmcli d wifi | MATCH Ubuntu ; then
+          break
+      fi
+      sleep 5
+      let i=i+1
+  done
+  test $i -lt $max_iterations
 }

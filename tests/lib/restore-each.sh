@@ -31,7 +31,6 @@ wait_for_systemd_service snapd.socket
 systemctl stop snap.network-manager.networkmanager
 rm -rf /var/snap/network-manager/*
 tar xzf $SPREAD_PATH/nm-state.tar.gz -C /
-sleep 5
 systemctl start snap.network-manager.networkmanager
 wait_for_network_manager
 
