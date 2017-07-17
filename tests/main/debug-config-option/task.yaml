@@ -1,6 +1,8 @@
 summary: Test network-manager snap debug configuration
 
 execute: |
+    . $TESTSLIB/utilities.sh
+    
     test "$(snap get network-manager debug.enable)" = "false"
     ! journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
 
