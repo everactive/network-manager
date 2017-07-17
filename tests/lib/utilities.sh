@@ -66,11 +66,7 @@ wait_for_systemd_service() {
   fi
 
   # adding 1 to be sure we exceed the limit
-  sleep_time=$((1 + $start_limit_interval / $start_limit_burst))
-
-  #TODO TRACE
-  echo "SLEEPTIME:$sleep_time"
-  
+  sleep_time=$((1 + $start_limit_interval / $start_limit_burst))  
 	sleep $sleep_time
 }
 
