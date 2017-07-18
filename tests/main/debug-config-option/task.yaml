@@ -14,6 +14,7 @@ execute: |
     journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
 
     journalctl --rotate
+    sleep .1
     journalctl --vacuum-time=1ms
     dmesg -c > /dev/null
 

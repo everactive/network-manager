@@ -3,6 +3,7 @@ summary: Test connection to a secured WiFi AP
 environment:
     WIFI_SSID: Ubuntu
     WIFI_PASSPHRASE: Test1234
+    MAX_ITERATIONS: 20
 
 execute: |
     snap install wifi-ap
@@ -18,10 +19,15 @@ execute: |
 
     # AP needs a bit to appear and be visible for NetworkManager
     /snap/bin/network-manager.nmcli d wifi rescan
-    while ! /snap/bin/network-manager.nmcli d wifi | grep Ubuntu ; do
-        /snap/bin/network-manager.nmcli d wifi rescan
-        sleep 1
+    i=0
+    while [ $i -lt $MAX_ITERATIONS ] ; do
+      if /snap/bin/network-manager.nmcli d wifi | grep Ubuntu ; then
+          break
+      fi
+      sleep 1
+      let i=i+1
     done
+    test $i -lt $MAX_ITERATIONS
 
     /snap/bin/network-manager.nmcli d wifi | grep $WIFI_SSID
 
