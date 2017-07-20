@@ -9,37 +9,36 @@ Debug is a feature that controls the amount of logs produced by the network-mana
 snap. It is useful for collecting information required to either report a bug or
 investigate a network-manager failure (if happens).
 
-The default is disabled by default and has to be explicitely turned on for
-usage.
+It is disabled by default and has to be explicitely turned on for usage.
 
-Note that the debug logs may contain sensitive information
+Note that the debug logs may contain sensitive information.
 
 ## Enable Debug
 
 The network-manager snap provides a single configuration option which can be used to
 turn the debug feature either on or off:
 
- * **debug.enable**
+ * **debug**
 
 The option takes a boolean value. The meaning of the possible values are:
 
  * **true:** Enable logging debug information
  * **false (default):** Disable logging debug information
 
-Changing the **debug.enable** configuration option have immediate
-effect as network-manager service restarts just after setting the new value
+Changing the **debug** configuration option has an immediate
+effect as network-manager service restarts just after setting the new value.
 
 **Example:** Enable debug feature
 
 ```
-$ snap set network-manager debug.enable=true
+$ snap set network-manager debug=true
 ```
 
 <br/>
 **Example:** Disable debug feature.
 
 ```
-$ snap set network-manager debug.enable=false
+$ snap set network-manager debug=false
 ```
 
 ## Viewing logs

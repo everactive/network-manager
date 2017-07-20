@@ -78,7 +78,7 @@ switch_wifi_wake_on_wlan() {
   fi
 }
 
-switch_debug_enable() {
+switch_debug() {
   DEBUG_FILE=$SNAP_DATA/conf.d/.debug_enabled
   # $1 true/false for enabling/disabling --debug flag in nm
   if [ "$1" = "true" ]; then
@@ -114,11 +114,11 @@ else
   switch_wifi_wake_on_wlan disabled ""
 fi
 
-value=$(snapctl get debug.enable)
+value=$(snapctl get debug)
 if [ -n "$value" ]; then
-  switch_debug_enable $value
+  switch_debug $value
 else
   default=false
-  snapctl set debug.enable=$default
-  switch_debug_enable $default
+  snapctl set debug=$default
+  switch_debug $default
 fi
