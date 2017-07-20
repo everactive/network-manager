@@ -26,7 +26,7 @@ The option takes a boolean value. The meaning of the possible values are:
  * **false (default):** Disable logging debug information
 
 Changing the **debug** configuration option has an immediate
-effect as network-manager service restarts just after setting the new value.
+effect as the network-manager service restarts just after setting the new value.
 
 **Example:** Enable debug feature
 

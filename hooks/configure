@@ -80,7 +80,7 @@ switch_wifi_wake_on_wlan() {
 
 switch_debug() {
   DEBUG_FILE=$SNAP_DATA/conf.d/.debug_enabled
-  # $1 true/false for enabling/disabling --debug flag in nm
+  # $1 true/false for enabling/disabling debug log level in nm
   if [ "$1" = "true" ]; then
     if [ ! -f "$DEBUG_FILE" ]; then
       touch "$DEBUG_FILE"
