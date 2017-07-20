@@ -13,13 +13,15 @@ execute: |
     ps -ef | grep -z "NetworkManager.*\-\-debug" | grep -v grep
     journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
 
+    snap set network-manager debug=false
+    wait_for_network_manager
+    
+    # Clean up logs. From now on there shouldn't be any new debug log for network manager
     journalctl --rotate
     sleep .1
     journalctl --vacuum-time=1ms
     dmesg -c > /dev/null
 
-    snap set network-manager debug=false
-    wait_for_network_manager
     test "$(snap get network-manager debug)" = "false"
     test ! -e /var/snap/network-manager/current/.debug_enabled
     ! journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
