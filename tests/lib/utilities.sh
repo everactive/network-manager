@@ -92,20 +92,9 @@ mac_to_ipv6() {
 
 # Creates an open AP using wifi-ap with SSID Ubuntu
 create_open_ap() {
-   # prevent looping forever in status check.
-  max_iterations=20
-
   snap install wifi-ap
   # wifi-ap needs a bit of time to settle down
-  i=0
-  while [ $i -lt $max_iterations ] ; do
-      if wifi-ap.status | MATCH "ap.active: true" ; then
-          break
-      fi
-      sleep 0.5
-      let i=i+1
-  done
-  test $i -lt $max_iterations
+  repeat_until_done 'wifi-ap.status | MATCH "ap.active: true"' 0.5
   
   /snap/bin/wifi-ap.config set wifi.interface=wlan0
   /snap/bin/wifi-ap.config set wifi.ssid=Ubuntu
@@ -119,37 +108,38 @@ create_open_ap() {
   sleep 30
   
   systemctl restart snap.network-manager.networkmanager.service
-  i=0
-  while [ $i -lt $max_iterations ] ; do
-      if busctl status org.freedesktop.NetworkManager &> /dev/null ; then
-          break
-      fi
-      sleep 0.5
-      let i=i+1
-  done
-  test $i -lt $max_iterations
+  repeat_until_done "busctl status org.freedesktop.NetworkManager &> /dev/null" 0.5
 
   # Restarting NM breaks wifi-ap (it logs "Failed to set beacon parameters").
   # Restarting wifi-ap fixes the issue. See LP: #1704096.
   wifi-ap.status restart-ap
-  i=0
-  while [ $i -lt $max_iterations ] ; do
-      if wifi-ap.status | MATCH "ap.active: true" ; then
-          break
-      fi
-      sleep 0.5
-      let i=i+1
-  done
-  test $i -lt $max_iterations
+  repeat_until_done 'wifi-ap.status | MATCH "ap.active: true"' 0.5
 
   /snap/bin/network-manager.nmcli d wifi rescan
-  i=0
-  while [ $i -lt $max_iterations ] ; do
-      if network-manager.nmcli d wifi | MATCH Ubuntu ; then
-          break
-      fi
-      sleep 5
-      let i=i+1
-  done
-  test $i -lt $max_iterations
+  repeat_until_done "network-manager.nmcli d wifi | MATCH Ubuntu" 5
+}
+
+# $1 instruction to execute repeatedly until complete or max times
+# $2 sleep time between retries. Default 1sec
+# $3 max_iterations. Default 20
+repeat_until_done() {
+  timeout=1
+  if [ $# -ge 2 ]; then
+    timeout=$2
+  fi
+
+  max_iterations=20
+  if [ $# -ge 3 ]; then
+    max_iterations=$3
+  fi
+
+    i=0
+    while [ $i -lt $max_iterations ] ; do
+        if $(eval $1) ; then
+            break
+        fi
+        sleep $timeout
+        let i=i+1
+    done
+    test $i -lt $max_iterations
 }
