@@ -69,7 +69,7 @@ $SNAP/bin/dhcp-lease-mover &
 
 # Identify if we are in debug mode or not
 LOG_LEVEL="INFO"
-if [ -f $SNAP_DATA/conf.d/.debug_enabled ]; then
+if [ -f $SNAP_DATA/.debug_enabled ]; then
     LOG_LEVEL="DEBUG"
 fi
 

@@ -133,13 +133,13 @@ repeat_until_done() {
     max_iterations=$3
   fi
 
-    i=0
-    while [ $i -lt $max_iterations ] ; do
-        if $(eval $1) ; then
-            break
-        fi
-        sleep $timeout
-        let i=i+1
-    done
-    test $i -lt $max_iterations
+  i=0
+  while [ $i -lt $max_iterations ] ; do
+      if $(eval $1) ; then
+          break
+      fi
+      sleep $timeout
+      let i=i+1
+  done
+  test $i -lt $max_iterations
 }
