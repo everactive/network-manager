@@ -3,17 +3,17 @@ summary: Test network-manager snap debug configuration
 execute: |
     . $TESTSLIB/utilities.sh
     
-    test "$(snap get network-manager debug)" = "false"
+    test "$(snap get network-manager debug.enable)" = "false"
     ! journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
 
-    snap set network-manager debug=true
+    snap set network-manager debug.enable=true
     wait_for_network_manager
-    test "$(snap get network-manager debug)" = "true"
+    test "$(snap get network-manager debug.enable)" = "true"
     test -e /var/snap/network-manager/current/conf.d/.debug_enabled
     ps -ef | grep -Pzq "NetworkManager.*\-\-log\-level=DEBUG"
     journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
 
-    snap set network-manager debug=false
+    snap set network-manager debug.enable=false
     wait_for_network_manager
     
     # Clean up logs. From now on there shouldn't be any new debug log for network manager
@@ -22,6 +22,6 @@ execute: |
     journalctl --vacuum-time=1ms
     dmesg -c > /dev/null
 
-    test "$(snap get network-manager debug)" = "false"
+    test "$(snap get network-manager debug.enable)" = "false"
     test ! -e /var/snap/network-manager/current/.debug_enabled
     ! journalctl --no-pager -u snap.network-manager.networkmanager.service | grep -Pzq "<debug>"
