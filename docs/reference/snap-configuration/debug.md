@@ -18,7 +18,7 @@ Note that the debug logs may contain sensitive information.
 The network-manager snap provides a single configuration option which can be used to
 turn the debug feature either on or off:
 
- * **debug**
+ * **debug.enable**
 
 The option takes a boolean value. The meaning of the possible values are:
 
@@ -31,14 +31,14 @@ effect as the network-manager service restarts just after setting the new value.
 **Example:** Enable debug feature
 
 ```
-$ snap set network-manager debug=true
+$ snap set network-manager debug.enable=true
 ```
 
 <br/>
 **Example:** Disable debug feature.
 
 ```
-$ snap set network-manager debug=false
+$ snap set network-manager debug.enable=false
 ```
 
 ## Viewing logs
