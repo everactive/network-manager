@@ -95,6 +95,23 @@ EOF
   esac
 }
 
+switch_debug_enable() {
+  DEBUG_FILE=$SNAP_DATA/.debug_enabled
+  # $1 true/false for enabling/disabling debug log level in nm
+  if [ "$1" = "true" ]; then
+    if [ ! -f "$DEBUG_FILE" ]; then
+      touch "$DEBUG_FILE"
+    fi
+  else
+    if [ -f "$DEBUG_FILE" ]; then
+      rm -f "$DEBUG_FILE"
+    fi
+  fi
+
+  # restart service to apply debug flag enable/disable
+  systemctl restart snap.network-manager.networkmanager.service
+}
+
 value="`snapctl get wifi.powersave`"
 if [ -n "$value" ]; then
   switch_wifi_powersave $value
@@ -124,4 +141,13 @@ else
     value=false
   fi
   snapctl set ethernet.enable=$value
+fi
+
+value=$(snapctl get debug.enable)
+if [ -n "$value" ]; then
+  switch_debug_enable $value
+else
+  default=false
+  snapctl set debug.enable=$default
+  switch_debug_enable $default
 fi

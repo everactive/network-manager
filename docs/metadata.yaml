@@ -29,6 +29,8 @@ navigation:
         children:
           - title: Ethernet Support
             location: reference/configuration/ethernet_support.md
+          - title: Debug
+            location: reference/snap-configuration/debug.md
           - title: Wake on WLAN
             location: reference/snap-configuration/wowlan.md
           - title: WiFi Powersave
