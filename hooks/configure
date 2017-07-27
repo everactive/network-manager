@@ -107,9 +107,6 @@ switch_debug_enable() {
       rm -f "$DEBUG_FILE"
     fi
   fi
-
-  # restart service to apply debug flag enable/disable
-  systemctl restart snap.network-manager.networkmanager.service
 }
 
 value="`snapctl get wifi.powersave`"
