@@ -36,14 +36,15 @@ systemctl stop snapd.service snapd.socket
 tar czf $SPREAD_PATH/snapd-state.tar.gz /var/lib/snapd /etc/netplan
 systemctl start snapd.socket
 
+# Make sure the original netplan configuration is applied and active
+# (we do this before re-starting NM to avoid race conditions in some tests)
+netplan generate
+netplan apply
+
 # And also snapshot NetworkManager's state
 systemctl stop snap.network-manager.networkmanager
 tar czf $SPREAD_PATH/nm-state.tar.gz /var/snap/network-manager
 systemctl start snap.network-manager.networkmanager
-
-# Make sure the original netplan configuration is applied and active
-netplan generate
-netplan apply
 
 # For debugging dump all snaps and connected slots/plugs
 snap list
