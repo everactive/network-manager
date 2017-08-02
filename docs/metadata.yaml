@@ -27,6 +27,8 @@ navigation:
     children:
       - title: Snap Configuration
         children:
+          - title: Debug
+            location: reference/snap-configuration/debug.md
           - title: Wake on WLAN
             location: reference/snap-configuration/wowlan.md
           - title: WiFi Powersave

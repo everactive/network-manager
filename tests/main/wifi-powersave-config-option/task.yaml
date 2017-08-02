@@ -14,15 +14,18 @@ execute: |
 
     # Try to enable and disable again
     snap set network-manager wifi.powersave=enabled
+    wait_for_network_manager
     test "`snap get network-manager wifi.powersave`" = "enabled"
     grep "wifi.powersave = 3" $WIFI_POWERSAVE_CONF_PATH
 
     snap set network-manager wifi.powersave=disabled
+    wait_for_network_manager
     test "`snap get network-manager wifi.powersave`" = "disabled"
     grep "wifi.powersave = 2" $WIFI_POWERSAVE_CONF_PATH
 
     # Specifying no value means the snap should use the default
     # which is 'disable'
     snap set network-manager wifi.powersave=
+    wait_for_network_manager
     test "`snap get network-manager wifi.powersave`" = "disabled"
     grep "wifi.powersave = 2" $WIFI_POWERSAVE_CONF_PATH

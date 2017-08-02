@@ -5,25 +5,9 @@ environment:
     WIFI_PASSPHRASE: Test1234
 
 execute: |
-    snap install wifi-ap
-    # FIXME: until the wifi-ap utility is clever enough to retry
-    # connecting with the service we need to add a short sleep here
-    sleep 0.5
+    . $TESTSLIB/utilities.sh
 
-    # Setup the AP on wlan0
-    /snap/bin/wifi-ap.config set wifi.interface=wlan0
-    /snap/bin/wifi-ap.config set wifi.ssid=$WIFI_SSID
-    /snap/bin/wifi-ap.config set wifi.security=wpa2
-    /snap/bin/wifi-ap.config set wifi.security-passphrase=$WIFI_PASSPHRASE
-
-    # AP needs a bit to appear and be visible for NetworkManager
-    /snap/bin/network-manager.nmcli d wifi rescan
-    while ! /snap/bin/network-manager.nmcli d wifi | grep Ubuntu ; do
-        /snap/bin/network-manager.nmcli d wifi rescan
-        sleep 1
-    done
-
-    /snap/bin/network-manager.nmcli d wifi | grep $WIFI_SSID
+    create_ap "$WIFI_SSID" "$WIFI_PASSPHRASE"
 
     # Connect to the AP and ensure the connection was established
     /snap/bin/network-manager.nmcli d wifi connect $WIFI_SSID password $WIFI_PASSPHRASE

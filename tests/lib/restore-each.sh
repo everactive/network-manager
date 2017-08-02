@@ -25,12 +25,16 @@ rm -rf /var/lib/snapd/*
 tar xzf $SPREAD_PATH/snapd-state.tar.gz -C /
 rm -rf /root/.snap
 systemctl start snapd.service snapd.socket
+wait_for_systemd_service snapd.service
+wait_for_systemd_service snapd.socket
+
+# Make sure the original netplan configuration is applied and active
+# (we do this before re-starting NM to avoid race conditions in some tests)
+netplan generate
+netplan apply
 
 systemctl stop snap.network-manager.networkmanager
 rm -rf /var/snap/network-manager/*
 tar xzf $SPREAD_PATH/nm-state.tar.gz -C /
 systemctl start snap.network-manager.networkmanager
-
-# Make sure the original netplan configuration is applied and active
-netplan generate
-netplan apply
+wait_for_network_manager
