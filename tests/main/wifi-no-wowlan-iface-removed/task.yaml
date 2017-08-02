@@ -20,7 +20,7 @@ execute: |
     ! iw phy phy0 wowlan show
 
     # Get us an AP via the wifi-ap we can use to create a connection to
-    create_open_ap
+    create_ap Ubuntu
 
     # Connect to the AP and ensure the connection was established
     /snap/bin/network-manager.nmcli d wifi | grep Ubuntu
