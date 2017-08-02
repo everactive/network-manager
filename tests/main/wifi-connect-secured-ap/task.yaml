@@ -7,20 +7,7 @@ environment:
 execute: |
     . $TESTSLIB/utilities.sh
 
-    snap install wifi-ap
-    # FIXME: until the wifi-ap utility is clever enough to retry
-    # connecting with the service we need to add a short sleep here
-    sleep 0.5
-
-    # Setup the AP on wlan0
-    /snap/bin/wifi-ap.config set wifi.interface=wlan0
-    /snap/bin/wifi-ap.config set wifi.ssid=$WIFI_SSID
-    /snap/bin/wifi-ap.config set wifi.security=wpa2
-    /snap/bin/wifi-ap.config set wifi.security-passphrase=$WIFI_PASSPHRASE
-
-    # AP needs a bit to appear and be visible for NetworkManager
-    /snap/bin/network-manager.nmcli d wifi rescan
-    repeat_until_done "/snap/bin/network-manager.nmcli d wifi | MATCH $WIFI_SSID"
+    create_ap "$WIFI_SSID" "$WIFI_PASSPHRASE"
 
     # Connect to the AP and ensure the connection was established
     /snap/bin/network-manager.nmcli d wifi connect $WIFI_SSID password $WIFI_PASSPHRASE
