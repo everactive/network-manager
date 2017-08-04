@@ -16,7 +16,7 @@ slots:
 
 hooks:
   configure:
-    plugs: [core-support]
+    plugs: [nmcli]
 
 plugs:
   nmcli: network-manager
