@@ -1,3 +1,14 @@
+2017-08-07 network-manager 1.2.2-13
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Change debug activation to avoid having to re-start NM.
+    To be able to re-start NM the core-support plug was being used, which
+    would have never been accepted in the Ubuntu store, as that interface
+    is meant to be used by the core snap only. Instead, avoid having to
+    restart by using nmcli to dynamically activate/deactivate debug option.
+    For this we need to use the nmcli plug instead for the configure hook.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/328576
+
 2017-08-02 network-manager 1.2.2-12
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
