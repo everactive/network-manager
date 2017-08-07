@@ -16,7 +16,7 @@ slots:
 
 hooks:
   configure:
-    plugs: [core-support]
+    plugs: [nmcli]
 
 plugs:
   nmcli: network-manager
@@ -56,6 +56,7 @@ parts:
     files:
       bin/networkmanager: bin/networkmanager
       bin/dhcp-lease-mover: bin/dhcp-lease-mover
+      bin/nmcli-internal: bin/nmcli-internal
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
       data/copyright: usr/share/doc/network-manager/copyright
       startup-hooks/99-wol-by-default.sh: startup-hooks/99-wol-by-default.sh
