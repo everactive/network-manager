@@ -86,12 +86,12 @@ switch_debug_enable() {
   if [ "$1" = "true" ]; then
     if [ ! -f "$DEBUG_FILE" ]; then
       touch "$DEBUG_FILE"
-      "$SNAP"/command-nmcli.wrapper g log level DEBUG
+      "$SNAP"/bin/nmcli-internal g log level DEBUG
     fi
   else
     if [ -f "$DEBUG_FILE" ]; then
       rm -f "$DEBUG_FILE"
-      "$SNAP"/command-nmcli.wrapper g log level INFO
+      "$SNAP"/bin/nmcli-internal g log level INFO
     fi
   fi
 }
