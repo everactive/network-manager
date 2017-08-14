@@ -1,3 +1,50 @@
+2017-08-07 network-manager 1.2.2-13
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Change debug activation to avoid having to re-start NM.
+    To be able to re-start NM the core-support plug was being used, which
+    would have never been accepted in the Ubuntu store, as that interface
+    is meant to be used by the core snap only. Instead, avoid having to
+    restart by using nmcli to dynamically activate/deactivate debug option.
+    For this we need to use the nmcli plug instead for the configure hook.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/328576
+
+2017-08-02 network-manager 1.2.2-12
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * spread: fix tests that use wifi-ap.
+    NM some times needs to be restarted to properly re-scan APs and get
+    the right authentication type.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/327212
+  * Fixes for immutable-netplan-config and wifi-connect-secured-ap tests
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/328363
+
+  [ unknown ]
+  * See more information in merge proposal
+    
+  * See more information in merge proposal
+    
+
+  [ Roberto Mier Escandón  <roberto.escandon@canonical.com> ]
+  * Debug enable/disable config option.
+    
+    You can restart network-manager service in debug mode by:
+      snap set network-manager debug.enable=true
+    
+    and disable debug mode:
+      snap set network-manager debug.enable=false
+    
+    Default value is false.
+    
+    When set to true, service is started with these flags:
+      --debug --log-level=DEBUG
+    
+    NOTE: Additionally, there are some spread tests changes to make them more stable
+    Merge-Proposal: https://code.launchpad.net/~rmescandon/snappy-hwe-snaps/+git/network-manager/+merge/327096
+  * debug config option back to debug.enable
+    spread tests operations being repeated use now a common helper function
+    Merge-Proposal: https://code.launchpad.net/~rmescandon/snappy-hwe-snaps/+git/network-manager/+merge/327866
+
 2017-07-10 network-manager 1.2.2-11
 
   [ teknoraver ]
