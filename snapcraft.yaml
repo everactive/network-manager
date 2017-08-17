@@ -14,10 +14,6 @@ grade: stable
 slots:
   service: network-manager
 
-hooks:
-  configure:
-    plugs: [nmcli]
-
 plugs:
   nmcli: network-manager
   wpa:
@@ -28,6 +24,7 @@ plugs:
 hooks:
   configure:
     plugs:
+      - nmcli
       - network-setup-control
 
 apps:
@@ -48,11 +45,6 @@ apps:
     # is implemented we keep the alias disabled.
     #
     # aliases: [NetworkManager]
-
-hooks:
-  configure:
-    plugs:
-      - network-setup-control
 
 parts:
   hooks:
