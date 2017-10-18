@@ -5,12 +5,7 @@ execute: |
     # have them approved from the store in our snap-declaration assertion.
     test ! -e /snap/bin/nmcli
 
-    snapd_version=$(snap version | awk '/^snapd / {print $2; exit}')
-    target=$SNAP_NAME.nmcli
-    if dpkg --compare-versions $snapd_version lt 2.25 ; then
-        target=$SNAP_NAME
-    fi
-    snap alias $target nmcli
+    snap alias $SNAP_NAME.nmcli nmcli
 
     test -e /snap/bin/nmcli
 

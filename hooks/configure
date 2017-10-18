@@ -78,6 +78,23 @@ switch_wifi_wake_on_wlan() {
   fi
 }
 
+switch_ethernet() {
+  case "$1" in
+    true)
+      cat <<EOF > /etc/netplan/00-default-nm-renderer.yaml
+network:
+  renderer: NetworkManager
+EOF
+      ;;
+    false)
+      rm -f /etc/netplan/00-default-nm-renderer.yaml
+      ;;
+    *)
+      echo "ERROR: Invalid value provided for ethernet"
+      exit 1
+  esac
+}
+
 switch_debug_enable() {
   DEBUG_FILE=$SNAP_DATA/.debug_enabled
   # $1 true/false for enabling/disabling debug log level in nm
@@ -113,6 +130,18 @@ else
   snapctl set wifi.wake-on-wlan=disabled
   snapctl set wifi.wake-on-wlan-password=
   switch_wifi_wake_on_wlan disabled ""
+fi
+
+value=`snapctl get ethernet.enable`
+if [ -n "$value" ]; then
+  switch_ethernet $value
+else
+  if [ -e /etc/netplan/00-default-nm-renderer.yaml ]; then
+    value=true
+  else
+    value=false
+  fi
+  snapctl set ethernet.enable=$value
 fi
 
 value=$(snapctl get debug.enable)

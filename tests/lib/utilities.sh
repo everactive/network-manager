@@ -20,10 +20,15 @@ switch_netplan_to_network_manager() {
 		return 0
 	fi
 
-	cat <<-EOF > /etc/netplan/00-default-nm-renderer.yaml
+	# set ethernet.enable in case the snap is already installed
+	if snap list | grep -q network-manager ; then
+		snap set network-manager ethernet.enable=true
+	else
+		cat << EOF > /etc/netplan/00-default-nm-renderer.yaml
 network:
   renderer: NetworkManager
-	EOF
+EOF
+	fi
 }
 
 switch_netplan_to_networkd() {
@@ -31,7 +36,12 @@ switch_netplan_to_networkd() {
 		return 0
 	fi
 
-	rm /etc/netplan/00-default-nm-renderer.yaml
+	# unset ethernet.enable in case the snap is already installed
+	if snap list | grep -q network-manager ; then
+		snap set network-manager ethernet.enable=false
+	else
+		rm /etc/netplan/00-default-nm-renderer.yaml
+	fi
 }
 
 # waits for a service to be active. Besides that, waits enough
@@ -75,7 +85,7 @@ wait_for_network_manager() {
 }
 
 stop_after_first_reboot() {
-	if [ $SPREAD_REBOOT -eq 1 ] ; then
+	if [ $SPREAD_REBOOT -gt 0 ] ; then
 		exit 0
 	fi
 }

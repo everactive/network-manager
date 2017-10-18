@@ -14,16 +14,18 @@ grade: stable
 slots:
   service: network-manager
 
-hooks:
-  configure:
-    plugs: [nmcli]
-
 plugs:
   nmcli: network-manager
   wpa:
     interface: dbus
     bus: system
     name: fi.w1.wpa_supplicant1
+
+hooks:
+  configure:
+    plugs:
+      - nmcli
+      - network-setup-control
 
 apps:
   nmcli:
