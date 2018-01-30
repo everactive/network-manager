@@ -56,6 +56,9 @@
                 _NM_UTILS_MACRO_REST (__VA_ARGS__)); \
     } G_STMT_END
 
+/* Time between retrying to connect, for modems */
+#define MODEM_DELAY_RETRY_S 10
+
 typedef struct _NMPolicyPrivate NMPolicyPrivate;
 
 struct _NMPolicyPrivate {
@@ -931,7 +934,7 @@ sleeping_changed (NMManager *manager, GParamSpec *pspec, gpointer user_data)
 }
 
 static void
-schedule_activate_check (NMPolicy *self, NMDevice *device)
+schedule_activate_check (NMPolicy *self, NMDevice *device, guint delay)
 {
 	NMPolicyPrivate *priv = NM_POLICY_GET_PRIVATE (self);
 	ActivateData *data;
@@ -960,7 +963,10 @@ schedule_activate_check (NMPolicy *self, NMDevice *device)
 	data = g_slice_new0 (ActivateData);
 	data->policy = self;
 	data->device = g_object_ref (device);
-	data->autoactivate_id = g_idle_add (auto_activate_device, data);
+	if (delay)
+		data->autoactivate_id = g_timeout_add_seconds (delay, auto_activate_device, data);
+	else
+		data->autoactivate_id = g_idle_add (auto_activate_device, data);
 	priv->pending_activation_checks = g_slist_append (priv->pending_activation_checks, data);
 }
 
@@ -1155,6 +1161,7 @@ device_state_changed (NMDevice *device,
 	NMIP4Config *ip4_config;
 	NMIP6Config *ip6_config;
 	NMSettingConnection *s_con = NULL;
+	guint delay = 0;
 
 	switch (new_state) {
 	case NM_DEVICE_STATE_FAILED:
@@ -1183,6 +1190,11 @@ device_state_changed (NMDevice *device,
 				/* Schedule a handler to reset retries count */
 				if (!priv->reset_retries_id) {
 					gint32 retry_time = nm_settings_connection_get_autoconnect_retry_time (connection);
+
+					gint32 actual_time = MAX (0, retry_time - nm_utils_get_monotonic_timestamp_s ());
+					_LOGI (LOGD_DEVICE, "Disabling autoconnect for connection '%s'; "
+						   "setting retry of %d secs.",
+						   nm_connection_get_id (NM_CONNECTION (connection)), actual_time);
 
 					g_warn_if_fail (retry_time != 0);
 					priv->reset_retries_id = g_timeout_add_seconds (MAX (0, retry_time - nm_utils_get_monotonic_timestamp_s ()), reset_connections_retries, self);
@@ -1250,7 +1262,17 @@ device_state_changed (NMDevice *device,
 			update_routing_and_dns (self, FALSE);
 
 		/* Device is now available for auto-activation */
-		schedule_activate_check (self, device);
+		if (nm_device_get_device_type (device) == NM_DEVICE_TYPE_MODEM)
+			delay = MODEM_DELAY_RETRY_S;
+
+		if (connection)
+			_LOGI (LOGD_DEVICE, "Connection '%s' disconnected, scheduling activate_check in %u seconds.",
+				nm_connection_get_id (NM_CONNECTION (connection)), delay);
+		else
+			_LOGI (LOGD_DEVICE, "Device '%s' has no connection; scheduling activate_check in %u seconds.",
+				nm_device_get_iface (device), delay);
+
+		schedule_activate_check (self, device, delay);
 		break;
 
 	case NM_DEVICE_STATE_PREPARE:
@@ -1363,7 +1385,7 @@ device_autoconnect_changed (NMDevice *device,
 	NMPolicy *self = priv->self;
 
 	if (nm_device_autoconnect_allowed (device))
-		schedule_activate_check (self, device);
+		schedule_activate_check (self, device, 0);
 }
 
 static void
@@ -1372,7 +1394,7 @@ device_recheck_auto_activate (NMDevice *device, gpointer user_data)
 	NMPolicyPrivate *priv = user_data;
 	NMPolicy *self = priv->self;
 
-	schedule_activate_check (self, device);
+	schedule_activate_check (self, device, 0);
 }
 
 static void
@@ -1586,7 +1608,7 @@ schedule_activate_all (NMPolicy *self)
 	const GSList *iter;
 
 	for (iter = nm_manager_get_devices (priv->manager); iter; iter = g_slist_next (iter))
-		schedule_activate_check (self, NM_DEVICE (iter->data));
+		schedule_activate_check (self, NM_DEVICE (iter->data), 0);
 }
 
 static void
