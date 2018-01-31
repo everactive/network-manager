@@ -28,8 +28,9 @@ rm -f /home/network-manager/nm-state.tar.gz
 
 snap_install network-manager
 # FIXME: Until the store snap-declaration is updated we need to connect
-# this plug manually.
+# this plugs manually.
 snap connect network-manager:firewall-control
+snap connect network-manager:network-setup-control
 
 # Snapshot of the current snapd state for a later restore
 systemctl stop snapd.service snapd.socket

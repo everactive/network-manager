@@ -1,5 +1,5 @@
 name: network-manager
-version: 1.2.2-13
+version: 1.2.2-14
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
@@ -14,16 +14,18 @@ grade: stable
 slots:
   service: network-manager
 
-hooks:
-  configure:
-    plugs: [nmcli]
-
 plugs:
   nmcli: network-manager
   wpa:
     interface: dbus
     bus: system
     name: fi.w1.wpa_supplicant1
+
+hooks:
+  configure:
+    plugs:
+      - nmcli
+      - network-setup-control
 
 apps:
   nmcli:

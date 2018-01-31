@@ -1,0 +1,55 @@
+summary: Verify ethernet support can be enabled via configuration option
+
+execute: |
+    . $TESTSLIB/utilities.sh
+
+    # We need to have the network-setup-control interface available as
+    # otherwise the hook can't do its job
+    snap interfaces | grep network-setup-control
+
+    case "$SPREAD_REBOOT" in
+        0)
+            # We should now have the interface available
+            snap interfaces | grep network-setup-control
+
+            # In the default setup NetworkManager doesn't take over ethernet
+            wait_for_network_manager
+
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
+
+            # By default ethernet is disabled
+            test "`snap get network-manager ethernet.enable`" = "false"
+
+            # Enable ethernet support requires us to reboot two times to get
+            # things into a right state.
+            snap set network-manager ethernet.enable=true
+            test "`snap get network-manager ethernet.enable`" = "true"
+
+            REBOOT
+            ;;
+        1)
+            wait_for_network_manager
+
+            # NetworkManager now controls eth0 and networkd does not
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
+            # ... and we're running with the netplan configuration
+            /snap/bin/network-manager.nmcli d | grep 'netplan-eth0'
+            networkctl status eth0 | grep 'State: routable'
+
+            # Now lets switch back to network by using the configuration
+            # item again and doing another reboot.
+            snap set network-manager ethernet.enable=false
+            test "`snap get network-manager ethernet.enable`" = "false"
+            REBOOT
+            ;;
+        2)
+            wait_for_network_manager
+
+            # networkd manages eth0 and NetworkManager does not
+            networkctl | grep 'eth0.*routable'
+            /snap/bin/network-manager.nmcli d | grep 'eth0.*unmanaged'
+            ;;
+        *)
+            exit 1
+            ;;
+    esac

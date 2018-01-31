@@ -66,5 +66,11 @@ else
 	clone_tests_extras
 fi
 
+# Any project-specific options for test-runner should be specified in
+# .tests_config under EXTRA_ARGS
+if [ -e ".tests_config" ]; then
+    . .tests_config
+fi
+
 echo "INFO: Executing tests runner"
-cd $TESTS_EXTRAS_PATH && ./tests-runner.sh "$@"
+cd $TESTS_EXTRAS_PATH && ./tests-runner.sh "$@" "$EXTRA_ARGS"
