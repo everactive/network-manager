@@ -6,13 +6,13 @@ switch_wifi_powersave() {
   # for the meaning of the different values for the wifi.powersave option.
   case $1 in
     enabled)
-      cat <<EOF > $path
+      cat <<EOF > "$path"
 [connection]
 wifi.powersave = 3
 EOF
       ;;
     disabled)
-      cat <<EOF > $path
+      cat <<EOF > "$path"
 [connection]
 wifi.powersave = 2
 EOF
@@ -66,15 +66,15 @@ switch_wifi_wake_on_wlan() {
   password=$2
   path=$SNAP_DATA/conf.d/wifi-wowlan.conf
 
-  echo "[connection]" > $path
+  echo "[connection]" > "$path"
   # If we don't get a value provided there is no one set in the snap
   # configuration and we can simply leave it out here and let
   # NetworkManager take its default one.
   if [ -n "$value" ]; then
-    echo "wifi.wake-on-wlan=$value" >> $path
+    echo "wifi.wake-on-wlan=$value" >> "$path"
   fi
   if [ -n "$password" ]; then
-    echo "wifi.wake-on-wlan-password=$password" >> $path
+    echo "wifi.wake-on-wlan-password=$password" >> "$path"
   fi
 }
 
@@ -113,28 +113,28 @@ switch_debug_enable() {
   fi
 }
 
-value="`snapctl get wifi.powersave`"
+value=$(snapctl get wifi.powersave)
 if [ -n "$value" ]; then
-  switch_wifi_powersave $value
+  switch_wifi_powersave "$value"
 else
   default="disabled"
   snapctl set wifi.powersave=$default
   switch_wifi_powersave $default
 fi
 
-value=`snapctl get wifi.wake-on-wlan`
-password=`snapctl get wifi.wake-on-wlan-password`
-if [ -n "$value" ] || [ -n "$password" ]; then
-  switch_wifi_wake_on_wlan $value "$password"
+value=$(snapctl get wifi.wake-on-wlan)
+password=$(snapctl get wifi.wake-on-wlan-password)
+if [ -n "$value" ]; then
+    switch_wifi_wake_on_wlan "$value" "$password"
 else
-  snapctl set wifi.wake-on-wlan=disabled
-  snapctl set wifi.wake-on-wlan-password=
-  switch_wifi_wake_on_wlan disabled ""
+    snapctl set wifi.wake-on-wlan=disabled
+    snapctl set wifi.wake-on-wlan-password=
+    switch_wifi_wake_on_wlan disabled ""
 fi
 
-value=`snapctl get ethernet.enable`
+value=$(snapctl get ethernet.enable)
 if [ -n "$value" ]; then
-  switch_ethernet $value
+  switch_ethernet "$value"
 else
   if [ -e /etc/netplan/00-default-nm-renderer.yaml ]; then
     value=true
@@ -146,7 +146,7 @@ fi
 
 value=$(snapctl get debug.enable)
 if [ -n "$value" ]; then
-  switch_debug_enable $value
+  switch_debug_enable "$value"
 else
   default=false
   snapctl set debug.enable=$default
