@@ -1,154 +1,39 @@
-#!/bin/bash
+#!/bin/sh -ex
+# Configure hook has two missions:
+# 1. Set properties defaults on installation, so users can see them
+# 2. Re-start daemon if a property has changed
 
-switch_wifi_powersave() {
-    path=$SNAP_DATA/conf.d/wifi-powersave.conf
-    # See https://developer.gnome.org/libnm/stable/NMSettingWireless.html#NMSettingWirelessPowersave
-    # for the meaning of the different values for the wifi.powersave option.
-    case $1 in
-        enabled)
-            cat <<EOF > "$path"
-[connection]
-wifi.powersave = 3
-EOF
-            ;;
-        disabled)
-            cat <<EOF > "$path"
-[connection]
-wifi.powersave = 2
-EOF
-            ;;
-        *)
-            echo "WARNING: invalid value '$1' supplied for wifi.powersave configuration option"
-            exit 1
-            ;;
-    esac
+. "$SNAP"/bin/snap-prop.sh
+
+props_file="$SNAP_DATA"/current_snap_props
+
+_create_props_content() {
+    printf "wifi_powersave=%s\n" "$(get_wifi_powersave)"
+    printf "wifi_wake_on_wlan=%s\n" "$(get_wifi_wake_on_wlan)"
+    printf "wifi_wake_on_password=%s\n" "$(get_wifi_wake_on_password)"
+    printf "ethernet_enable=%s\n" "$(get_ethernet_enable)"
+    printf "debug_enable=%s\n" "$(get_debug_enable)"
 }
 
-switch_wifi_wake_on_wlan() {
-    value=0
-    # See `man nm-settings` for details about those values. They
-    # correspond to the enum NMSettingWirelessWakeOnWLan defined
-    # in libnm-core. NetworkManager only allows us to set integer
-    # values here.
-    case "$1" in
-        disabled)
-            value=0
-            ;;
-        any)
-            value=2
-            ;;
-        disconnect)
-            value=4
-            ;;
-        magic)
-            value=8
-            ;;
-        gtk-rekey-failure)
-            value=16
-            ;;
-        eap-identity-request)
-            value=32
-            ;;
-        4way-handshake)
-            value=64
-            ;;
-        rfkill-release)
-            value=128
-            ;;
-        tcp)
-            value=256
-            ;;
-        *)
-            echo "ERROR: Invalid value provided for wifi.wake-on-wlan"
-            exit 1
-            ;;
-    esac
-    password=$2
-    path=$SNAP_DATA/conf.d/wifi-wowlan.conf
+content=_create_props_content
 
-    echo "[connection]" > "$path"
-    # If we don't get a value provided there is no one set in the snap
-    # configuration and we can simply leave it out here and let
-    # NetworkManager take its default one.
-    if [ -n "$value" ]; then
-        echo "wifi.wake-on-wlan=$value" >> "$path"
-    fi
-    if [ -n "$password" ]; then
-        echo "wifi.wake-on-wlan-password=$password" >> "$path"
-    fi
-}
-
-switch_ethernet() {
-    case "$1" in
-        true)
-            cat <<EOF > /etc/netplan/00-default-nm-renderer.yaml
-network:
-  renderer: NetworkManager
-EOF
-            ;;
-        false)
-            rm -f /etc/netplan/00-default-nm-renderer.yaml
-            ;;
-        *)
-            echo "ERROR: Invalid value provided for ethernet"
-            exit 1
-    esac
-}
-
-switch_debug_enable() {
-    DEBUG_FILE=$SNAP_DATA/.debug_enabled
-    # $1 true/false for enabling/disabling debug log level in nm
-    # We create/remove the file for future executions and also change
-    # the logging level of the running daemon.
-    if [ "$1" = "true" ]; then
-        if [ ! -f "$DEBUG_FILE" ]; then
-            touch "$DEBUG_FILE"
-            "$SNAP"/bin/nmcli-internal g log level DEBUG
-        fi
-    else
-        if [ -f "$DEBUG_FILE" ]; then
-            rm -f "$DEBUG_FILE"
-            "$SNAP"/bin/nmcli-internal g log level INFO
-        fi
-    fi
-}
-
-value=$(snapctl get wifi.powersave)
-if [ -n "$value" ]; then
-    switch_wifi_powersave "$value"
-else
-    default="disabled"
-    snapctl set wifi.powersave=$default
-    switch_wifi_powersave $default
+if [ ! -e "$props_file" ]; then
+    # Installation or refresh from old snap. Put defaults.
+    snapctl set "$(get_wifi_powersave)"
+    snapctl set "$(get_wifi_wake_on_wlan)"
+    snapctl set "$(get_wifi_wake_on_password)"
+    snapctl set "$(get_ethernet_enable)"
+    snapctl set "$(get_debug_enable)"
+    echo "$content" > "$props_file"
+    return 0
 fi
 
-value=$(snapctl get wifi.wake-on-wlan)
-password=$(snapctl get wifi.wake-on-wlan-password)
-if [ -n "$value" ]; then
-    switch_wifi_wake_on_wlan "$value" "$password"
-else
-    snapctl set wifi.wake-on-wlan=disabled
-    snapctl set wifi.wake-on-wlan-password=
-    switch_wifi_wake_on_wlan disabled ""
+old_content=$(cat "$props_file")
+if [ "$content" = "$old_content" ]; then
+    # No change in properties, this must be a snap refresh
+    return 0
 fi
 
-value=$(snapctl get ethernet.enable)
-if [ -n "$value" ]; then
-    switch_ethernet "$value"
-else
-    if [ -e /etc/netplan/00-default-nm-renderer.yaml ]; then
-        value=true
-    else
-        value=false
-    fi
-    snapctl set ethernet.enable=$value
-fi
-
-value=$(snapctl get debug.enable)
-if [ -n "$value" ]; then
-    switch_debug_enable "$value"
-else
-    default=false
-    snapctl set debug.enable=$default
-    switch_debug_enable $default
-fi
+# Some property changed, store new values and re-start daemon to apply changes
+echo "$content" > "$props_file"
+snapctl restart "$SNAP"
