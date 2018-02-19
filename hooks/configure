@@ -15,15 +15,17 @@ _create_props_content() {
     printf "debug_enable=%s\n" "$(get_debug_enable)"
 }
 
+# Store always, so we show defaults when properties are set to empty strings
+snapctl set wifi.powersave="$(get_wifi_powersave)"
+snapctl set wifi.wake-on-wlan="$(get_wifi_wake_on_wlan)"
+snapctl set wifi.wake-on-wlan-password="$(get_wifi_wake_on_password)"
+snapctl set ethernet.enable="$(get_ethernet_enable)"
+snapctl set debug.enable="$(get_debug_enable)"
+
 content=$(_create_props_content)
 
 if [ ! -e "$props_file" ]; then
     # Installation or refresh from old snap. Assign defaults.
-    snapctl set wifi.powersave="$(get_wifi_powersave)"
-    snapctl set wifi.wake-on-wlan="$(get_wifi_wake_on_wlan)"
-    snapctl set wifi.wake-on-wlan-password="$(get_wifi_wake_on_password)"
-    snapctl set ethernet.enable="$(get_ethernet_enable)"
-    snapctl set debug.enable="$(get_debug_enable)"
     echo "$content" > "$props_file"
     return 0
 fi
