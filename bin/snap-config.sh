@@ -1,28 +1,37 @@
 #!/bin/sh -ex
 # Functions to apply snap settings
 
+# Replace content of file if current content is different
+# $1: file
+# $2: new content
+_replace_file_if_diff() {
+    old_content=""
+    if [ -e "$1" ]; then
+        old_content=$(cat "$1")
+    fi
+    if [ "$2" != "$old_content" ]; then
+        echo "Replacing $1"
+        echo "$2" > "$1"
+    fi
+}
+
 _switch_wifi_powersave() {
     path=$SNAP_DATA/conf.d/wifi-powersave.conf
     # See https://developer.gnome.org/libnm/stable/NMSettingWireless.html#NMSettingWirelessPowersave
     # for the meaning of the different values for the wifi.powersave option.
     case $1 in
         enabled)
-            cat <<EOF > "$path"
-[connection]
-wifi.powersave = 3
-EOF
+            content=$(printf "[connection]\nwifi.powersave = 3")
             ;;
         disabled)
-            cat <<EOF > "$path"
-[connection]
-wifi.powersave = 2
-EOF
+            content=$(printf "[connection]\nwifi.powersave = 2")
             ;;
         *)
             echo "WARNING: invalid value '$1' supplied for wifi.powersave configuration option"
             exit 1
             ;;
     esac
+    _replace_file_if_diff "$path" "$content"
 }
 
 _switch_wifi_wake_on_wlan() {
@@ -67,28 +76,29 @@ _switch_wifi_wake_on_wlan() {
     password=$2
     path=$SNAP_DATA/conf.d/wifi-wowlan.conf
 
-    echo "[connection]" > "$path"
+    content=$(printf "[connection]")
     # If we don't get a value provided there is no one set in the snap
     # configuration and we can simply leave it out here and let
     # NetworkManager take its default one.
     if [ -n "$value" ]; then
-        echo "wifi.wake-on-wlan=$value" >> "$path"
+        content=$(printf "%s\nwifi.wake-on-wlan=%s" "$content" "$value")
     fi
     if [ -n "$password" ]; then
-        echo "wifi.wake-on-wlan-password=$password" >> "$path"
+        content=$(printf "%s\nwifi.wake-on-wlan-password=%s" "$content" "$password")
     fi
+
+    _replace_file_if_diff "$path" "$content"
 }
 
 _switch_ethernet() {
+    path=/etc/netplan/00-default-nm-renderer.yaml
     case "$1" in
         true)
-            cat <<EOF > /etc/netplan/00-default-nm-renderer.yaml
-network:
-  renderer: NetworkManager
-EOF
+            content=$(printf "network:\n  renderer: NetworkManager")
+            _replace_file_if_diff "$path" "$content"
             ;;
         false)
-            rm -f /etc/netplan/00-default-nm-renderer.yaml
+            rm -f "$path"
             ;;
         *)
             echo "ERROR: Invalid value provided for ethernet"
