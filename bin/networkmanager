@@ -30,7 +30,7 @@ mkdir -p "$SNAP_DATA"/conf.d
 mkdir -p "$SNAP_DATA"/state
 mkdir -p "$SNAP_DATA"/state/dhcp
 
-# Apply snapctl settings
+# Apply current snapctl settings
 . "$SNAP"/bin/snap-config.sh
 apply_snap_config
 
@@ -38,9 +38,9 @@ apply_snap_config
 # to provide their own configuration file in $SNAP_DATA but
 # will fallback if no one exists to the default one we ship
 # in $SNAP
-NM_CONF="$SNAP/etc/NetworkManager/NetworkManager.conf"
+NM_CONF=$SNAP/etc/NetworkManager/NetworkManager.conf
 if [ -e "$SNAP_DATA"/NetworkManager.conf ]; then
-    NM_CONF="$SNAP_DATA/NetworkManager.conf"
+    NM_CONF=$SNAP_DATA/NetworkManager.conf
 fi
 
 # If netplan is not configured to render by default to NetworkManager
@@ -48,7 +48,7 @@ fi
 # as this will clash with any configuration netplan puts in place
 # for networkd.
 if [ ! -e "/etc/netplan/00-default-nm-renderer.yaml" ] ; then
-    if [ ! -e "$SNAP_DATA/conf.d/disable-ethernet.conf" ] ; then
+    if [ ! -e "$SNAP_DATA"/conf.d/disable-ethernet.conf ] ; then
         echo "[keyfile]" > "$SNAP_DATA"/conf.d/disable-ethernet.conf
         echo "unmanaged-devices+=interface-name:eth*,interface-name:enx*" >> \
              "$SNAP_DATA"/conf.d/disable-ethernet.conf
@@ -68,7 +68,7 @@ else
            [ -s /etc/netplan/00-snapd-config.yaml ] ; then
         rm -f "$SNAP_DATA"/conf.d/no-auto-default-ethernet.conf
     else
-        if [ ! -e "$SNAP_DATA/conf.d/no-auto-default-ethernet.conf" ] ; then
+        if [ ! -e "$SNAP_DATA"/conf.d/no-auto-default-ethernet.conf ] ; then
             # If we're running as the only network management service
             # and are configured via netplan on first boot then we should
             # not try to auto configure ethernet ports as this is up to
@@ -88,9 +88,9 @@ fi
 "$SNAP"/bin/dhcp-lease-mover &
 
 # Identify if we are in debug mode or not
-LOG_LEVEL="INFO"
+LOG_LEVEL=INFO
 if [ -f "$SNAP_DATA"/.debug_enabled ]; then
-    LOG_LEVEL="DEBUG"
+    LOG_LEVEL=DEBUG
 fi
 
 # Run available startup hooks to have a point to store custom
@@ -100,7 +100,7 @@ for hook in "$SNAP"/startup-hooks/* ; do
     [ -x "$hook" ] && /bin/sh -x "$hook"
 done
 
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager
 
 exec "$SNAP"/usr/sbin/NetworkManager \
     --config-dir="$SNAP_DATA"/conf.d/ \

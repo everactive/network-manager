@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Getters for snap properties
+# Getters for snap properties. They write the current value to stdout.
 
 get_wifi_powersave() {
     value=$(snapctl get wifi.powersave)
     if [ -z "$value" ]; then
-        value="disabled"
+        value=disabled
     fi
     echo "$value"
 }
@@ -26,7 +26,7 @@ get_wifi_powersave() {
 get_wifi_wake_on_wlan() {
     value=$(snapctl get wifi.wake-on-wlan)
     if [ -z "$value" ]; then
-        value="disabled"
+        value=disabled
     fi
     echo "$value"
 }
@@ -38,8 +38,9 @@ get_wifi_wake_on_password() {
 get_ethernet_enable() {
     value=$(snapctl get ethernet.enable)
     if [ -z "$value" ]; then
-        # TODO Check if this is the way to set it to true in plano
-        # (pre-injected file). But the gadget snap could be used instead!
+        # If this file was already present, assume NM is wanted to handle
+        # ethernet in the device. Ideally this should be handled by setting
+        # NM's ethernet.enable property in the gadget snap though.
         if [ -e /etc/netplan/00-default-nm-renderer.yaml ]; then
             value=true
         else
@@ -52,7 +53,7 @@ get_ethernet_enable() {
 get_debug_enable() {
     value=$(snapctl get debug.enable)
     if [ -z "$value" ]; then
-        value="false"
+        value=false
     fi
     echo "$value"
 }

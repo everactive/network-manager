@@ -19,7 +19,7 @@
 # $1: file
 # $2: new content
 _replace_file_if_diff() {
-    old_content=""
+    old_content=
     if [ -e "$1" ]; then
         old_content=$(cat "$1")
     fi
@@ -29,6 +29,8 @@ _replace_file_if_diff() {
     fi
 }
 
+# Disable wifi powersave
+# $1: enabled/disabled literal string
 _switch_wifi_powersave() {
     path=$SNAP_DATA/conf.d/wifi-powersave.conf
     # See https://developer.gnome.org/libnm/stable/NMSettingWireless.html#NMSettingWirelessPowersave
@@ -48,12 +50,16 @@ _switch_wifi_powersave() {
     _replace_file_if_diff "$path" "$content"
 }
 
+# Set WoWLAN configuration
+# $1: disabled/any/disconnect/magic/gtk-rekey-failure/eap-identity-request/
+#     4way-handshake/rfkill-release/tcp literal string. They
+#     correspond to the enum NMSettingWirelessWakeOnWLan defined
+#     in libnm-core. NetworkManager only allows us to set integer
+#     values here. This still needs to be upstreamed: see
+#     https://mail.gnome.org/archives/networkmanager-list/2017-January/thread.html
+# $2: WoWLAN activation password
 _switch_wifi_wake_on_wlan() {
     value=0
-    # See `man nm-settings` for details about those values. They
-    # correspond to the enum NMSettingWirelessWakeOnWLan defined
-    # in libnm-core. NetworkManager only allows us to set integer
-    # values here.
     case "$1" in
         disabled)
             value=0
@@ -91,7 +97,7 @@ _switch_wifi_wake_on_wlan() {
     path=$SNAP_DATA/conf.d/wifi-wowlan.conf
 
     content=$(printf "[connection]")
-    # If we don't get a value provided there is no one set in the snap
+    # If we don't get a value provided there is not one set in the snap
     # configuration and we can simply leave it out here and let
     # NetworkManager take its default one.
     if [ -n "$value" ]; then
@@ -104,6 +110,8 @@ _switch_wifi_wake_on_wlan() {
     _replace_file_if_diff "$path" "$content"
 }
 
+# Change netplan renderer to NM
+# $1: true/false literal string
 _switch_ethernet() {
     path=/etc/netplan/00-default-nm-renderer.yaml
     case "$1" in
@@ -120,6 +128,8 @@ _switch_ethernet() {
     esac
 }
 
+# Enable debug mode
+# $1: true/false literal string
 _switch_debug_enable() {
     DEBUG_FILE=$SNAP_DATA/.debug_enabled
     # $1 true/false for enabling/disabling debug log level in nm
