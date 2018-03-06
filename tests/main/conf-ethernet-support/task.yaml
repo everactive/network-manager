@@ -24,6 +24,8 @@ execute: |
             # things into a right state.
             snap set network-manager ethernet.enable=true
             test "`snap get network-manager ethernet.enable`" = "true"
+            # Leave some time for NM wrapper to write netplan config
+            repeat_until_done "test -e /etc/netplan/00-default-nm-renderer.yaml"
 
             REBOOT
             ;;
@@ -40,6 +42,8 @@ execute: |
             # item again and doing another reboot.
             snap set network-manager ethernet.enable=false
             test "`snap get network-manager ethernet.enable`" = "false"
+            # Leave some time for NM wrapper to remove netplan config
+            repeat_until_done "test ! -e /etc/netplan/00-default-nm-renderer.yaml"
             REBOOT
             ;;
         2)
