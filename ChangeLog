@@ -1,3 +1,9 @@
+2018-03-15 network-manager 1.2.2-15
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Make sure there is no race condition between the configure hook and the start of the NM daemon. This is fulfilled by making sure that the only script that touches configuration files is the NM wrapper, while the configure hook only checks the snap properties and re-starts NM if a change has been detected (the later is done by comparing with a file that contains the state in the previous call to the hook). Fixes LP: #1748154.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/337957
+
 2018-01-31 network-manager 1.2.2-14
 
   [ unknown ]

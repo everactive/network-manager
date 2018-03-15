@@ -1,5 +1,5 @@
 name: network-manager
-version: 1.2.2-14
+version: 1.2.2-15
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
@@ -59,6 +59,8 @@ parts:
       bin/networkmanager: bin/networkmanager
       bin/dhcp-lease-mover: bin/dhcp-lease-mover
       bin/nmcli-internal: bin/nmcli-internal
+      bin/snap-config.sh: bin/snap-config.sh
+      bin/snap-prop.sh: bin/snap-prop.sh
       conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
       data/copyright: usr/share/doc/network-manager/copyright
       startup-hooks/99-wol-by-default.sh: startup-hooks/99-wol-by-default.sh

@@ -23,6 +23,8 @@ switch_netplan_to_network_manager() {
 	# set ethernet.enable in case the snap is already installed
 	if snap list | grep -q network-manager ; then
 		snap set network-manager ethernet.enable=true
+		# Leave some time for NM wrapper to write netplan config
+		repeat_until_done "test -e /etc/netplan/00-default-nm-renderer.yaml"
 	else
 		cat << EOF > /etc/netplan/00-default-nm-renderer.yaml
 network:
@@ -39,6 +41,8 @@ switch_netplan_to_networkd() {
 	# unset ethernet.enable in case the snap is already installed
 	if snap list | grep -q network-manager ; then
 		snap set network-manager ethernet.enable=false
+		# Leave some time for NM wrapper to remove netplan config
+		repeat_until_done "test ! -e /etc/netplan/00-default-nm-renderer.yaml"
 	else
 		rm /etc/netplan/00-default-nm-renderer.yaml
 	fi
