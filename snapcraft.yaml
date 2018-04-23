@@ -24,8 +24,7 @@ plugs:
 hooks:
   configure:
     plugs:
-      - nmcli
-      - network-setup-control
+      - network-setup-observe
 
 apps:
   nmcli:
