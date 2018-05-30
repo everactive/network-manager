@@ -24,8 +24,7 @@ plugs:
 hooks:
   configure:
     plugs:
-      - nmcli
-      - network-setup-control
+      - network-setup-observe
 
 apps:
   nmcli:
@@ -194,7 +193,8 @@ parts:
         - usr/share/doc
       rdepends:
         - lib64/*
-        - lib/*/
+        - lib/*
+        - lib/x86_64-linux-gnu/*
         - usr/lib/*
       unwanted:
         # We don't want anything in usr/share but the doc folder
@@ -222,7 +222,6 @@ parts:
         # Unwanted content coming from the stage debian packages
         - -etc/
         # Contains many libraries which are already present in usr/lib/
-        - -lib/
         - -usr/include/
         - -usr/etc
         - -usr/sbin/invoke-rc.d

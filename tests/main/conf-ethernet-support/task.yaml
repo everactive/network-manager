@@ -3,15 +3,8 @@ summary: Verify ethernet support can be enabled via configuration option
 execute: |
     . $TESTSLIB/utilities.sh
 
-    # We need to have the network-setup-control interface available as
-    # otherwise the hook can't do its job
-    snap interfaces | grep network-setup-control
-
     case "$SPREAD_REBOOT" in
         0)
-            # We should now have the interface available
-            snap interfaces | grep network-setup-control
-
             # In the default setup NetworkManager doesn't take over ethernet
             wait_for_network_manager
 
