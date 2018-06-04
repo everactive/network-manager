@@ -30,20 +30,11 @@ apps:
   nmcli:
     command: usr/bin/nmcli
     plugs: [nmcli]
-    aliases: [nmcli]
   networkmanager:
     command: bin/networkmanager
     daemon: simple
     slots: [service]
     plugs: [modem-manager, ppp, network-setup-observe, wpa, firewall-control]
-    # FIXME: This will create currently a symlink inside /snap/bin
-    # which points nowhere as the service isn't exposed as application
-    # for the user. Instead snapd needs to gain support to handle
-    # aliases for services differently by adding the Alias= option
-    # within the systemd unit file instead for example. Until this
-    # is implemented we keep the alias disabled.
-    #
-    # aliases: [NetworkManager]
 
 parts:
   hooks:
@@ -53,16 +44,8 @@ parts:
       configure: meta/hooks/configure
 
   networkmanager-common:
-    plugin: copy
-    files:
-      bin/networkmanager: bin/networkmanager
-      bin/dhcp-lease-mover: bin/dhcp-lease-mover
-      bin/nmcli-internal: bin/nmcli-internal
-      bin/snap-config.sh: bin/snap-config.sh
-      bin/snap-prop.sh: bin/snap-prop.sh
-      conf/NetworkManager.conf: etc/NetworkManager/NetworkManager.conf
-      data/copyright: usr/share/doc/network-manager/copyright
-      startup-hooks/99-wol-by-default.sh: startup-hooks/99-wol-by-default.sh
+    plugin: dump
+    source: dump
 
   inotify-tools:
     plugin: nil
@@ -76,7 +59,7 @@ parts:
         - usr/share/doc/libinotifytools0/copyright
         - usr/lib/libinotifytools.so.0.4.1
         - usr/lib/libinotifytools.so.0
-    snap:
+    prime:
       - $wanted
 
   networkmanager:
@@ -128,19 +111,19 @@ parts:
       - libgcrypt20
       - libglib2.0-0
       - libgudev-1.0-0
-      - libiw-dev
       - libmbim-glib4
+      - libmm-glib0
       - libndp0
       - libnl-3-200
-      - libnl-3-dev
       - libnl-genl-3-200
       - libnl-route-3-200
+      - libnspr4
+      - libnss3
       - libpam-systemd
       - libreadline6
       - libsystemd0
       - libuuid1
       - lsb-base
-      - uuid-dev
       - wireless-tools
 
     configflags:
@@ -243,7 +226,7 @@ parts:
         - -usr/lib/*/*.o
         - -usr/lib/*/systemd-shim
         - -usr/lib/*/systemd-shim-cgroup-release-agent
-    snap:
+    prime:
       - $binaries
       - $configs
       - $docs
