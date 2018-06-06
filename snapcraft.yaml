@@ -107,7 +107,6 @@ parts:
     stage-packages:
       - iputils-arping
       - iw
-      - libc6
       - libdbus-1-3
       - libdbus-glib-1-2
       - libgcrypt20
@@ -175,59 +174,31 @@ parts:
       configs:
         - etc/NetworkManager/*
       docs:
-        - usr/share/doc
+        - usr/share/doc/*/copyright
       rdepends:
-        - lib64/*
-        - lib/*
-        - lib/x86_64-linux-gnu/*
-        - usr/lib/*
+        - usr/lib/libnm*
+        - usr/lib/*/libdbus-glib*
+        - usr/lib/*/libgudev*
+        - usr/lib/*/libmm-glib*
+        - usr/lib/*/libndp*
+        - usr/lib/*/libnspr4*
+        - usr/lib/*/libnss3*
+        - usr/lib/*/libnssutil3*
+        - usr/lib/*/libplc4*
+        - usr/lib/*/libplds4*
+        - usr/lib/*/libsmime3*
+        - usr/lib/*/libsqlite3*
+        - usr/lib/*/nss/*
       unwanted:
-        # We don't want anything in usr/share but the doc folder
-        # to carry all copyright information
-        - -usr/share/bash-completion
-        - -usr/share/bug
-        - -usr/share/dbus-1
-        - -usr/share/gir-1.0
-        - -usr/share/glib-2.0
-        - -usr/share/gtk-doc
-        - -usr/share/lintian
-        - -usr/share/locale
-        - -usr/share/man
-        - -usr/share/pam-configs
-        - -usr/share/polkit-1
-        - -usr/share/upstart
-
         # We don't use dhclient so we don't need this helper
         - -usr/lib/NetworkManager/nm-dhcp-helper
         # Things we don't support yet and don't have to ship
         - -usr/lib/NetworkManager/libnm-device-plugin-adsl.so
         - -usr/lib/NetworkManager/libnm-device-plugin-bluetooth.so
         - -usr/lib/NetworkManager/libnm-settings-plugin-ibft.so
+        # Some additional build artifacts we do not need
+        - -usr/lib/pkgconfig/
 
-        # Unwanted content coming from the stage debian packages
-        - -etc/
-        # Contains many libraries which are already present in usr/lib/
-        - -usr/include/
-        - -usr/etc
-        - -usr/sbin/invoke-rc.d
-        - -usr/sbin/service
-        - -usr/sbin/update-rc.d
-        - -usr/lib/dbus-1.0/
-        - -usr/lib/tmpfiles.d/
-        - -usr/lib/*/pkgconfig
-        - -usr/lib/pkgconfig
-        - -usr/lib/gcc/
-        - -usr/lib/*/gconv/
-        - -usr/lib/girepository-1.0/
-        - -usr/lib/systemd/
-        - -usr/lib/udev/
-        - -usr/lib/*.a
-        - -usr/lib/*/*.a
-        - -usr/lib/*.la
-        - -usr/lib/*/*.la
-        - -usr/lib/*/*.o
-        - -usr/lib/*/systemd-shim
-        - -usr/lib/*/systemd-shim-cgroup-release-agent
     prime:
       - $binaries
       - $configs
