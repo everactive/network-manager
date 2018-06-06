@@ -24,6 +24,8 @@ plugs:
 hooks:
   configure:
     plugs:
+      # network is needed to avoid some denials when using snapctl
+      - network
       - network-setup-observe
 
 apps:
