@@ -105,6 +105,7 @@ parts:
 
     # We stage everything here we need for build and runtime
     stage-packages:
+      - iputils-arping
       - libdbus-glib-1-2
       - libgudev-1.0-0
       - libmm-glib0
@@ -153,6 +154,7 @@ parts:
     # here are the results of the network manager build.
     filesets:
       binaries:
+        - usr/bin/arping
         - usr/bin/nmcli
         - usr/lib/*/NetworkManager
         - usr/lib/pppd/2.4.5/nm-pppd-plugin.so
