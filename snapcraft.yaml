@@ -47,7 +47,7 @@ parts:
 
   networkmanager-common:
     plugin: dump
-    source: dump
+    source: snap-common
 
   inotify-tools:
     plugin: nil
