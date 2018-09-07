@@ -1591,7 +1591,7 @@ static int client_receive_message_udp(sd_event_source *s, int fd,
         if (!message)
                 return -ENOMEM;
 
-        len = read(fd, message, buflen);
+        len = recv(fd, message, buflen, 0);
         if (len < 0) {
                 if (errno == EAGAIN || errno == EINTR)
                         return 0;
