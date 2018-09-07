@@ -19,18 +19,11 @@ for name in $gadget_name $kernel_name $core_name; do
 	fi
 done
 
-echo "Kernel has a store revision"
-snap list | grep ^${kernel_name} | grep -E " [0-9]+\s+canonical"
-
 # Remove any existing state archive from other test suites
 rm -f /home/network-manager/snapd-state.tar.gz
 rm -f /home/network-manager/nm-state.tar.gz
 
 snap_install network-manager
-# FIXME: Until the store snap-declaration is updated we need to connect
-# this plugs manually.
-snap connect network-manager:firewall-control
-snap connect network-manager:network-setup-control
 
 # Snapshot of the current snapd state for a later restore
 systemctl stop snapd.service snapd.socket

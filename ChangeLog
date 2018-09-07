@@ -1,3 +1,19 @@
+2018-09-07 network-manager 1.2.2-16
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Change docs so they reflect the correct way of making NM manage ethernet devices
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/343839
+  * * Fix snapcraft 2.42.1 warnings
+    * Add network interface to configure hook, for snapctl
+    * Do not stage libc6, as that makes snapcraft to set RPATH in the binaries
+    * Reduce size of the snap
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/347531
+  * tests: remove buggy test
+    
+    This check fails because output of "snap list" changes continuously, so
+    you cannot rely on it. Also, the check is redundant.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/354468
+
 2018-03-15 network-manager 1.2.2-15
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
