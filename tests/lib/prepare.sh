@@ -19,9 +19,6 @@ for name in $gadget_name $kernel_name $core_name; do
 	fi
 done
 
-echo "Kernel has a store revision"
-snap list | grep ^${kernel_name} | grep -E "\s+canonical"
-
 # Remove any existing state archive from other test suites
 rm -f /home/network-manager/snapd-state.tar.gz
 rm -f /home/network-manager/nm-state.tar.gz
