@@ -359,7 +359,7 @@ static int ipv4acd_on_packet(
         sd_ipv4acd *ll = userdata;
         struct ether_arp packet;
         ssize_t n;
-        int r;
+        int r = 0;
 
         assert(s);
         assert(ll);
