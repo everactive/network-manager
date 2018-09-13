@@ -1,5 +1,5 @@
 name: network-manager
-version: 1.2.2-16
+version: 1.2.2-17
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
@@ -142,6 +142,8 @@ parts:
       # We want to support ModemManager
       - --with-modem-manager-1=yes
       - --enable-tests=yes
+      # Set explicitly CFLAGS until lp: #1791946 is solved
+      - CFLAGS=-O2
 
     install: |
       # Run all tests NetworkManager ships by default
