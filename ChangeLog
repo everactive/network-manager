@@ -1,3 +1,12 @@
+2018-09-13 network-manager 1.2.2-17
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Compile wiht optimizations turned on
+    
+    Override snapcraft's CFLAGS to make sure -O2 is set and -g is not
+    (LP: #1791333).
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/354748
+
 2018-09-07 network-manager 1.2.2-16
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
