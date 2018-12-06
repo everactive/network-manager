@@ -1,3 +1,9 @@
+2018-12-06 network-manager 18
+
+  [ Tony Espy <(unknown e-mail)> ]
+  * This change removes a broken link to RHEL documentation for nmcli.
+    Merge-Proposal: https://code.launchpad.net/~awe/snappy-hwe-snaps/+git/network-manager/+merge/356279
+
 2018-09-13 network-manager 1.2.2-17
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
