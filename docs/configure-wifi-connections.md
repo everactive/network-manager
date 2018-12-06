@@ -78,4 +78,3 @@ hexadecimal characters in order to specify a full 256-bit key.
 You will find further information and more detailed examples on following pages:
 
 * <https://developer.gnome.org/NetworkManager/unstable/nmcli.html>
-* <https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/sec-Using_the_NetworkManager_Command_Line_Tool_nmcli.html>
