@@ -29,7 +29,7 @@ execute: |
             /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
             # ... and we're running with the netplan configuration
             /snap/bin/network-manager.nmcli d | grep 'netplan-eth0'
-            networkctl status eth0 | grep 'State: routable'
+            networkctl status eth0 | grep unmanaged
 
             # Now lets switch back to network by using the configuration
             # item again and doing another reboot.
