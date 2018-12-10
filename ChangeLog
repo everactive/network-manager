@@ -1,36 +1,11 @@
-2018-12-07 network-manager 1.2.2-19
+2018-12-10 network-manager 1.2.2-20
 
-2018-12-06 network-manager 1.2.2-18
-
-  [ unknown ]
-  * See more information in merge proposal
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Robustify service start:
     
-  * See more information in merge proposal
-    
-  * See more information in merge proposal
-    
-  * See more information in merge proposal
-    
-  * See more information in merge proposal
-    
-  * See more information in merge proposal
-    
-  * See more information in merge proposal
-    
-  * See more information in merge proposal
-    
-
-  [ morphis ]
-  * See more information in merge proposal
-    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/320352
-  * See more information in merge proposal
-    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/320458
-  * See more information in merge proposal
-    Merge-Proposal: https://code.launchpad.net/~morphis/snappy-hwe-snaps/+git/network-manager/+merge/320601
-
-  [ alfonsosanchezbeato ]
-  * See more information in merge proposal
-    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/321420
+    * Do not fail on error when calling snapctl
+    * Do not exit on bad configuration
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/360107
 
 2018-12-06 network-manager 18
 
