@@ -22,7 +22,7 @@ execute: |
 
             # NetworkManager now controls eth0 and networkd does not
             /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
-            networkctl status eth0 | grep 'State: routable'
+            networkctl status eth0 | grep unmanaged
 
             # And switch back to networkd
             switch_netplan_to_networkd

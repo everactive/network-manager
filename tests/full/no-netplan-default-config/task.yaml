@@ -24,7 +24,7 @@ execute: |
             # generated from netplan
             wait_for_network_manager
             /snap/bin/network-manager.nmcli d | grep 'eth0.*connected'
-            networkctl status eth0 | grep 'State: routable'
+            networkctl status eth0 | grep unmanaged
             /snap/bin/network-manager.nmcli c show --active | grep eth0 | grep -v netplan
 
             # We should only have a single active configuration
