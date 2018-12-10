@@ -1,3 +1,12 @@
+2018-12-10 network-manager 1.2.2-20
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Robustify service start:
+    
+    * Do not fail on error when calling snapctl
+    * Do not exit on bad configuration
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/360107
+
 2018-12-06 network-manager 18
 
   [ Tony Espy <(unknown e-mail)> ]
