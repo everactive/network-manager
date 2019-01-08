@@ -1,3 +1,15 @@
+2019-01-08 network-manager 1.2.2-21
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Make sure default routes survive across expiring of DHCP leases
+    
+    Make sure default routes survive across expiring of DHCP leases. Commits
+    taken from upstream. Related to LP: #1800712.
+    
+    Empty commit so changelog is updated on release. The real change has
+    happened in the network-manager/xenial/1.2.2 code branch.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/361484
+
 2018-12-10 network-manager 1.2.2-20
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
