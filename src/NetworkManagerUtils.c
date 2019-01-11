@@ -385,6 +385,16 @@ route_ptr_compare (const void *a, const void *b, gpointer metric)
 }
 
 static gboolean
+route_is_v6_multicast (NMIPRoute *route)
+{
+	if (nm_ip_route_get_prefix (route) == 8 &&
+		g_strcmp0 (nm_ip_route_get_dest (route), "ff00::") == 0)
+		return TRUE;
+
+	return FALSE;
+}
+
+static gboolean
 check_ip_routes (NMConnection *orig,
                  NMConnection *candidate,
                  GHashTable *settings,
@@ -451,14 +461,21 @@ check_ip_routes (NMConnection *orig,
 		 * Likeweise for /128 for IPv6. */
 		if (nm_ip_route_get_prefix (routes1[i1]) == PLEN)
 			continue;
+		/* We also ignore IPv6 default multicast route, that sometimes happen to be there */
+		if (!v4 && route_is_v6_multicast (routes1[i1]))
+			continue;
 
 		return FALSE;
 	}
 
 	/* check that @orig has no left-over (except host routes that we ignore). */
 	for (; i1 < num1; i1++) {
-		if (nm_ip_route_get_prefix (routes1[i1]) != PLEN)
-			return FALSE;
+		if (nm_ip_route_get_prefix (routes1[i1]) == PLEN)
+			continue;
+		if (!v4 && route_is_v6_multicast (routes1[i1]))
+			continue;
+
+		return FALSE;
 	}
 
 	remove_from_hash (settings, props, s_name, NM_SETTING_IP_CONFIG_ROUTES);
