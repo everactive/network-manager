@@ -1,3 +1,9 @@
+2019-01-14 network-manager 1.2.2-22
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Avoid duplicated connections (LP: #1811347) - changes in source branch
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/361725
+
 2019-01-08 network-manager 1.2.2-21
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
