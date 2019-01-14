@@ -1,5 +1,5 @@
 name: network-manager
-version: 1.2.2-22
+version: 1.2.2-23-dev
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
