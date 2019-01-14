@@ -341,18 +341,19 @@ static int
 route_compare (NMIPRoute *route1, NMIPRoute *route2, gint64 default_metric)
 {
 	gint64 r, metric1, metric2;
+	int family;
+	guint plen;
+	NMIPAddr a1 = { 0 }, a2 = { 0 };
 
-	r = g_strcmp0 (nm_ip_route_get_dest (route1), nm_ip_route_get_dest (route2));
-	if (r)
-		return r;
-
-	r = nm_ip_route_get_prefix (route1) - nm_ip_route_get_prefix (route2);
+	family = nm_ip_route_get_family (route1);
+	r = family - nm_ip_route_get_family (route2);
 	if (r)
 		return r > 0 ? 1 : -1;
 
-	r = g_strcmp0 (nm_ip_route_get_next_hop (route1), nm_ip_route_get_next_hop (route2));
+	plen = nm_ip_route_get_prefix (route1);
+	r = plen - nm_ip_route_get_prefix (route2);
 	if (r)
-		return r;
+		return r > 0 ? 1 : -1;
 
 	metric1 = nm_ip_route_get_metric (route1) == -1 ? default_metric : nm_ip_route_get_metric (route1);
 	metric2 = nm_ip_route_get_metric (route2) == -1 ? default_metric : nm_ip_route_get_metric (route2);
@@ -361,17 +362,36 @@ route_compare (NMIPRoute *route1, NMIPRoute *route2, gint64 default_metric)
 	if (r)
 		return r > 0 ? 1 : -1;
 
-	r = nm_ip_route_get_family (route1) - nm_ip_route_get_family (route2);
+	r = g_strcmp0 (nm_ip_route_get_next_hop (route1), nm_ip_route_get_next_hop (route2));
 	if (r)
-		return r > 0 ? 1 : -1;
+		return r;
+
+	/* NMIPRoute validates family and dest. inet_pton() is not expected to fail. */
+	inet_pton (family, nm_ip_route_get_dest (route1), &a1);
+	inet_pton (family, nm_ip_route_get_dest (route2), &a2);
+	nm_utils_ipx_address_clear_host_address (family, &a1, &a1, plen);
+	nm_utils_ipx_address_clear_host_address (family, &a2, &a2, plen);
+	r = memcmp (&a1, &a2, sizeof (a1));
+	if (r)
+		return r;
 
 	return 0;
 }
 
 static int
-route_ptr_compare (const void *a, const void *b)
+route_ptr_compare (const void *a, const void *b, gpointer metric)
 {
-	return route_compare (*(NMIPRoute **) a, *(NMIPRoute **) b, -1);
+	return route_compare (*(NMIPRoute **) a, *(NMIPRoute **) b, *((gint64 *) metric));
+}
+
+static gboolean
+route_is_v6_multicast (NMIPRoute *route)
+{
+	if (nm_ip_route_get_prefix (route) == 8 &&
+		g_strcmp0 (nm_ip_route_get_dest (route), "ff00::") == 0)
+		return TRUE;
+
+	return FALSE;
 }
 
 static gboolean
@@ -381,11 +401,14 @@ check_ip_routes (NMConnection *orig,
                  gint64 default_metric,
                  gboolean v4)
 {
-	gs_free NMIPRoute **routes1 = NULL, **routes2 = NULL;
+	gs_free NMIPRoute **routes1 = NULL;
+	NMIPRoute **routes2;
 	NMSettingIPConfig *s_ip1, *s_ip2;
+	gint64 m;
 	const char *s_name;
 	GHashTable *props;
-	guint i, num;
+	guint i, i1, i2, num1, num2;
+	const guint8 PLEN = v4 ? 32 : 128;
 
 	s_name = v4 ? NM_SETTING_IP4_CONFIG_SETTING_NAME :
 	              NM_SETTING_IP6_CONFIG_SETTING_NAME;
@@ -402,24 +425,57 @@ check_ip_routes (NMConnection *orig,
 	if (!s_ip1 || !s_ip2)
 		return FALSE;
 
-	num = nm_setting_ip_config_get_num_routes (s_ip1);
-	if (num != nm_setting_ip_config_get_num_routes (s_ip2))
-		return FALSE;
+	num1 = nm_setting_ip_config_get_num_routes (s_ip1);
+	num2 = nm_setting_ip_config_get_num_routes (s_ip2);
 
-	routes1 = g_new (NMIPRoute *, num);
-	routes2 = g_new (NMIPRoute *, num);
+	routes1 = g_new (NMIPRoute *, (gsize) num1 + num2);
+	routes2 = &routes1[num1];
 
-	for (i = 0; i < num; i++) {
+	for (i = 0; i < num1; i++)
 		routes1[i] = nm_setting_ip_config_get_route (s_ip1, i);
+	for (i = 0; i < num2; i++)
 		routes2[i] = nm_setting_ip_config_get_route (s_ip2, i);
+
+	m = nm_setting_ip_config_get_route_metric (s_ip2);
+	if (m != -1)
+		default_metric = m;
+
+	g_qsort_with_data (routes1, num1, sizeof (NMIPRoute *), route_ptr_compare, &default_metric);
+	g_qsort_with_data (routes2, num2, sizeof (NMIPRoute *), route_ptr_compare, &default_metric);
+
+	for (i1 = 0, i2 = 0; i2 < num2; i1++) {
+		if (i1 >= num1)
+			return FALSE;
+		if (route_compare (routes1[i1], routes2[i2], default_metric) == 0) {
+			i2++;
+			continue;
+		}
+
+		/* if @orig (@routes1) contains /32 routes that are missing in @candidate,
+		 * we accept that.
+		 *
+		 * A /32 may have been added automatically, as a direct-route to the gateway.
+		 * The generated connection (@orig) would contain that route, so we shall ignore
+		 * it.
+		 *
+		 * Likeweise for /128 for IPv6. */
+		if (nm_ip_route_get_prefix (routes1[i1]) == PLEN)
+			continue;
+		/* We also ignore IPv6 default multicast route, that sometimes happen to be there */
+		if (!v4 && route_is_v6_multicast (routes1[i1]))
+			continue;
+
+		return FALSE;
 	}
 
-	qsort (routes1, num, sizeof (NMIPRoute *), route_ptr_compare);
-	qsort (routes2, num, sizeof (NMIPRoute *), route_ptr_compare);
+	/* check that @orig has no left-over (except host routes that we ignore). */
+	for (; i1 < num1; i1++) {
+		if (nm_ip_route_get_prefix (routes1[i1]) == PLEN)
+			continue;
+		if (!v4 && route_is_v6_multicast (routes1[i1]))
+			continue;
 
-	for (i = 0; i < num; i++) {
-		if (route_compare (routes1[i], routes2[i], default_metric))
-			return FALSE;
+		return FALSE;
 	}
 
 	remove_from_hash (settings, props, s_name, NM_SETTING_IP_CONFIG_ROUTES);
