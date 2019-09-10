@@ -10,6 +10,7 @@ description: |
   Please find the source code at https://code.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
 confinement: strict
 grade: stable
+base: core
 
 slots:
   service: network-manager
@@ -152,7 +153,8 @@ parts:
       # Set explicitly CFLAGS until lp: #1791946 is solved
       - CFLAGS=-O2
 
-    install: |
+    override-build: |
+      snapcraftctl build
       # Run all tests NetworkManager ships by default
       make check
       # Strip binaries
