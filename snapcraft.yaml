@@ -49,6 +49,13 @@ parts:
     plugin: dump
     source: snap-common
 
+  changelog:
+    plugin: nil
+    override-build: |
+      cp "$SNAPCRAFT_PROJECT_DIR"/ChangeLog "$SNAPCRAFT_PART_INSTALL"
+    organize:
+      ChangeLog: usr/share/doc/network-manager/ChangeLog
+
   inotify-tools:
     plugin: nil
     stage-packages:
