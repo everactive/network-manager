@@ -13,10 +13,12 @@ grade: stable
 base: core
 
 slots:
-  service: network-manager
+  service:
+    interface: network-manager
 
 plugs:
-  nmcli: network-manager
+  nmcli:
+    interface: network-manager
   wpa:
     interface: dbus
     bus: system
