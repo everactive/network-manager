@@ -1,5 +1,5 @@
 name: network-manager
-version: 1.2.2-22
+version: 1.2.2-23
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
@@ -10,12 +10,15 @@ description: |
   Please find the source code at https://code.launchpad.net/~snappy-hwe-team/snappy-hwe-snaps/+git/network-manager
 confinement: strict
 grade: stable
+base: core
 
 slots:
-  service: network-manager
+  service:
+    interface: network-manager
 
 plugs:
-  nmcli: network-manager
+  nmcli:
+    interface: network-manager
   wpa:
     interface: dbus
     bus: system
@@ -48,6 +51,13 @@ parts:
   networkmanager-common:
     plugin: dump
     source: snap-common
+
+  changelog:
+    plugin: nil
+    override-build: |
+      cp "$SNAPCRAFT_PROJECT_DIR"/ChangeLog "$SNAPCRAFT_PART_INSTALL"
+    organize:
+      ChangeLog: usr/share/doc/network-manager/ChangeLog
 
   inotify-tools:
     plugin: nil
@@ -103,16 +113,12 @@ parts:
       - iptables
       - ppp-dev
 
-    # We stage everything here we need for build and runtime
     stage-packages:
       - iputils-arping
       - libdbus-glib-1-2
       - libgudev-1.0-0
       - libmm-glib0
       - libndp0
-      - libnl-3-200
-      - libnl-genl-3-200
-      - libnl-route-3-200
       - libnspr4
       - libnss3
 
@@ -145,15 +151,15 @@ parts:
       # Set explicitly CFLAGS until lp: #1791946 is solved
       - CFLAGS=-O2
 
-    install: |
+    override-build: |
+      snapcraftctl build
       # Run all tests NetworkManager ships by default
       make check
+      # Strip binaries
+      find ../install -executable -type f | xargs file -Ni |
+          grep 'application/x-executable\|application/x-sharedlib' | cut -d: -f1 | xargs strip
 
-    # Filter files pulled in by stage-packages so they aren't
-    # included in the final snap. We only need them to build
-    # NetworkManager. All runtime dependencies are pulled in with
-    # the rdepends part below. The only left items specified
-    # here are the results of the network manager build.
+    # Filter files to pull only the minimum needed
     filesets:
       binaries:
         - usr/bin/arping
