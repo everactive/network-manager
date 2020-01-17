@@ -1,3 +1,247 @@
+2020-01-17 network-manager 1.2.2-23
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Strip binaries for a smaller snap
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/354491
+  * snap: copy changelog to the package
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/372525
+  * Do not stage libraries that are part already of the core snap and that
+    in fact we were not even including in the snap. This will remove some
+    dependencies from the manifest so we will not get CVEs for these libs
+    that do not actually affect us.
+    
+    Use documented way of specifying slots and hooks
+    
+    Remove calls to set log level in wrapper:
+    The calls were actually failing as NM was not started yet. Furthermore,
+    the log level is set via a call option in NM. Also remove nmcli-internal
+    as after this it is not used anymore and probably there will be no need
+    for it in the future (we restart always NM when the settings change
+    instead of dynamically changing it).
+    
+    test: debug-config-option: robustify and fix:
+    '!' does not have the expected effect with 'set -e'. Also, wait a bit
+    when NM is re-starting. Ideally we should wait for it to appear on DBus
+    though.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/377715
+
+  [ Changes in staged packages ]
+  
+  libglib2.0-0 (built from glib2.0) updated from 2.48.2-0ubuntu4.1 to 2.48.2-0ubuntu4.4:
+  
+    glib2.0 (2.48.2-0ubuntu4.4) xenial-security; urgency=medium
+  
+      * SECURITY REGRESSION: regression in last security update (LP: #1838890)
+        - debian/patches/CVE-2019-13012-regression.patch: fix a
+          memory leak introduced by the last security update while
+          not properly handled the g_file_get_patch function in
+          gio/gkeyfilesettingsbackend.c.
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Mon, 05 Aug 2019 12:09:36 -0300
+  
+    glib2.0 (2.48.2-0ubuntu4.3) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Not properly restrict directory and file permissions
+        - debian/patches/CVE-2019-13012.patch: changes the permissions when
+          a directory is created, using 700 instead 777 in
+          gio/gkeyfilesettingsbackend.c and changes test to run in a temp
+          directory in gio/tests/gsettings.c.
+        - CVE-2019-13012
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Wed, 03 Jul 2019 15:24:33 -0300
+  
+    glib2.0 (2.48.2-0ubuntu4.2) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Less restrictive permissions during copying
+        - debian/patches/CVE-2019-12450.patch: limit access to file when
+          copying in file_copy_fallback in file gio/gfile.c.
+        - CVE-2019-12450
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Wed, 05 Jun 2019 13:49:53 -0300
+  
+  libdbus-1-3 (built from dbus) updated from 1.10.6-1ubuntu3.3 to 1.10.6-1ubuntu3.5:
+  
+    dbus (1.10.6-1ubuntu3.5) xenial; urgency=medium
+  
+      * Prevent logind from leaking session files (LP: #1846787). Fixed by
+        upstream patches:
+        - d/p/Only-read-one-message-at-a-time-if-there-are-fds-pen.patch
+        - d/p/bus-Fix-timeout-restarts.patch
+        - d/p/DBusMainLoop-ensure-all-required-timeouts-are-restar.patch
+  
+     -- Heitor Alves de Siqueira <halves@canonical.com>  Mon, 07 Oct 2019 08:29:04 -0300
+  
+    dbus (1.10.6-1ubuntu3.4) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: DBUS_COOKIE_SHA1 implementation flaw
+        - d/p/0001-auth-Reject-DBUS_COOKIE_SHA1-for-users-other-than-th.patch:
+          reject DBUS_COOKIE_SHA1 for users other than the server owner in
+          dbus/dbus-auth.c.
+        - d/p/0002-test-Add-basic-test-coverage-for-DBUS_COOKIE_SHA1.patch:
+          add basic test coverage for DBUS_COOKIE_SHA1 in
+          dbus/dbus-auth-script.c, dbus/dbus-sysdeps-util-unix.c,
+          dbus/dbus-sysdeps-util-win.c, dbus/dbus-sysdeps.h, test/Makefile.am,
+          test/data/auth/cookie-sha1-username.auth-script,
+          test/data/auth/cookie-sha1.auth-script.
+        - CVE-2019-12749
+  
+     -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 10 Jun 2019 14:06:01 -0400
+  
+  libnss3, libnss3-nssdb (built from nss) updated from 2:3.28.4-0ubuntu0.16.04.4 to 2:3.28.4-0ubuntu0.16.04.10:
+  
+    nss (2:3.28.4-0ubuntu0.16.04.10) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Possible wrong length for cryptographic primitives input
+        - debian/patches/CVE-2019-17006.patch: adds checks for length of crypto
+          primitives in nss/lib/freebl/chacha20poly1305.c,
+          nss/lib/freebl/ctr.c, nss/lib/freebl/gcm.c,
+          nss/lib/freebl/intel-gcm-wrap.c,
+          nss/lib/freebl/rsapkcs.c.
+        - CVE-2019-17006
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Tue, 07 Jan 2020 14:42:06 -0300
+  
+    nss (2:3.28.4-0ubuntu0.16.04.9) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Denial of service
+        - debian/patches/CVE-2019-17007.patch: check got some certs in
+          collect_certs r=jcj in nss/lib/pkcs7/certread.c.
+        - CVE-2019-17007
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Thu, 05 Dec 2019 13:25:47 -0300
+  
+    nss (2:3.28.4-0ubuntu0.16.04.8) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: out-of-bounds write in NSC_EncryptUpdate
+        - debian/patches/CVE-2019-11745.patch: use maxout not block size in
+          nss/lib/softoken/pkcs11c.c.
+        - CVE-2019-11745
+      * Note: this does _not_ contain the changes from
+        2:3.28.4-0ubuntu0.16.04.7 in xenial-proposed.
+  
+     -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 26 Nov 2019 08:53:56 -0500
+  
+    nss (2:3.28.4-0ubuntu0.16.04.6) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: OOB read when importing a curve25519 private key
+        - debian/patches/CVE-2019-11719.patch: don't unnecessarily strip
+          leading 0's from key material during PKCS11 import in
+          nss/lib/freebl/ecl/ecp_25519.c, nss/lib/pk11wrap/pk11akey.c,
+          nss/lib/pk11wrap/pk11cert.c, nss/lib/pk11wrap/pk11pk12.c,
+          nss/lib/softoken/legacydb/lgattr.c, nss/lib/softoken/pkcs11c.c.
+        - CVE-2019-11719
+      * SECURITY UPDATE: segfault via empty or malformed p256-ECDH public keys
+        - debian/patches/CVE-2019-11729-1.patch: more thorough input checking
+          in nss/lib/cryptohi/seckey.c, nss/lib/freebl/dh.c,
+          nss/lib/freebl/ec.c, nss/lib/util/quickder.c.
+        - CVE-2019-11729
+  
+     -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Fri, 12 Jul 2019 08:23:50 -0400
+  
+    nss (2:3.28.4-0ubuntu0.16.04.5) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: DoS in NULL pointer dereference in CMS functions
+        - debian/patches/CVE-2018-18508-1.patch: add null checks in
+          nss/lib/smime/cmscinfo.c, nss/lib/smime/cmsdigdata.c,
+          nss/lib/smime/cmsencdata.c, nss/lib/smime/cmsenvdata.c,
+          nss/lib/smime/cmsmessage.c, nss/lib/smime/cmsudf.c.
+        - debian/patches/CVE-2018-18508-2.patch: add null checks in
+          nss/lib/smime/cmsmessage.c.
+        - CVE-2018-18508
+  
+     -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 19 Feb 2019 13:39:44 +0100
+  
+  libsqlite3-0 (built from sqlite3) updated from 3.11.0-1ubuntu1 to 3.11.0-1ubuntu1.3:
+  
+    sqlite3 (3.11.0-1ubuntu1.3) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Severe division by zero
+        - debian/patches/CVE-2019-16168.patch: fix in
+          src/analyze.c, src/where.c, test/analyzeC.test.
+        - CVE-2019-16168
+      * SECURITY UPDATE: Heap corruption exploit
+        - debian/patches/CVE-2019-5827-*.patch: fix in
+          ext/fts3*, ext/rtree/geopoly.c, src/build.c,
+          src/expr.c, src/main.c, src/test_fs.c, src/util.c,
+          src/vdbeaux.c, src/vdbesort.c, src/vtab.c.
+        - CVE-2019-5827
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Thu, 28 Nov 2019 13:39:43 -0300
+  
+    sqlite3 (3.11.0-1ubuntu1.2) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Denial of service
+        - debian/patches/CVE-2016-6153-*.patch: change temp direcotry
+          search algorithm in src/os_unix.c.
+        - CVE-2016-6153
+      * SECURITY UPDATE: heap-base buffer over-read
+        - debian/patches/CVE-2017-10989.patch: enhance RTree
+          module  in ext/rtree/rtree.c and added test in
+          ext/rtree/rtreeA.text.
+        - CVE-2017-10989
+      * SECURITY UPDATE: Denial of service
+        - debian/patches/CVE-2017-13685.patch: adds checks in
+          src/shell.c.
+        - CVE-2017-13685
+      * SECURITY UPDATE: Denial of service
+        - debian/patches/CVE-2017-2518.patch: prevent a use-after-free
+          in src/whereexpr.c.
+        - CVE-2017-2518
+      * SECURITY UPDATE: Denial of service
+        - debian/patches/CVE-2017-2519.patch: increase the size of
+          the reference count on table objects to 32bits in src/sqliteInt.h.
+        - CVE-2017-2519
+      * SECURITY UPDATE: Denial of service
+        - debian/patches/CVE-2017-2520.patch: add a check for pVal in
+          src/vdbemem.c
+        - CVE-2017-2520
+      * SECURITY UPDATE: Integer overflow
+        - debian/patches/CVE-2018-20346-and-CVE-2018-20506.patch:
+          add extra defenses against strategically corrupt databases
+          in ext/fts3/fst3.c, ext/fts3/fts3_write.c, test/fts3corrupt4.test,
+          test/permutations.test.
+        - CVE-2018-20346
+        - CVE-2018-20506
+      * SECURITY UPDATE: heap out-of-bound read
+        - debian/patches/CVE-2019-8457.patch: enhance the
+          rtreenode() in ext/rtree/rtree.c.
+        - debian/patches/CVE-2019-8457-string-interface.patch:
+          add string interface in src/btree.c, src/build.c,
+          src/func.c, src/mutex.c, src/pragma.c, src/printf.c,
+          src/sqlite.h.in, src/sqliteInt.h, src/treeview.c,
+          src/vdbeaux.c, src/vdbetrace.c, src/wherecode.c.
+        - CVE-2019-8457
+      * security update: heap-buffer over-read
+        - debian/patches/cve-2019-9936.patch: add checks
+          in code in order to fix in ext/fts5/fts5_hash.c,
+          ext/fts5/test/fts5aa.test.
+        - CVE-2019-9936
+      * security update: NULL pointer dereference
+        - debian/patches/cve-2019-9937.patch: fix in
+          ext/fts5/fts5Int.h, ext/fts5/fts5_hash.c, ext/fts5/fts5_index.c,
+          ext/fts5/test/fts5aa.test.
+        - CVE-2019-9937
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Tue, 18 Jun 2019 09:42:23 -0300
+  
+    sqlite3 (3.11.0-1ubuntu1.1) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Avoid segmentation fault while using a corrupted file.
+        - d/p/0001-Fix-a-parsing-issue-associated-with-a-corrupt-sqlite.patch:
+          Check if parser is busy before using it and raise an error if positive.
+          (LP: #1814869)
+        - d/p/0002-Better-error-message-text-when-the-schema-is-corrupt.patch:
+          Better message and additional checks.
+        - No CVE associated.
+  
+     -- Paulo Flabiano Smorigo <pfsmorigo@canonical.com>  Thu, 21 Feb 2019 16:35:05 +0100
+  
+  libnl-genl-3-200: not staged anymore
+  
+  libnl-route-3-200: not staged anymore
+  
+  libnl-3-200: not staged anymore
+  
 2019-01-14 network-manager 1.2.2-22
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
