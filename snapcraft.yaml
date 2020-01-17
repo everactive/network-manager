@@ -13,10 +13,12 @@ grade: stable
 base: core
 
 slots:
-  service: network-manager
+  service:
+    interface: network-manager
 
 plugs:
-  nmcli: network-manager
+  nmcli:
+    interface: network-manager
   wpa:
     interface: dbus
     bus: system
@@ -111,16 +113,12 @@ parts:
       - iptables
       - ppp-dev
 
-    # We stage everything here we need for build and runtime
     stage-packages:
       - iputils-arping
       - libdbus-glib-1-2
       - libgudev-1.0-0
       - libmm-glib0
       - libndp0
-      - libnl-3-200
-      - libnl-genl-3-200
-      - libnl-route-3-200
       - libnspr4
       - libnss3
 
@@ -161,11 +159,7 @@ parts:
       find ../install -executable -type f | xargs file -Ni |
           grep 'application/x-executable\|application/x-sharedlib' | cut -d: -f1 | xargs strip
 
-    # Filter files pulled in by stage-packages so they aren't
-    # included in the final snap. We only need them to build
-    # NetworkManager. All runtime dependencies are pulled in with
-    # the rdepends part below. The only left items specified
-    # here are the results of the network manager build.
+    # Filter files to pull only the minimum needed
     filesets:
       binaries:
         - usr/bin/arping

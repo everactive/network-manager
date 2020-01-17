@@ -134,17 +134,13 @@ _switch_ethernet() {
 _switch_debug_enable() {
     DEBUG_FILE=$SNAP_DATA/.debug_enabled
     # $1 true/false for enabling/disabling debug log level in nm
-    # We create/remove the file for future executions and also change
-    # the logging level of the running daemon.
     if [ "$1" = "true" ]; then
-        if [ ! -f "$DEBUG_FILE" ]; then
-            touch "$DEBUG_FILE"
-            "$SNAP"/bin/nmcli-internal g log level DEBUG
+        if [ ! -f "$DEBUG_FILE" ]
+        then touch "$DEBUG_FILE"
         fi
     else
-        if [ -f "$DEBUG_FILE" ]; then
-            rm -f "$DEBUG_FILE"
-            "$SNAP"/bin/nmcli-internal g log level INFO
+        if [ -f "$DEBUG_FILE" ]
+        then rm -f "$DEBUG_FILE"
         fi
     fi
 }
