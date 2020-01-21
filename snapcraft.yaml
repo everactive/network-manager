@@ -185,7 +185,6 @@ parts:
         - usr/lib/*/libplc4*
         - usr/lib/*/libplds4*
         - usr/lib/*/libsmime3*
-        - usr/lib/*/libsqlite3*
         - usr/lib/*/nss/*
       unwanted:
         # We don't use dhclient so we don't need this helper
