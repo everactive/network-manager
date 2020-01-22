@@ -172,7 +172,16 @@ parts:
       configs:
         - etc/NetworkManager/*
       docs:
-        - usr/share/doc/*/copyright
+        - usr/share/doc/inotify-tools/copyright
+        - usr/share/doc/iputils-arping/copyright
+        - usr/share/doc/libdbus-glib-1-2/copyright
+        - usr/share/doc/libgudev-1.0-0/copyright
+        - usr/share/doc/libinotifytools0/copyright
+        - usr/share/doc/libmm-glib0/copyright
+        - usr/share/doc/libndp0/copyright
+        - usr/share/doc/libnspr4/copyright
+        - usr/share/doc/libnss3/copyright
+        - usr/share/doc/network-manager/copyright
       rdepends:
         - usr/lib/libnm*
         - usr/lib/*/libdbus-glib*
@@ -185,7 +194,6 @@ parts:
         - usr/lib/*/libplc4*
         - usr/lib/*/libplds4*
         - usr/lib/*/libsmime3*
-        - usr/lib/*/libsqlite3*
         - usr/lib/*/nss/*
       unwanted:
         # We don't use dhclient so we don't need this helper
