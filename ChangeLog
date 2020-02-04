@@ -1,3 +1,35 @@
+2020-02-04 network-manager 1.2.2-24
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Stage only copyright of staged packages
+    Some copyright files were not needed as they come from packages from
+    which we do not take any file.
+    
+    Do not stage libsqlite3
+    libsqlite3 is already included in the core snap.
+    
+    Add unstage.txt file
+    This file contains a list of debian package that we are not actually
+    staging, although snapcraft adds them to manifest.yaml. CI now
+    recognizes this file, and manually removes the listed packages from the
+    manifest when releasing a snap to the store.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/377873
+  * NOTICE: CVE-2018-15688 was fixed in 1.2.2-20
+    CVE-2018-15688 / USN-3807-1 was fixed in 1.2.2-20, although
+    the Changelog for that version did not reflect the fact.
+    - CVE-2018-15688
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/378035
+
+  [ Changes in staged packages ]
+  
+  libdbus-1-3: not staged anymore
+  
+  libglib2.0-0: not staged anymore
+  
+  libnss3-nssdb: not staged anymore
+  
+  libffi6: not staged anymore
+  
 2020-01-17 network-manager 1.2.2-23
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
