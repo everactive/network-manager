@@ -1,3 +1,25 @@
+2020-06-17 network-manager 1.2.2-25
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * Make sure we remove libsqlite3-0 when releasing from CI from the list of
+    staged packages, as we are not including it anymore in the snap.
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/378728
+
+  [ Changes in staged packages ]
+  
+  libnss3 (built from nss) updated from 2:3.28.4-0ubuntu0.16.04.10 to 2:3.28.4-0ubuntu0.16.04.11:
+  
+    nss (2:3.28.4-0ubuntu0.16.04.11) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Timing attack during DSA key generation
+        - debian/patches/CVE-2020-12399.patch: force a fixed length for DSA
+          exponentiation in nss/lib/freebl/dsa.c.
+        - CVE-2020-12399
+  
+     -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 11 Jun 2020 09:45:43 -0400
+  
+  libsqlite3-0: not staged anymore
+  
 2020-02-04 network-manager 1.2.2-24
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
