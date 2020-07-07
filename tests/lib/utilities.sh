@@ -10,7 +10,7 @@ snap_install() {
 		# Need first install from store to get all necessary assertions into
 		# place. Second local install will then bring in our locally built
 		# snap.
-		snap install $name
+		snap install --channel=latest/stable $name
 		snap install --dangerous $PROJECT_PATH/$name*_amd64.snap
 	fi
 }
