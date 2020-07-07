@@ -60,11 +60,12 @@ execute: |
     # is correctly setting up the ethernet port again.
     journalctl --flush -u $service
     touch $PROJECT_PATH/systemd-suspend/wakeup
+    sleep 4
 
     journalctl --no-pager -u $service | grep 'manager: wake requested (sleeping: yes  enabled: yes)'
     journalctl --no-pager -u $service | grep 'manager: NetworkManager state is now CONNECTED_LOCAL'
     journalctl --no-pager -u $service | grep 'manager: NetworkManager state is now CONNECTED_GLOBAL'
     journalctl --no-pager -u $service | grep 'device (wlan1): Activation: successful, device activated.'
 
-    ifconfig | grep wlan1
-    /snap/bin/network-manager.nmcli d | grep -v 'wlan1.*connected'
+    ip address show wlan1 | grep UP
+    /snap/bin/network-manager.nmcli d | grep 'wlan1.*connected'
