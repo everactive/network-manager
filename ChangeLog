@@ -1,3 +1,41 @@
+2020-09-01 network-manager 1.2.2-27
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * * core/pppd-plugin: wait to recover port settings before notifying death
+      See code branch MP:
+      https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/387041
+    * docs: update to reflect current state
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/387195
+
+  [ Changes in primed packages ]
+  
+  libnss3 (built from nss) updated from 2:3.28.4-0ubuntu0.16.04.12 to 2:3.28.4-0ubuntu0.16.04.14:
+  
+    nss (2:3.28.4-0ubuntu0.16.04.14) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Out-of-bounds read
+        - debian/patches/CVE-2020-12403-2.patch: fix incorrect call to ChaChaPoly1305 by PKCS11
+          in nss/lib/freebl/chacha20poly1305.c.
+        - CVE-2020-12403
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Fri, 21 Aug 2020 15:41:08 -0300
+  
+    nss (2:3.28.4-0ubuntu0.16.04.13) xenial-security; urgency=medium
+  
+      * SECURITY UPDATE: Side-channel attack
+        - debian/patches/CVE-2020-12400-and-6829-*.patch: use constant-time
+          P-384 and P-521 in nss/lib/freebl/ecl/ecl-priv.h, nss/lib/freebl/ecl/ecl.c,
+          nss/lib/freebl/ecl/ecl_spec384r1.c, nss/lib/freebl/freebl_base.gypi,
+          nss/lib/freebl/manifest.mn, nss/test/ec/ectest.sh.
+        - CVE-2020-12400
+        - CVE-2020-6829
+      * SECURITY UPDATE: Timing attack mitigation bypass
+        - debian/patches/CVE-2020-12401.patch: remove unnecessary scalar
+          padding in nss/lib/freebl/ec.c.
+        - CVE-2020-12401
+  
+     -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Wed, 05 Aug 2020 16:20:52 -0300
+  
 2020-07-07 network-manager 1.2.2-26
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
