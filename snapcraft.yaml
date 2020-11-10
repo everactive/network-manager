@@ -75,6 +75,7 @@ apps:
 parts:
   patches:
     source: valgrind-patch
+    source-type: local
     plugin: dump
     organize:
       0001-Failgrind.patch: patches/0001-Failgrind.patch
