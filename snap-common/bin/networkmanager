@@ -103,7 +103,10 @@ done
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SNAP/usr/lib/NetworkManager
 
-exec "$SNAP"/usr/sbin/NetworkManager \
+export VALGRIND_LIB="$SNAP"/usr/lib/valgrind
+
+exec valgrind --leak-check=yes --extra-debuginfo-path="$SNAP"/usr/lib/debug/ \
+     "$SNAP"/usr/sbin/NetworkManager \
     --config-dir="$SNAP_DATA"/conf.d/ \
     --config="$NM_CONF" \
     --log-level="$LOG_LEVEL" \

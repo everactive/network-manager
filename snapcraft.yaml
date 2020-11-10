@@ -40,8 +40,65 @@ apps:
     daemon: simple
     slots: [service]
     plugs: [modem-manager, ppp, network-setup-observe, wpa, firewall-control]
+  callgrind-annotate:
+    command: usr/bin/callgrind_annotate
+
+  callgrind-control:
+    command: usr/bin/callgrind_control
+
+  cg-annotate:
+    command: usr/bin/cg_annotate
+
+  cg-diff:
+    command: usr/bin/cg_diff
+
+  cg-merge:
+    command: usr/bin/cg_merge
+
+  ms-print:
+    command: usr/bin/ms_print
+
+  valgrind:
+    command: usr/bin/valgrind
+    environment:
+      VALGRIND_LIB: $SNAP/usr/lib/valgrind
+
+  valgrind-di-server:
+    command: usr/bin/valgrind-di-server
+
+  valgrind-listener:
+    command: usr/bin/valgrind-listener
+
+  vgdb:
+    command: usr/bin/vgdb
 
 parts:
+  patches:
+    source: valgrind-patch
+    plugin: dump
+    organize:
+      0001-Failgrind.patch: patches/0001-Failgrind.patch
+    prime: [-*]
+
+  valgrind:
+    after: [patches]
+    plugin: autotools
+    stage-packages:
+      - libc6-dbg
+      - libglib2.0-0-dbg
+    source: https://sourceware.org/pub/valgrind/valgrind-3.16.1.tar.bz2
+    override-pull: |
+      snapcraftctl pull
+      patch -p1 < $SNAPCRAFT_STAGE/patches/0001-Failgrind.patch
+    override-build: |
+      ./autogen.sh
+      snapcraftctl build
+    configflags:
+    - --prefix=/usr
+    - --sysconfdir=/etc
+    - --enable-lto
+    prime: [-usr/share/doc/valgrind/valgrind_manual.ps]
+
   hooks:
     plugin: dump
     source: hooks
@@ -149,15 +206,15 @@ parts:
       - --with-modem-manager-1=yes
       - --enable-tests=yes
       # Set explicitly CFLAGS until lp: #1791946 is solved
-      - CFLAGS=-O2
+      - CFLAGS=-O2 -g
 
     override-build: |
       snapcraftctl build
       # Run all tests NetworkManager ships by default
-      make check
+      #make check
       # Strip binaries
-      find ../install -executable -type f | xargs file -Ni |
-          grep 'application/x-executable\|application/x-sharedlib' | cut -d: -f1 | xargs strip
+      # find ../install -executable -type f | xargs file -Ni |
+      #     grep 'application/x-executable\|application/x-sharedlib' | cut -d: -f1 | xargs strip
 
     # Filter files to pull only the minimum needed
     filesets:
