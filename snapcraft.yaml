@@ -12,6 +12,10 @@ confinement: strict
 grade: stable
 base: core
 
+layout:
+  /usr/lib/debug:
+    symlink: $SNAP/usr/lib/debug
+
 slots:
   service:
     interface: network-manager
