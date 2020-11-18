@@ -2691,6 +2691,7 @@ nm_utils_secret_key_read (gsize *out_key_len, GError **error)
 	}
 
 out:
+	g_free (secret_key_path);
 	if (key_len) {
 		*out_key_len = key_len;
 		return secret_key;

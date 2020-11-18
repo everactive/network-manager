@@ -42,7 +42,7 @@
 
 static const char *get_no_auto_default_file_path()
 {
-	const char *no_auto_default_file = NULL;
+	static const char *no_auto_default_file = NULL;
 
 	if (!no_auto_default_file)
 		no_auto_default_file = g_strdup_printf("%s/no-auto-default.state", nm_utils_get_state_dir());

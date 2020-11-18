@@ -38,7 +38,7 @@
 
 static const char *get_settings_timestamps_path()
 {
-	const char *timestamps_path = NULL;
+	static const char *timestamps_path = NULL;
 
 	if (!timestamps_path)
 		timestamps_path = g_strdup_printf("%s/timestamps", nm_utils_get_state_dir());
@@ -48,7 +48,7 @@ static const char *get_settings_timestamps_path()
 
 static const char *get_settings_seen_bssids_path()
 {
-	const char *seen_bssids_path = NULL;
+	static const char *seen_bssids_path = NULL;
 
 	if (!seen_bssids_path)
 		seen_bssids_path = g_strdup_printf("%s/seen-bssids", nm_utils_get_state_dir());
