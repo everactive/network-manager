@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/statvfs.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <dlfcn.h>
@@ -6164,6 +6165,28 @@ handle_udev_event (GUdevClient *client,
 
 /******************************************************************/
 
+/* Similar to systemd's path_is_read_only_fs(), at
+ * https://github.com/systemd/systemd/blob/v246/src/basic/stat-util.c#L132 */
+static int
+path_is_read_only_fs(const char *path)
+{
+	struct statvfs st;
+
+	if (statvfs (path, &st) < 0)
+		return -errno;
+
+	if (st.f_flag & ST_RDONLY)
+		return TRUE;
+
+	/* On NFS, statvfs() might not reflect whether we can actually
+	 * write to the remote share. Let's try again with
+	 * access(W_OK) which is more reliable, at least sometimes. */
+	if (access (path, W_OK) < 0 && errno == EROFS)
+		return TRUE;
+
+	return FALSE;
+}
+
 static void
 nm_linux_platform_init (NMLinuxPlatform *self)
 {
@@ -6171,7 +6194,7 @@ nm_linux_platform_init (NMLinuxPlatform *self)
 	gboolean use_udev;
 
 	use_udev =    nmp_netns_is_initial ()
-	           && access ("/sys", W_OK) == 0;
+	           && path_is_read_only_fs ("/sys") == FALSE;
 
 	self->priv = priv;
 
