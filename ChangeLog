@@ -1,3 +1,16 @@
+2020-11-25 network-manager 1.2.2-28
+
+  [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
+  * * Fix memory leaks introduced in snap patches (LP#1902271)
+    * platform: use also statvfs() to check for udevd. Fixes LP:#1712918,
+    LP:#1893184.
+    * Move hook files to snap/hooks (workaround LP#1905072)
+    Merge-Proposal: https://code.launchpad.net/~alfonsosanchezbeato/snappy-hwe-snaps/+git/network-manager/+merge/394309
+
+  [ Changes in primed packages ]
+  
+  No changes for primed packages
+  
 2020-09-01 network-manager 1.2.2-27
 
   [ Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com> ]
