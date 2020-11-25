@@ -1,9 +1,9 @@
-snapcraft-version: '4.2'
-snapcraft-started-at: '2020-09-01T07:17:23.791104Z'
+snapcraft-version: 4.4.2
+snapcraft-started-at: '2020-11-25T07:35:55.218599Z'
 snapcraft-os-release-id: ubuntu
 snapcraft-os-release-version-id: '16.04'
 name: network-manager
-version: 1.2.2-27
+version: 1.2.2-28
 summary: Network management framework
 description: |
   NetworkManager is a system network service that manages your network
@@ -62,14 +62,14 @@ parts:
     - automake=1:1.15-4ubuntu1
     - autopoint=0.19.7-2ubuntu3.1
     - autotools-dev=20150820.1
-    - base-files=9.4ubuntu4.12
+    - base-files=9.4ubuntu4.13
     - base-passwd=3.5.39
     - bash=4.3-14ubuntu1.4
     - binutils=2.26.1-1ubuntu1~16.04.8
     - bsdutils=1:2.27.1-6ubuntu3.10
     - build-essential=12.1ubuntu2
     - bzip2=1.0.6-8ubuntu0.2
-    - ca-certificates=20190110~16.04.1
+    - ca-certificates=20201027ubuntu0.16.04.1
     - coreutils=8.25-2ubuntu3~16.04
     - cpp-5=5.4.0-6ubuntu1~16.04.12
     - cpp=4:5.3.1-1ubuntu1
@@ -196,7 +196,7 @@ parts:
     - libgomp1=5.4.0-6ubuntu1~16.04.12
     - libgpg-error-dev=1.21-2ubuntu1
     - libgpg-error0=1.21-2ubuntu1
-    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.1
+    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.2
     - libgssapi3-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
     - libgudev-1.0-0=1:230-2
     - libgudev-1.0-dev=1:230-2
@@ -222,13 +222,13 @@ parts:
     - libitm1=5.4.0-6ubuntu1~16.04.12
     - libiw-dev=30~pre9-8ubuntu1
     - libiw30=30~pre9-8ubuntu1
-    - libk5crypto3=1.13.2+dfsg-5ubuntu2.1
+    - libk5crypto3=1.13.2+dfsg-5ubuntu2.2
     - libkeyutils1=1.5.9-8ubuntu1
     - libkmod2=22-1ubuntu5.2
     - libkrb5-26-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libkrb5-3=1.13.2+dfsg-5ubuntu2.1
-    - libkrb5support0=1.13.2+dfsg-5ubuntu2.1
-    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.9
+    - libkrb5-3=1.13.2+dfsg-5ubuntu2.2
+    - libkrb5support0=1.13.2+dfsg-5ubuntu2.2
+    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.11
     - liblockfile-bin=1.09-6ubuntu1
     - liblockfile1=1.09-6ubuntu1
     - liblsan0=5.4.0-6ubuntu1~16.04.12
@@ -269,25 +269,25 @@ parts:
     - libnss3=2:3.28.4-0ubuntu0.16.04.14
     - libp11-kit-dev=0.23.2-5~ubuntu16.04.1
     - libp11-kit0=0.23.2-5~ubuntu16.04.1
-    - libpam-modules-bin=1.1.8-3.2ubuntu2.1
-    - libpam-modules=1.1.8-3.2ubuntu2.1
-    - libpam-runtime=1.1.8-3.2ubuntu2.1
-    - libpam0g=1.1.8-3.2ubuntu2.1
+    - libpam-modules-bin=1.1.8-3.2ubuntu2.3
+    - libpam-modules=1.1.8-3.2ubuntu2.3
+    - libpam-runtime=1.1.8-3.2ubuntu2.3
+    - libpam0g=1.1.8-3.2ubuntu2.3
     - libpcre16-3=2:8.38-3.1
     - libpcre3-dev=2:8.38-3.1
     - libpcre32-3=2:8.38-3.1
     - libpcre3=2:8.38-3.1
     - libpcrecpp0v5=2:8.38-3.1
-    - libperl5.22=5.22.1-9ubuntu0.6
+    - libperl5.22=5.22.1-9ubuntu0.9
     - libpng12-0=1.2.54-1ubuntu1.1
     - libpng12-dev=1.2.54-1ubuntu1.1
     - libprocps4=2:3.3.10-4ubuntu2.5
     - libpython-stdlib=2.7.12-1~16.04
-    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.12
+    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.13
     - libpython3-stdlib=3.5.1-3
-    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.11
+    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.12
     - libquadmath0=5.4.0-6ubuntu1~16.04.12
     - libreadline-dev=6.3-8ubuntu2
     - libreadline6-dev=6.3-8ubuntu2
@@ -308,11 +308,11 @@ parts:
     - libsp1c2=1.3.4-1.2.1-49ubuntu1
     - libsqlite3-0=3.11.0-1ubuntu1.5
     - libss2=1.42.13-1ubuntu1.2
-    - libssl1.0.0=1.0.2g-1ubuntu4.16
+    - libssl1.0.0=1.0.2g-1ubuntu4.17
     - libstdc++-5-dev=5.4.0-6ubuntu1~16.04.12
     - libstdc++6=5.4.0-6ubuntu1~16.04.12
-    - libsystemd-dev=229-4ubuntu21.28
-    - libsystemd0=229-4ubuntu21.28
+    - libsystemd-dev=229-4ubuntu21.29
+    - libsystemd0=229-4ubuntu21.29
     - libtasn1-6-dev=4.7-3ubuntu0.16.04.3
     - libtasn1-6=4.7-3ubuntu0.16.04.3
     - libtimedate-perl=2.3000-2
@@ -321,8 +321,8 @@ parts:
     - libtool=2.4.6-0.1
     - libtsan0=5.4.0-6ubuntu1~16.04.12
     - libubsan0=5.4.0-6ubuntu1~16.04.12
-    - libudev-dev=229-4ubuntu21.28
-    - libudev1=229-4ubuntu21.28
+    - libudev-dev=229-4ubuntu21.29
+    - libudev1=229-4ubuntu21.29
     - libunistring0=0.9.3-5.2ubuntu1
     - liburi-perl=1.71-1
     - libusb-0.1-4=2:0.1.12-28
@@ -336,7 +336,7 @@ parts:
     - libxml2=2.9.3+dfsg1-1ubuntu0.7
     - libxslt1.1=1.1.28-2.1ubuntu0.3
     - libxtables11=1.6.0-2ubuntu3
-    - linux-libc-dev=4.4.0-189.219
+    - linux-libc-dev=4.4.0-194.226
     - lockfile-progs=0.1.17
     - login=1:4.2-3.1ubuntu5.4
     - lsb-base=9.20160110ubuntu0.2
@@ -353,13 +353,13 @@ parts:
     - netbase=5.3
     - nettle-dev=3.2-1ubuntu0.16.04.1
     - openssh-client=1:7.2p2-4ubuntu2.10
-    - openssl=1.0.2g-1ubuntu4.16
+    - openssl=1.0.2g-1ubuntu4.17
     - optipng=0.7.6-1ubuntu0.16.04.1
     - passwd=1:4.2-3.1ubuntu5.4
     - patch=2.7.5-1ubuntu0.16.04.2
-    - perl-base=5.22.1-9ubuntu0.6
-    - perl-modules-5.22=5.22.1-9ubuntu0.6
-    - perl=5.22.1-9ubuntu0.6
+    - perl-base=5.22.1-9ubuntu0.9
+    - perl-modules-5.22=5.22.1-9ubuntu0.9
+    - perl=5.22.1-9ubuntu0.9
     - pkg-config=0.29.1-0ubuntu1
     - pkg-create-dbgsym=0.72
     - pkgbinarymangler=129
@@ -371,11 +371,11 @@ parts:
     - python-mako=1.0.3+ds1-1ubuntu1
     - python-markupsafe=0.23-2build2
     - python-minimal=2.7.12-1~16.04
-    - python2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - python2.7=2.7.12-1ubuntu0~16.04.12
+    - python2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - python2.7=2.7.12-1ubuntu0~16.04.13
     - python3-minimal=3.5.1-3
-    - python3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - python3.5=3.5.2-2ubuntu0~16.04.11
+    - python3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - python3.5=3.5.2-2ubuntu0~16.04.12
     - python3=3.5.1-3
     - python=2.7.12-1~16.04
     - readline-common=6.3-8ubuntu2
@@ -383,20 +383,20 @@ parts:
     - sensible-utils=0.0.9ubuntu0.16.04.1
     - sgml-base=1.26+nmu4ubuntu1
     - sgml-data=2.0.10
-    - snapd=2.45.1ubuntu0.2
+    - snapd=2.47.1
     - socat=1.7.3.1-1
     - sp=1.3.4-1.2.1-49ubuntu1
     - squashfs-tools=1:4.3-3ubuntu2.16.04.3
     - squashfuse=0.1.100-0ubuntu1~ubuntu16.04.1
     - sudo=1.8.16-0ubuntu1.9
-    - systemd-sysv=229-4ubuntu21.28
-    - systemd=229-4ubuntu21.28
+    - systemd-sysv=229-4ubuntu21.29
+    - systemd=229-4ubuntu21.29
     - sysv-rc=2.88dsf-59.3ubuntu2
     - sysvinit-utils=2.88dsf-59.3ubuntu2
     - tar=1.28-2.1ubuntu0.1
-    - tzdata=2020a-0ubuntu0.16.04
+    - tzdata=2020d-0ubuntu0.16.04
     - ubuntu-keyring=2012.05.19.1
-    - udev=229-4ubuntu21.28
+    - udev=229-4ubuntu21.29
     - util-linux=2.27.1-6ubuntu3.10
     - uuid-dev=2.27.1-6ubuntu3.10
     - xml-core=0.13+nmu2
@@ -405,389 +405,20 @@ parts:
     - zlib1g-dev=1:1.2.8.dfsg-2ubuntu4.3
     - zlib1g=1:1.2.8.dfsg-2ubuntu4.3
     installed-snaps:
-    - core18=1885
-    - core=9804
-    - snapcraft=5407
-    - snapd=8790
+    - core18=1932
+    - core=10185
+    - snapcraft=5756
+    - snapd=9721
     organize:
       ChangeLog: usr/share/doc/network-manager/ChangeLog
-    override-build: 'cp "/build/ci-network-manager-15ubxw2erlyzyai4"/ChangeLog "$SNAPCRAFT_PART_INSTALL"
+    override-build: 'cp "/build/ci-network-manager-w1n3ihi46bm1yqom"/ChangeLog "$SNAPCRAFT_PART_INSTALL"
 
 '
     plugin: nil
     prime: []
     stage: []
     stage-packages: []
-    uname: 'Linux 4.15.0-112-generic #113-Ubuntu SMP Thu Jul 9 23:41:39 UTC 2020 x86_64
-      x86_64 x86_64 GNU/Linux'
-  hooks:
-    build-packages: []
-    installed-packages:
-    - adduser=3.113+nmu3ubuntu4
-    - advancecomp=1.20-1ubuntu0.2
-    - apparmor=2.10.95-0ubuntu2.11
-    - apt-transport-https=1.2.32ubuntu0.1
-    - apt=1.2.32ubuntu0.1
-    - autoconf-archive=20150925-1
-    - autoconf=2.69-9
-    - automake=1:1.15-4ubuntu1
-    - autopoint=0.19.7-2ubuntu3.1
-    - autotools-dev=20150820.1
-    - base-files=9.4ubuntu4.12
-    - base-passwd=3.5.39
-    - bash=4.3-14ubuntu1.4
-    - binutils=2.26.1-1ubuntu1~16.04.8
-    - bsdutils=1:2.27.1-6ubuntu3.10
-    - build-essential=12.1ubuntu2
-    - bzip2=1.0.6-8ubuntu0.2
-    - ca-certificates=20190110~16.04.1
-    - coreutils=8.25-2ubuntu3~16.04
-    - cpp-5=5.4.0-6ubuntu1~16.04.12
-    - cpp=4:5.3.1-1ubuntu1
-    - dash=0.5.8-2.1ubuntu2
-    - dbus-test-runner=15.04.0+15.10.20151002-0ubuntu1
-    - dbus=1.10.6-1ubuntu3.6
-    - debconf=1.5.58ubuntu2
-    - debianutils=4.7
-    - dh-python=2.20151103ubuntu1.2
-    - diffutils=1:3.3-3
-    - docbook-dsssl=1.79-9
-    - docbook-to-man=1:2.0.0-34
-    - docbook-xml=4.5-7.3
-    - docbook-xsl=1.79.1+dfsg-1
-    - docbook=4.5-6
-    - dpkg-dev=1.18.4ubuntu1.6
-    - dpkg=1.18.4ubuntu1.6
-    - e2fslibs=1.42.13-1ubuntu1.2
-    - e2fsprogs=1.42.13-1ubuntu1.2
-    - fakeroot=1.20.2-1ubuntu1
-    - file=1:5.25-2ubuntu1.4
-    - findutils=4.6.0+git+20160126-2
-    - fuse=2.9.4-1ubuntu3.1
-    - g++-5=5.4.0-6ubuntu1~16.04.12
-    - g++=4:5.3.1-1ubuntu1
-    - gcc-5-base=5.4.0-6ubuntu1~16.04.12
-    - gcc-5=5.4.0-6ubuntu1~16.04.12
-    - gcc-6-base=6.0.1-0ubuntu1
-    - gcc=4:5.3.1-1ubuntu1
-    - gettext-base=0.19.7-2ubuntu3.1
-    - gettext=0.19.7-2ubuntu3.1
-    - gir1.2-freedesktop=1.46.0-3ubuntu1
-    - gir1.2-glib-2.0=1.46.0-3ubuntu1
-    - gir1.2-gudev-1.0=1:230-2
-    - gir1.2-modemmanager-1.0=1.6.4-1ubuntu0.16.04.1
-    - git-man=1:2.7.4-0ubuntu1.9
-    - git=1:2.7.4-0ubuntu1.9
-    - gnome-common=3.14.0-2
-    - gnupg=1.4.20-1ubuntu3.3
-    - gobject-introspection=1.46.0-3ubuntu1
-    - gpgv=1.4.20-1ubuntu3.3
-    - grep=2.25-1~16.04.1
-    - gtk-doc-tools=1.25-1ubuntu1.1
-    - gzip=1.6-4ubuntu1
-    - hostname=3.16ubuntu2
-    - init-system-helpers=1.29ubuntu4
-    - init=1.29ubuntu4
-    - initscripts=2.88dsf-59.3ubuntu2
-    - insserv=1.14.0-5ubuntu3
-    - intltool=0.51.0-2ubuntu1.16.04.1
-    - iproute2=4.3.0-1ubuntu3.16.04.5
-    - iptables=1.6.0-2ubuntu3
-    - isc-dhcp-client=4.3.3-5ubuntu12.10
-    - jade=1.2.1-49ubuntu1
-    - libacl1=2.2.52-3
-    - libapparmor-perl=2.10.95-0ubuntu2.11
-    - libapparmor1=2.10.95-0ubuntu2.11
-    - libapt-pkg5.0=1.2.32ubuntu0.1
-    - libasan2=5.4.0-6ubuntu1~16.04.12
-    - libasn1-8-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libasprintf0v5=0.19.7-2ubuntu3.1
-    - libatomic1=5.4.0-6ubuntu1~16.04.12
-    - libattr1=1:2.4.47-2
-    - libaudit-common=1:2.4.5-1ubuntu2.1
-    - libaudit1=1:2.4.5-1ubuntu2.1
-    - libblkid1=2.27.1-6ubuntu3.10
-    - libbsd0=0.8.2-1ubuntu0.1
-    - libbz2-1.0=1.0.6-8ubuntu0.2
-    - libc-bin=2.23-0ubuntu11.2
-    - libc-dev-bin=2.23-0ubuntu11.2
-    - libc6-dev=2.23-0ubuntu11.2
-    - libc6=2.23-0ubuntu11.2
-    - libcap-ng0=0.7.7-1
-    - libcap2-bin=1:2.24-12
-    - libcap2=1:2.24-12
-    - libcc1-0=5.4.0-6ubuntu1~16.04.12
-    - libcilkrts5=5.4.0-6ubuntu1~16.04.12
-    - libcomerr2=1.42.13-1ubuntu1.2
-    - libcroco3=0.6.11-1
-    - libcryptsetup4=2:1.6.6-5ubuntu2.1
-    - libcurl3-gnutls=7.47.0-1ubuntu2.16
-    - libdb5.3=5.3.28-11ubuntu0.2
-    - libdbus-1-3=1.10.6-1ubuntu3.6
-    - libdbus-1-dev=1.10.6-1ubuntu3.6
-    - libdbus-glib-1-2=0.106-1
-    - libdbus-glib-1-dev=0.106-1
-    - libdbustest1=15.04.0+15.10.20151002-0ubuntu1
-    - libdebconfclient0=0.198ubuntu1
-    - libdevmapper1.02.1=2:1.02.110-1ubuntu10
-    - libdns-export162=1:9.10.3.dfsg.P4-8ubuntu1.17
-    - libdpkg-perl=1.18.4ubuntu1.6
-    - libedit2=3.1-20150325-1ubuntu2
-    - libelf1=0.165-3ubuntu1.2
-    - libencode-locale-perl=1.05-1
-    - liberror-perl=0.17-1.2
-    - libexpat1=2.1.0-7ubuntu0.16.04.5
-    - libfakeroot=1.20.2-1ubuntu1
-    - libfdisk1=2.27.1-6ubuntu3.10
-    - libffi-dev=3.2.1-4
-    - libffi6=3.2.1-4
-    - libfile-listing-perl=6.04-1
-    - libfuse2=2.9.4-1ubuntu3.1
-    - libgcc-5-dev=5.4.0-6ubuntu1~16.04.12
-    - libgcc1=1:6.0.1-0ubuntu1
-    - libgcrypt11-dev=1.5.4-3+really1.6.5-2ubuntu0.6
-    - libgcrypt20-dev=1.6.5-2ubuntu0.6
-    - libgcrypt20=1.6.5-2ubuntu0.6
-    - libgdbm3=1.8.3-13.1
-    - libgirepository-1.0-1=1.46.0-3ubuntu1
-    - libgirepository1.0-dev=1.46.0-3ubuntu1
-    - libglib2.0-0=2.48.2-0ubuntu4.6
-    - libglib2.0-bin=2.48.2-0ubuntu4.6
-    - libglib2.0-data=2.48.2-0ubuntu4.6
-    - libglib2.0-dev=2.48.2-0ubuntu4.6
-    - libglib2.0-doc=2.48.2-0ubuntu4.6
-    - libgmp-dev=2:6.1.0+dfsg-2
-    - libgmp10=2:6.1.0+dfsg-2
-    - libgmpxx4ldbl=2:6.1.0+dfsg-2
-    - libgnutls-dev=3.4.10-4ubuntu1.8
-    - libgnutls-openssl27=3.4.10-4ubuntu1.8
-    - libgnutls28-dev=3.4.10-4ubuntu1.8
-    - libgnutls30=3.4.10-4ubuntu1.8
-    - libgnutlsxx28=3.4.10-4ubuntu1.8
-    - libgomp1=5.4.0-6ubuntu1~16.04.12
-    - libgpg-error-dev=1.21-2ubuntu1
-    - libgpg-error0=1.21-2ubuntu1
-    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.1
-    - libgssapi3-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libgudev-1.0-0=1:230-2
-    - libgudev-1.0-dev=1:230-2
-    - libhcrypto4-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libheimbase1-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libheimntlm0-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libhogweed4=3.2-1ubuntu0.16.04.1
-    - libhtml-parser-perl=3.72-1
-    - libhtml-tagset-perl=3.20-2
-    - libhtml-tree-perl=5.03-2
-    - libhttp-cookies-perl=6.01-1
-    - libhttp-date-perl=6.02-1
-    - libhttp-message-perl=6.11-1
-    - libhttp-negotiate-perl=6.00-2
-    - libhx509-5-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libicu55=55.1-7ubuntu0.5
-    - libidn11-dev=1.32-3ubuntu1.2
-    - libidn11=1.32-3ubuntu1.2
-    - libio-html-perl=1.001-1
-    - libio-socket-ssl-perl=2.024-1
-    - libisc-export160=1:9.10.3.dfsg.P4-8ubuntu1.17
-    - libisl15=0.16.1-1
-    - libitm1=5.4.0-6ubuntu1~16.04.12
-    - libiw-dev=30~pre9-8ubuntu1
-    - libiw30=30~pre9-8ubuntu1
-    - libk5crypto3=1.13.2+dfsg-5ubuntu2.1
-    - libkeyutils1=1.5.9-8ubuntu1
-    - libkmod2=22-1ubuntu5.2
-    - libkrb5-26-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libkrb5-3=1.13.2+dfsg-5ubuntu2.1
-    - libkrb5support0=1.13.2+dfsg-5ubuntu2.1
-    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.9
-    - liblockfile-bin=1.09-6ubuntu1
-    - liblockfile1=1.09-6ubuntu1
-    - liblsan0=5.4.0-6ubuntu1~16.04.12
-    - liblwp-mediatypes-perl=6.02-1
-    - liblwp-protocol-https-perl=6.06-2
-    - liblz4-1=0.0~r131-2ubuntu2
-    - liblzma5=5.1.1alpha+20120614-2ubuntu2
-    - liblzo2-2=2.08-1.2
-    - libmagic1=1:5.25-2ubuntu1.4
-    - libmm-glib-dev=1.6.4-1ubuntu0.16.04.1
-    - libmm-glib0=1.6.4-1ubuntu0.16.04.1
-    - libmnl0=1.0.3-5
-    - libmount1=2.27.1-6ubuntu3.10
-    - libmpc3=1.0.3-1
-    - libmpdec2=2.4.2-1
-    - libmpfr4=3.1.4-1
-    - libmpx0=5.4.0-6ubuntu1~16.04.12
-    - libncurses5=6.0+20160213-1ubuntu1
-    - libncursesw5=6.0+20160213-1ubuntu1
-    - libndp-dev=1.4-2ubuntu0.16.04.1
-    - libndp0=1.4-2ubuntu0.16.04.1
-    - libnet-http-perl=6.09-1
-    - libnet-ssleay-perl=1.72-1build1
-    - libnettle6=3.2-1ubuntu0.16.04.1
-    - libnewt-dev=0.52.18-1ubuntu2
-    - libnewt0.52=0.52.18-1ubuntu2
-    - libnfnetlink0=1.0.1-3
-    - libnl-3-200=3.2.27-1ubuntu0.16.04.1
-    - libnl-3-dev=3.2.27-1ubuntu0.16.04.1
-    - libnl-genl-3-200=3.2.27-1ubuntu0.16.04.1
-    - libnl-genl-3-dev=3.2.27-1ubuntu0.16.04.1
-    - libnl-route-3-200=3.2.27-1ubuntu0.16.04.1
-    - libnl-route-3-dev=3.2.27-1ubuntu0.16.04.1
-    - libnspr4-dev=2:4.13.1-0ubuntu0.16.04.1
-    - libnspr4=2:4.13.1-0ubuntu0.16.04.1
-    - libnss3-dev=2:3.28.4-0ubuntu0.16.04.14
-    - libnss3-nssdb=2:3.28.4-0ubuntu0.16.04.14
-    - libnss3=2:3.28.4-0ubuntu0.16.04.14
-    - libp11-kit-dev=0.23.2-5~ubuntu16.04.1
-    - libp11-kit0=0.23.2-5~ubuntu16.04.1
-    - libpam-modules-bin=1.1.8-3.2ubuntu2.1
-    - libpam-modules=1.1.8-3.2ubuntu2.1
-    - libpam-runtime=1.1.8-3.2ubuntu2.1
-    - libpam0g=1.1.8-3.2ubuntu2.1
-    - libpcre16-3=2:8.38-3.1
-    - libpcre3-dev=2:8.38-3.1
-    - libpcre32-3=2:8.38-3.1
-    - libpcre3=2:8.38-3.1
-    - libpcrecpp0v5=2:8.38-3.1
-    - libperl5.22=5.22.1-9ubuntu0.6
-    - libpng12-0=1.2.54-1ubuntu1.1
-    - libpng12-dev=1.2.54-1ubuntu1.1
-    - libprocps4=2:3.3.10-4ubuntu2.5
-    - libpython-stdlib=2.7.12-1~16.04
-    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.12
-    - libpython3-stdlib=3.5.1-3
-    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.11
-    - libquadmath0=5.4.0-6ubuntu1~16.04.12
-    - libreadline-dev=6.3-8ubuntu2
-    - libreadline6-dev=6.3-8ubuntu2
-    - libreadline6=6.3-8ubuntu2
-    - libroken18-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - librtmp1=2.4+20151223.gitfa8646d-1ubuntu0.1
-    - libsasl2-2=2.1.26.dfsg1-14ubuntu0.2
-    - libsasl2-modules-db=2.1.26.dfsg1-14ubuntu0.2
-    - libseccomp2=2.4.3-1ubuntu3.16.04.3
-    - libselinux1=2.4-3build2
-    - libsemanage-common=2.3-1build3
-    - libsemanage1=2.3-1build3
-    - libsepol1=2.4-2
-    - libsigsegv2=2.10-4
-    - libslang2-dev=2.3.0-2ubuntu1.1
-    - libslang2=2.3.0-2ubuntu1.1
-    - libsmartcols1=2.27.1-6ubuntu3.10
-    - libsp1c2=1.3.4-1.2.1-49ubuntu1
-    - libsqlite3-0=3.11.0-1ubuntu1.5
-    - libss2=1.42.13-1ubuntu1.2
-    - libssl1.0.0=1.0.2g-1ubuntu4.16
-    - libstdc++-5-dev=5.4.0-6ubuntu1~16.04.12
-    - libstdc++6=5.4.0-6ubuntu1~16.04.12
-    - libsystemd-dev=229-4ubuntu21.28
-    - libsystemd0=229-4ubuntu21.28
-    - libtasn1-6-dev=4.7-3ubuntu0.16.04.3
-    - libtasn1-6=4.7-3ubuntu0.16.04.3
-    - libtimedate-perl=2.3000-2
-    - libtinfo-dev=6.0+20160213-1ubuntu1
-    - libtinfo5=6.0+20160213-1ubuntu1
-    - libtool=2.4.6-0.1
-    - libtsan0=5.4.0-6ubuntu1~16.04.12
-    - libubsan0=5.4.0-6ubuntu1~16.04.12
-    - libudev-dev=229-4ubuntu21.28
-    - libudev1=229-4ubuntu21.28
-    - libunistring0=0.9.3-5.2ubuntu1
-    - liburi-perl=1.71-1
-    - libusb-0.1-4=2:0.1.12-28
-    - libustr-1.0-1=1.0.4-5
-    - libuuid1=2.27.1-6ubuntu3.10
-    - libwind0-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libwrap0=7.6.q-25
-    - libwww-perl=6.15-1
-    - libwww-robotrules-perl=6.01-1
-    - libxml-parser-perl=2.44-1build1
-    - libxml2=2.9.3+dfsg1-1ubuntu0.7
-    - libxslt1.1=1.1.28-2.1ubuntu0.3
-    - libxtables11=1.6.0-2ubuntu3
-    - linux-libc-dev=4.4.0-189.219
-    - lockfile-progs=0.1.17
-    - login=1:4.2-3.1ubuntu5.4
-    - lsb-base=9.20160110ubuntu0.2
-    - m4=1.4.17-5
-    - make=4.1-6
-    - makedev=2.3.1-93ubuntu2~ubuntu16.04.1
-    - mawk=1.3.3-17ubuntu2
-    - mime-support=3.59ubuntu1
-    - modemmanager-dev=1.6.4-1ubuntu0.16.04.1
-    - mount=2.27.1-6ubuntu3.10
-    - multiarch-support=2.23-0ubuntu11.2
-    - ncurses-base=6.0+20160213-1ubuntu1
-    - ncurses-bin=6.0+20160213-1ubuntu1
-    - netbase=5.3
-    - nettle-dev=3.2-1ubuntu0.16.04.1
-    - openssh-client=1:7.2p2-4ubuntu2.10
-    - openssl=1.0.2g-1ubuntu4.16
-    - optipng=0.7.6-1ubuntu0.16.04.1
-    - passwd=1:4.2-3.1ubuntu5.4
-    - patch=2.7.5-1ubuntu0.16.04.2
-    - perl-base=5.22.1-9ubuntu0.6
-    - perl-modules-5.22=5.22.1-9ubuntu0.6
-    - perl=5.22.1-9ubuntu0.6
-    - pkg-config=0.29.1-0ubuntu1
-    - pkg-create-dbgsym=0.72
-    - pkgbinarymangler=129
-    - policyrcd-script-zg2=0.1-2
-    - ppp-dev=2.4.7-1+2ubuntu1.16.04.3
-    - procps=2:3.3.10-4ubuntu2.5
-    - python-dbus=1.2.0-3
-    - python-gi=3.20.0-0ubuntu1
-    - python-mako=1.0.3+ds1-1ubuntu1
-    - python-markupsafe=0.23-2build2
-    - python-minimal=2.7.12-1~16.04
-    - python2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - python2.7=2.7.12-1ubuntu0~16.04.12
-    - python3-minimal=3.5.1-3
-    - python3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - python3.5=3.5.2-2ubuntu0~16.04.11
-    - python3=3.5.1-3
-    - python=2.7.12-1~16.04
-    - readline-common=6.3-8ubuntu2
-    - sed=4.2.2-7
-    - sensible-utils=0.0.9ubuntu0.16.04.1
-    - sgml-base=1.26+nmu4ubuntu1
-    - sgml-data=2.0.10
-    - snapd=2.45.1ubuntu0.2
-    - socat=1.7.3.1-1
-    - sp=1.3.4-1.2.1-49ubuntu1
-    - squashfs-tools=1:4.3-3ubuntu2.16.04.3
-    - squashfuse=0.1.100-0ubuntu1~ubuntu16.04.1
-    - sudo=1.8.16-0ubuntu1.9
-    - systemd-sysv=229-4ubuntu21.28
-    - systemd=229-4ubuntu21.28
-    - sysv-rc=2.88dsf-59.3ubuntu2
-    - sysvinit-utils=2.88dsf-59.3ubuntu2
-    - tar=1.28-2.1ubuntu0.1
-    - tzdata=2020a-0ubuntu0.16.04
-    - ubuntu-keyring=2012.05.19.1
-    - udev=229-4ubuntu21.28
-    - util-linux=2.27.1-6ubuntu3.10
-    - uuid-dev=2.27.1-6ubuntu3.10
-    - xml-core=0.13+nmu2
-    - xsltproc=1.1.28-2.1ubuntu0.3
-    - xz-utils=5.1.1alpha+20120614-2ubuntu2
-    - zlib1g-dev=1:1.2.8.dfsg-2ubuntu4.3
-    - zlib1g=1:1.2.8.dfsg-2ubuntu4.3
-    installed-snaps:
-    - core18=1885
-    - core=9804
-    - snapcraft=5407
-    - snapd=8790
-    organize:
-      configure: meta/hooks/configure
-    plugin: dump
-    prime: []
-    source: hooks
-    stage: []
-    stage-packages: []
-    uname: 'Linux 4.15.0-112-generic #113-Ubuntu SMP Thu Jul 9 23:41:39 UTC 2020 x86_64
+    uname: 'Linux 4.15.0-124-generic #127-Ubuntu SMP Fri Nov 6 10:54:43 UTC 2020 x86_64
       x86_64 x86_64 GNU/Linux'
   inotify-tools:
     build-packages: []
@@ -802,14 +433,14 @@ parts:
     - automake=1:1.15-4ubuntu1
     - autopoint=0.19.7-2ubuntu3.1
     - autotools-dev=20150820.1
-    - base-files=9.4ubuntu4.12
+    - base-files=9.4ubuntu4.13
     - base-passwd=3.5.39
     - bash=4.3-14ubuntu1.4
     - binutils=2.26.1-1ubuntu1~16.04.8
     - bsdutils=1:2.27.1-6ubuntu3.10
     - build-essential=12.1ubuntu2
     - bzip2=1.0.6-8ubuntu0.2
-    - ca-certificates=20190110~16.04.1
+    - ca-certificates=20201027ubuntu0.16.04.1
     - coreutils=8.25-2ubuntu3~16.04
     - cpp-5=5.4.0-6ubuntu1~16.04.12
     - cpp=4:5.3.1-1ubuntu1
@@ -936,7 +567,7 @@ parts:
     - libgomp1=5.4.0-6ubuntu1~16.04.12
     - libgpg-error-dev=1.21-2ubuntu1
     - libgpg-error0=1.21-2ubuntu1
-    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.1
+    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.2
     - libgssapi3-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
     - libgudev-1.0-0=1:230-2
     - libgudev-1.0-dev=1:230-2
@@ -962,13 +593,13 @@ parts:
     - libitm1=5.4.0-6ubuntu1~16.04.12
     - libiw-dev=30~pre9-8ubuntu1
     - libiw30=30~pre9-8ubuntu1
-    - libk5crypto3=1.13.2+dfsg-5ubuntu2.1
+    - libk5crypto3=1.13.2+dfsg-5ubuntu2.2
     - libkeyutils1=1.5.9-8ubuntu1
     - libkmod2=22-1ubuntu5.2
     - libkrb5-26-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libkrb5-3=1.13.2+dfsg-5ubuntu2.1
-    - libkrb5support0=1.13.2+dfsg-5ubuntu2.1
-    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.9
+    - libkrb5-3=1.13.2+dfsg-5ubuntu2.2
+    - libkrb5support0=1.13.2+dfsg-5ubuntu2.2
+    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.11
     - liblockfile-bin=1.09-6ubuntu1
     - liblockfile1=1.09-6ubuntu1
     - liblsan0=5.4.0-6ubuntu1~16.04.12
@@ -1009,25 +640,25 @@ parts:
     - libnss3=2:3.28.4-0ubuntu0.16.04.14
     - libp11-kit-dev=0.23.2-5~ubuntu16.04.1
     - libp11-kit0=0.23.2-5~ubuntu16.04.1
-    - libpam-modules-bin=1.1.8-3.2ubuntu2.1
-    - libpam-modules=1.1.8-3.2ubuntu2.1
-    - libpam-runtime=1.1.8-3.2ubuntu2.1
-    - libpam0g=1.1.8-3.2ubuntu2.1
+    - libpam-modules-bin=1.1.8-3.2ubuntu2.3
+    - libpam-modules=1.1.8-3.2ubuntu2.3
+    - libpam-runtime=1.1.8-3.2ubuntu2.3
+    - libpam0g=1.1.8-3.2ubuntu2.3
     - libpcre16-3=2:8.38-3.1
     - libpcre3-dev=2:8.38-3.1
     - libpcre32-3=2:8.38-3.1
     - libpcre3=2:8.38-3.1
     - libpcrecpp0v5=2:8.38-3.1
-    - libperl5.22=5.22.1-9ubuntu0.6
+    - libperl5.22=5.22.1-9ubuntu0.9
     - libpng12-0=1.2.54-1ubuntu1.1
     - libpng12-dev=1.2.54-1ubuntu1.1
     - libprocps4=2:3.3.10-4ubuntu2.5
     - libpython-stdlib=2.7.12-1~16.04
-    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.12
+    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.13
     - libpython3-stdlib=3.5.1-3
-    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.11
+    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.12
     - libquadmath0=5.4.0-6ubuntu1~16.04.12
     - libreadline-dev=6.3-8ubuntu2
     - libreadline6-dev=6.3-8ubuntu2
@@ -1048,11 +679,11 @@ parts:
     - libsp1c2=1.3.4-1.2.1-49ubuntu1
     - libsqlite3-0=3.11.0-1ubuntu1.5
     - libss2=1.42.13-1ubuntu1.2
-    - libssl1.0.0=1.0.2g-1ubuntu4.16
+    - libssl1.0.0=1.0.2g-1ubuntu4.17
     - libstdc++-5-dev=5.4.0-6ubuntu1~16.04.12
     - libstdc++6=5.4.0-6ubuntu1~16.04.12
-    - libsystemd-dev=229-4ubuntu21.28
-    - libsystemd0=229-4ubuntu21.28
+    - libsystemd-dev=229-4ubuntu21.29
+    - libsystemd0=229-4ubuntu21.29
     - libtasn1-6-dev=4.7-3ubuntu0.16.04.3
     - libtasn1-6=4.7-3ubuntu0.16.04.3
     - libtimedate-perl=2.3000-2
@@ -1061,8 +692,8 @@ parts:
     - libtool=2.4.6-0.1
     - libtsan0=5.4.0-6ubuntu1~16.04.12
     - libubsan0=5.4.0-6ubuntu1~16.04.12
-    - libudev-dev=229-4ubuntu21.28
-    - libudev1=229-4ubuntu21.28
+    - libudev-dev=229-4ubuntu21.29
+    - libudev1=229-4ubuntu21.29
     - libunistring0=0.9.3-5.2ubuntu1
     - liburi-perl=1.71-1
     - libusb-0.1-4=2:0.1.12-28
@@ -1076,7 +707,7 @@ parts:
     - libxml2=2.9.3+dfsg1-1ubuntu0.7
     - libxslt1.1=1.1.28-2.1ubuntu0.3
     - libxtables11=1.6.0-2ubuntu3
-    - linux-libc-dev=4.4.0-189.219
+    - linux-libc-dev=4.4.0-194.226
     - lockfile-progs=0.1.17
     - login=1:4.2-3.1ubuntu5.4
     - lsb-base=9.20160110ubuntu0.2
@@ -1093,13 +724,13 @@ parts:
     - netbase=5.3
     - nettle-dev=3.2-1ubuntu0.16.04.1
     - openssh-client=1:7.2p2-4ubuntu2.10
-    - openssl=1.0.2g-1ubuntu4.16
+    - openssl=1.0.2g-1ubuntu4.17
     - optipng=0.7.6-1ubuntu0.16.04.1
     - passwd=1:4.2-3.1ubuntu5.4
     - patch=2.7.5-1ubuntu0.16.04.2
-    - perl-base=5.22.1-9ubuntu0.6
-    - perl-modules-5.22=5.22.1-9ubuntu0.6
-    - perl=5.22.1-9ubuntu0.6
+    - perl-base=5.22.1-9ubuntu0.9
+    - perl-modules-5.22=5.22.1-9ubuntu0.9
+    - perl=5.22.1-9ubuntu0.9
     - pkg-config=0.29.1-0ubuntu1
     - pkg-create-dbgsym=0.72
     - pkgbinarymangler=129
@@ -1111,11 +742,11 @@ parts:
     - python-mako=1.0.3+ds1-1ubuntu1
     - python-markupsafe=0.23-2build2
     - python-minimal=2.7.12-1~16.04
-    - python2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - python2.7=2.7.12-1ubuntu0~16.04.12
+    - python2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - python2.7=2.7.12-1ubuntu0~16.04.13
     - python3-minimal=3.5.1-3
-    - python3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - python3.5=3.5.2-2ubuntu0~16.04.11
+    - python3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - python3.5=3.5.2-2ubuntu0~16.04.12
     - python3=3.5.1-3
     - python=2.7.12-1~16.04
     - readline-common=6.3-8ubuntu2
@@ -1123,20 +754,20 @@ parts:
     - sensible-utils=0.0.9ubuntu0.16.04.1
     - sgml-base=1.26+nmu4ubuntu1
     - sgml-data=2.0.10
-    - snapd=2.45.1ubuntu0.2
+    - snapd=2.47.1
     - socat=1.7.3.1-1
     - sp=1.3.4-1.2.1-49ubuntu1
     - squashfs-tools=1:4.3-3ubuntu2.16.04.3
     - squashfuse=0.1.100-0ubuntu1~ubuntu16.04.1
     - sudo=1.8.16-0ubuntu1.9
-    - systemd-sysv=229-4ubuntu21.28
-    - systemd=229-4ubuntu21.28
+    - systemd-sysv=229-4ubuntu21.29
+    - systemd=229-4ubuntu21.29
     - sysv-rc=2.88dsf-59.3ubuntu2
     - sysvinit-utils=2.88dsf-59.3ubuntu2
     - tar=1.28-2.1ubuntu0.1
-    - tzdata=2020a-0ubuntu0.16.04
+    - tzdata=2020d-0ubuntu0.16.04
     - ubuntu-keyring=2012.05.19.1
-    - udev=229-4ubuntu21.28
+    - udev=229-4ubuntu21.29
     - util-linux=2.27.1-6ubuntu3.10
     - uuid-dev=2.27.1-6ubuntu3.10
     - xml-core=0.13+nmu2
@@ -1145,10 +776,10 @@ parts:
     - zlib1g-dev=1:1.2.8.dfsg-2ubuntu4.3
     - zlib1g=1:1.2.8.dfsg-2ubuntu4.3
     installed-snaps:
-    - core18=1885
-    - core=9804
-    - snapcraft=5407
-    - snapd=8790
+    - core18=1932
+    - core=10185
+    - snapcraft=5756
+    - snapd=9721
     plugin: nil
     prime:
     - usr/share/doc/inotify-tools/copyright
@@ -1160,7 +791,7 @@ parts:
     stage-packages:
     - inotify-tools=3.14-1ubuntu1
     - libinotifytools0=3.14-1ubuntu1
-    uname: 'Linux 4.15.0-112-generic #113-Ubuntu SMP Thu Jul 9 23:41:39 UTC 2020 x86_64
+    uname: 'Linux 4.15.0-124-generic #127-Ubuntu SMP Fri Nov 6 10:54:43 UTC 2020 x86_64
       x86_64 x86_64 GNU/Linux'
   networkmanager:
     build-packages:
@@ -1229,14 +860,14 @@ parts:
     - automake=1:1.15-4ubuntu1
     - autopoint=0.19.7-2ubuntu3.1
     - autotools-dev=20150820.1
-    - base-files=9.4ubuntu4.12
+    - base-files=9.4ubuntu4.13
     - base-passwd=3.5.39
     - bash=4.3-14ubuntu1.4
     - binutils=2.26.1-1ubuntu1~16.04.8
     - bsdutils=1:2.27.1-6ubuntu3.10
     - build-essential=12.1ubuntu2
     - bzip2=1.0.6-8ubuntu0.2
-    - ca-certificates=20190110~16.04.1
+    - ca-certificates=20201027ubuntu0.16.04.1
     - coreutils=8.25-2ubuntu3~16.04
     - cpp-5=5.4.0-6ubuntu1~16.04.12
     - cpp=4:5.3.1-1ubuntu1
@@ -1363,7 +994,7 @@ parts:
     - libgomp1=5.4.0-6ubuntu1~16.04.12
     - libgpg-error-dev=1.21-2ubuntu1
     - libgpg-error0=1.21-2ubuntu1
-    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.1
+    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.2
     - libgssapi3-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
     - libgudev-1.0-0=1:230-2
     - libgudev-1.0-dev=1:230-2
@@ -1389,13 +1020,13 @@ parts:
     - libitm1=5.4.0-6ubuntu1~16.04.12
     - libiw-dev=30~pre9-8ubuntu1
     - libiw30=30~pre9-8ubuntu1
-    - libk5crypto3=1.13.2+dfsg-5ubuntu2.1
+    - libk5crypto3=1.13.2+dfsg-5ubuntu2.2
     - libkeyutils1=1.5.9-8ubuntu1
     - libkmod2=22-1ubuntu5.2
     - libkrb5-26-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libkrb5-3=1.13.2+dfsg-5ubuntu2.1
-    - libkrb5support0=1.13.2+dfsg-5ubuntu2.1
-    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.9
+    - libkrb5-3=1.13.2+dfsg-5ubuntu2.2
+    - libkrb5support0=1.13.2+dfsg-5ubuntu2.2
+    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.11
     - liblockfile-bin=1.09-6ubuntu1
     - liblockfile1=1.09-6ubuntu1
     - liblsan0=5.4.0-6ubuntu1~16.04.12
@@ -1436,25 +1067,25 @@ parts:
     - libnss3=2:3.28.4-0ubuntu0.16.04.14
     - libp11-kit-dev=0.23.2-5~ubuntu16.04.1
     - libp11-kit0=0.23.2-5~ubuntu16.04.1
-    - libpam-modules-bin=1.1.8-3.2ubuntu2.1
-    - libpam-modules=1.1.8-3.2ubuntu2.1
-    - libpam-runtime=1.1.8-3.2ubuntu2.1
-    - libpam0g=1.1.8-3.2ubuntu2.1
+    - libpam-modules-bin=1.1.8-3.2ubuntu2.3
+    - libpam-modules=1.1.8-3.2ubuntu2.3
+    - libpam-runtime=1.1.8-3.2ubuntu2.3
+    - libpam0g=1.1.8-3.2ubuntu2.3
     - libpcre16-3=2:8.38-3.1
     - libpcre3-dev=2:8.38-3.1
     - libpcre32-3=2:8.38-3.1
     - libpcre3=2:8.38-3.1
     - libpcrecpp0v5=2:8.38-3.1
-    - libperl5.22=5.22.1-9ubuntu0.6
+    - libperl5.22=5.22.1-9ubuntu0.9
     - libpng12-0=1.2.54-1ubuntu1.1
     - libpng12-dev=1.2.54-1ubuntu1.1
     - libprocps4=2:3.3.10-4ubuntu2.5
     - libpython-stdlib=2.7.12-1~16.04
-    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.12
+    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.13
     - libpython3-stdlib=3.5.1-3
-    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.11
+    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.12
     - libquadmath0=5.4.0-6ubuntu1~16.04.12
     - libreadline-dev=6.3-8ubuntu2
     - libreadline6-dev=6.3-8ubuntu2
@@ -1475,11 +1106,11 @@ parts:
     - libsp1c2=1.3.4-1.2.1-49ubuntu1
     - libsqlite3-0=3.11.0-1ubuntu1.5
     - libss2=1.42.13-1ubuntu1.2
-    - libssl1.0.0=1.0.2g-1ubuntu4.16
+    - libssl1.0.0=1.0.2g-1ubuntu4.17
     - libstdc++-5-dev=5.4.0-6ubuntu1~16.04.12
     - libstdc++6=5.4.0-6ubuntu1~16.04.12
-    - libsystemd-dev=229-4ubuntu21.28
-    - libsystemd0=229-4ubuntu21.28
+    - libsystemd-dev=229-4ubuntu21.29
+    - libsystemd0=229-4ubuntu21.29
     - libtasn1-6-dev=4.7-3ubuntu0.16.04.3
     - libtasn1-6=4.7-3ubuntu0.16.04.3
     - libtimedate-perl=2.3000-2
@@ -1488,8 +1119,8 @@ parts:
     - libtool=2.4.6-0.1
     - libtsan0=5.4.0-6ubuntu1~16.04.12
     - libubsan0=5.4.0-6ubuntu1~16.04.12
-    - libudev-dev=229-4ubuntu21.28
-    - libudev1=229-4ubuntu21.28
+    - libudev-dev=229-4ubuntu21.29
+    - libudev1=229-4ubuntu21.29
     - libunistring0=0.9.3-5.2ubuntu1
     - liburi-perl=1.71-1
     - libusb-0.1-4=2:0.1.12-28
@@ -1503,7 +1134,7 @@ parts:
     - libxml2=2.9.3+dfsg1-1ubuntu0.7
     - libxslt1.1=1.1.28-2.1ubuntu0.3
     - libxtables11=1.6.0-2ubuntu3
-    - linux-libc-dev=4.4.0-189.219
+    - linux-libc-dev=4.4.0-194.226
     - lockfile-progs=0.1.17
     - login=1:4.2-3.1ubuntu5.4
     - lsb-base=9.20160110ubuntu0.2
@@ -1520,13 +1151,13 @@ parts:
     - netbase=5.3
     - nettle-dev=3.2-1ubuntu0.16.04.1
     - openssh-client=1:7.2p2-4ubuntu2.10
-    - openssl=1.0.2g-1ubuntu4.16
+    - openssl=1.0.2g-1ubuntu4.17
     - optipng=0.7.6-1ubuntu0.16.04.1
     - passwd=1:4.2-3.1ubuntu5.4
     - patch=2.7.5-1ubuntu0.16.04.2
-    - perl-base=5.22.1-9ubuntu0.6
-    - perl-modules-5.22=5.22.1-9ubuntu0.6
-    - perl=5.22.1-9ubuntu0.6
+    - perl-base=5.22.1-9ubuntu0.9
+    - perl-modules-5.22=5.22.1-9ubuntu0.9
+    - perl=5.22.1-9ubuntu0.9
     - pkg-config=0.29.1-0ubuntu1
     - pkg-create-dbgsym=0.72
     - pkgbinarymangler=129
@@ -1538,11 +1169,11 @@ parts:
     - python-mako=1.0.3+ds1-1ubuntu1
     - python-markupsafe=0.23-2build2
     - python-minimal=2.7.12-1~16.04
-    - python2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - python2.7=2.7.12-1ubuntu0~16.04.12
+    - python2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - python2.7=2.7.12-1ubuntu0~16.04.13
     - python3-minimal=3.5.1-3
-    - python3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - python3.5=3.5.2-2ubuntu0~16.04.11
+    - python3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - python3.5=3.5.2-2ubuntu0~16.04.12
     - python3=3.5.1-3
     - python=2.7.12-1~16.04
     - readline-common=6.3-8ubuntu2
@@ -1550,20 +1181,20 @@ parts:
     - sensible-utils=0.0.9ubuntu0.16.04.1
     - sgml-base=1.26+nmu4ubuntu1
     - sgml-data=2.0.10
-    - snapd=2.45.1ubuntu0.2
+    - snapd=2.47.1
     - socat=1.7.3.1-1
     - sp=1.3.4-1.2.1-49ubuntu1
     - squashfs-tools=1:4.3-3ubuntu2.16.04.3
     - squashfuse=0.1.100-0ubuntu1~ubuntu16.04.1
     - sudo=1.8.16-0ubuntu1.9
-    - systemd-sysv=229-4ubuntu21.28
-    - systemd=229-4ubuntu21.28
+    - systemd-sysv=229-4ubuntu21.29
+    - systemd=229-4ubuntu21.29
     - sysv-rc=2.88dsf-59.3ubuntu2
     - sysvinit-utils=2.88dsf-59.3ubuntu2
     - tar=1.28-2.1ubuntu0.1
-    - tzdata=2020a-0ubuntu0.16.04
+    - tzdata=2020d-0ubuntu0.16.04
     - ubuntu-keyring=2012.05.19.1
-    - udev=229-4ubuntu21.28
+    - udev=229-4ubuntu21.29
     - util-linux=2.27.1-6ubuntu3.10
     - uuid-dev=2.27.1-6ubuntu3.10
     - xml-core=0.13+nmu2
@@ -1572,10 +1203,10 @@ parts:
     - zlib1g-dev=1:1.2.8.dfsg-2ubuntu4.3
     - zlib1g=1:1.2.8.dfsg-2ubuntu4.3
     installed-snaps:
-    - core18=1885
-    - core=9804
-    - snapcraft=5407
-    - snapd=8790
+    - core18=1932
+    - core=10185
+    - snapcraft=5756
+    - snapd=9721
     override-build: |
       snapcraftctl build
       # Run all tests NetworkManager ships by default
@@ -1635,7 +1266,7 @@ parts:
     - libndp0=1.4-2ubuntu0.16.04.1
     - libnspr4=2:4.13.1-0ubuntu0.16.04.1
     - libnss3=2:3.28.4-0ubuntu0.16.04.14
-    uname: 'Linux 4.15.0-112-generic #113-Ubuntu SMP Thu Jul 9 23:41:39 UTC 2020 x86_64
+    uname: 'Linux 4.15.0-124-generic #127-Ubuntu SMP Fri Nov 6 10:54:43 UTC 2020 x86_64
       x86_64 x86_64 GNU/Linux'
   networkmanager-common:
     build-packages: []
@@ -1650,14 +1281,14 @@ parts:
     - automake=1:1.15-4ubuntu1
     - autopoint=0.19.7-2ubuntu3.1
     - autotools-dev=20150820.1
-    - base-files=9.4ubuntu4.12
+    - base-files=9.4ubuntu4.13
     - base-passwd=3.5.39
     - bash=4.3-14ubuntu1.4
     - binutils=2.26.1-1ubuntu1~16.04.8
     - bsdutils=1:2.27.1-6ubuntu3.10
     - build-essential=12.1ubuntu2
     - bzip2=1.0.6-8ubuntu0.2
-    - ca-certificates=20190110~16.04.1
+    - ca-certificates=20201027ubuntu0.16.04.1
     - coreutils=8.25-2ubuntu3~16.04
     - cpp-5=5.4.0-6ubuntu1~16.04.12
     - cpp=4:5.3.1-1ubuntu1
@@ -1784,7 +1415,7 @@ parts:
     - libgomp1=5.4.0-6ubuntu1~16.04.12
     - libgpg-error-dev=1.21-2ubuntu1
     - libgpg-error0=1.21-2ubuntu1
-    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.1
+    - libgssapi-krb5-2=1.13.2+dfsg-5ubuntu2.2
     - libgssapi3-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
     - libgudev-1.0-0=1:230-2
     - libgudev-1.0-dev=1:230-2
@@ -1810,13 +1441,13 @@ parts:
     - libitm1=5.4.0-6ubuntu1~16.04.12
     - libiw-dev=30~pre9-8ubuntu1
     - libiw30=30~pre9-8ubuntu1
-    - libk5crypto3=1.13.2+dfsg-5ubuntu2.1
+    - libk5crypto3=1.13.2+dfsg-5ubuntu2.2
     - libkeyutils1=1.5.9-8ubuntu1
     - libkmod2=22-1ubuntu5.2
     - libkrb5-26-heimdal=1.7~git20150920+dfsg-4ubuntu1.16.04.1
-    - libkrb5-3=1.13.2+dfsg-5ubuntu2.1
-    - libkrb5support0=1.13.2+dfsg-5ubuntu2.1
-    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.9
+    - libkrb5-3=1.13.2+dfsg-5ubuntu2.2
+    - libkrb5support0=1.13.2+dfsg-5ubuntu2.2
+    - libldap-2.4-2=2.4.42+dfsg-2ubuntu3.11
     - liblockfile-bin=1.09-6ubuntu1
     - liblockfile1=1.09-6ubuntu1
     - liblsan0=5.4.0-6ubuntu1~16.04.12
@@ -1857,25 +1488,25 @@ parts:
     - libnss3=2:3.28.4-0ubuntu0.16.04.14
     - libp11-kit-dev=0.23.2-5~ubuntu16.04.1
     - libp11-kit0=0.23.2-5~ubuntu16.04.1
-    - libpam-modules-bin=1.1.8-3.2ubuntu2.1
-    - libpam-modules=1.1.8-3.2ubuntu2.1
-    - libpam-runtime=1.1.8-3.2ubuntu2.1
-    - libpam0g=1.1.8-3.2ubuntu2.1
+    - libpam-modules-bin=1.1.8-3.2ubuntu2.3
+    - libpam-modules=1.1.8-3.2ubuntu2.3
+    - libpam-runtime=1.1.8-3.2ubuntu2.3
+    - libpam0g=1.1.8-3.2ubuntu2.3
     - libpcre16-3=2:8.38-3.1
     - libpcre3-dev=2:8.38-3.1
     - libpcre32-3=2:8.38-3.1
     - libpcre3=2:8.38-3.1
     - libpcrecpp0v5=2:8.38-3.1
-    - libperl5.22=5.22.1-9ubuntu0.6
+    - libperl5.22=5.22.1-9ubuntu0.9
     - libpng12-0=1.2.54-1ubuntu1.1
     - libpng12-dev=1.2.54-1ubuntu1.1
     - libprocps4=2:3.3.10-4ubuntu2.5
     - libpython-stdlib=2.7.12-1~16.04
-    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.12
+    - libpython2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.13
     - libpython3-stdlib=3.5.1-3
-    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.11
+    - libpython3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - libpython3.5-stdlib=3.5.2-2ubuntu0~16.04.12
     - libquadmath0=5.4.0-6ubuntu1~16.04.12
     - libreadline-dev=6.3-8ubuntu2
     - libreadline6-dev=6.3-8ubuntu2
@@ -1896,11 +1527,11 @@ parts:
     - libsp1c2=1.3.4-1.2.1-49ubuntu1
     - libsqlite3-0=3.11.0-1ubuntu1.5
     - libss2=1.42.13-1ubuntu1.2
-    - libssl1.0.0=1.0.2g-1ubuntu4.16
+    - libssl1.0.0=1.0.2g-1ubuntu4.17
     - libstdc++-5-dev=5.4.0-6ubuntu1~16.04.12
     - libstdc++6=5.4.0-6ubuntu1~16.04.12
-    - libsystemd-dev=229-4ubuntu21.28
-    - libsystemd0=229-4ubuntu21.28
+    - libsystemd-dev=229-4ubuntu21.29
+    - libsystemd0=229-4ubuntu21.29
     - libtasn1-6-dev=4.7-3ubuntu0.16.04.3
     - libtasn1-6=4.7-3ubuntu0.16.04.3
     - libtimedate-perl=2.3000-2
@@ -1909,8 +1540,8 @@ parts:
     - libtool=2.4.6-0.1
     - libtsan0=5.4.0-6ubuntu1~16.04.12
     - libubsan0=5.4.0-6ubuntu1~16.04.12
-    - libudev-dev=229-4ubuntu21.28
-    - libudev1=229-4ubuntu21.28
+    - libudev-dev=229-4ubuntu21.29
+    - libudev1=229-4ubuntu21.29
     - libunistring0=0.9.3-5.2ubuntu1
     - liburi-perl=1.71-1
     - libusb-0.1-4=2:0.1.12-28
@@ -1924,7 +1555,7 @@ parts:
     - libxml2=2.9.3+dfsg1-1ubuntu0.7
     - libxslt1.1=1.1.28-2.1ubuntu0.3
     - libxtables11=1.6.0-2ubuntu3
-    - linux-libc-dev=4.4.0-189.219
+    - linux-libc-dev=4.4.0-194.226
     - lockfile-progs=0.1.17
     - login=1:4.2-3.1ubuntu5.4
     - lsb-base=9.20160110ubuntu0.2
@@ -1941,13 +1572,13 @@ parts:
     - netbase=5.3
     - nettle-dev=3.2-1ubuntu0.16.04.1
     - openssh-client=1:7.2p2-4ubuntu2.10
-    - openssl=1.0.2g-1ubuntu4.16
+    - openssl=1.0.2g-1ubuntu4.17
     - optipng=0.7.6-1ubuntu0.16.04.1
     - passwd=1:4.2-3.1ubuntu5.4
     - patch=2.7.5-1ubuntu0.16.04.2
-    - perl-base=5.22.1-9ubuntu0.6
-    - perl-modules-5.22=5.22.1-9ubuntu0.6
-    - perl=5.22.1-9ubuntu0.6
+    - perl-base=5.22.1-9ubuntu0.9
+    - perl-modules-5.22=5.22.1-9ubuntu0.9
+    - perl=5.22.1-9ubuntu0.9
     - pkg-config=0.29.1-0ubuntu1
     - pkg-create-dbgsym=0.72
     - pkgbinarymangler=129
@@ -1959,11 +1590,11 @@ parts:
     - python-mako=1.0.3+ds1-1ubuntu1
     - python-markupsafe=0.23-2build2
     - python-minimal=2.7.12-1~16.04
-    - python2.7-minimal=2.7.12-1ubuntu0~16.04.12
-    - python2.7=2.7.12-1ubuntu0~16.04.12
+    - python2.7-minimal=2.7.12-1ubuntu0~16.04.13
+    - python2.7=2.7.12-1ubuntu0~16.04.13
     - python3-minimal=3.5.1-3
-    - python3.5-minimal=3.5.2-2ubuntu0~16.04.11
-    - python3.5=3.5.2-2ubuntu0~16.04.11
+    - python3.5-minimal=3.5.2-2ubuntu0~16.04.12
+    - python3.5=3.5.2-2ubuntu0~16.04.12
     - python3=3.5.1-3
     - python=2.7.12-1~16.04
     - readline-common=6.3-8ubuntu2
@@ -1971,20 +1602,20 @@ parts:
     - sensible-utils=0.0.9ubuntu0.16.04.1
     - sgml-base=1.26+nmu4ubuntu1
     - sgml-data=2.0.10
-    - snapd=2.45.1ubuntu0.2
+    - snapd=2.47.1
     - socat=1.7.3.1-1
     - sp=1.3.4-1.2.1-49ubuntu1
     - squashfs-tools=1:4.3-3ubuntu2.16.04.3
     - squashfuse=0.1.100-0ubuntu1~ubuntu16.04.1
     - sudo=1.8.16-0ubuntu1.9
-    - systemd-sysv=229-4ubuntu21.28
-    - systemd=229-4ubuntu21.28
+    - systemd-sysv=229-4ubuntu21.29
+    - systemd=229-4ubuntu21.29
     - sysv-rc=2.88dsf-59.3ubuntu2
     - sysvinit-utils=2.88dsf-59.3ubuntu2
     - tar=1.28-2.1ubuntu0.1
-    - tzdata=2020a-0ubuntu0.16.04
+    - tzdata=2020d-0ubuntu0.16.04
     - ubuntu-keyring=2012.05.19.1
-    - udev=229-4ubuntu21.28
+    - udev=229-4ubuntu21.29
     - util-linux=2.27.1-6ubuntu3.10
     - uuid-dev=2.27.1-6ubuntu3.10
     - xml-core=0.13+nmu2
@@ -1993,21 +1624,21 @@ parts:
     - zlib1g-dev=1:1.2.8.dfsg-2ubuntu4.3
     - zlib1g=1:1.2.8.dfsg-2ubuntu4.3
     installed-snaps:
-    - core18=1885
-    - core=9804
-    - snapcraft=5407
-    - snapd=8790
+    - core18=1932
+    - core=10185
+    - snapcraft=5756
+    - snapd=9721
     plugin: dump
     prime: []
     source: snap-common
     stage: []
     stage-packages: []
-    uname: 'Linux 4.15.0-112-generic #113-Ubuntu SMP Thu Jul 9 23:41:39 UTC 2020 x86_64
+    uname: 'Linux 4.15.0-124-generic #127-Ubuntu SMP Fri Nov 6 10:54:43 UTC 2020 x86_64
       x86_64 x86_64 GNU/Linux'
 architectures:
 - amd64
 image-info:
-  build_url: https://launchpad.net/~snappy-hwe-team/+snap/ci-network-manager-15ubxw2erlyzyai4/+build/1103048
+  build_url: https://launchpad.net/~snappy-hwe-team/+snap/ci-network-manager-w1n3ihi46bm1yqom/+build/1193982
 build-packages:
 - autoconf-archive=20150925-1
 - autoconf=2.69-9
@@ -2112,20 +1743,20 @@ build-packages:
 - libpcrecpp0v5=2:8.38-3.1
 - libpng12-dev=1.2.54-1ubuntu1.1
 - libpython-stdlib=2.7.12-1~16.04
-- libpython2.7-minimal=2.7.12-1ubuntu0~16.04.12
-- libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.12
+- libpython2.7-minimal=2.7.12-1ubuntu0~16.04.13
+- libpython2.7-stdlib=2.7.12-1ubuntu0~16.04.13
 - libreadline-dev=6.3-8ubuntu2
 - libreadline6-dev=6.3-8ubuntu2
 - libsigsegv2=2.10-4
 - libslang2-dev=2.3.0-2ubuntu1.1
 - libslang2=2.3.0-2ubuntu1.1
 - libsp1c2=1.3.4-1.2.1-49ubuntu1
-- libsystemd-dev=229-4ubuntu21.28
+- libsystemd-dev=229-4ubuntu21.29
 - libtasn1-6-dev=4.7-3ubuntu0.16.04.3
 - libtimedate-perl=2.3000-2
 - libtinfo-dev=6.0+20160213-1ubuntu1
 - libtool=2.4.6-0.1
-- libudev-dev=229-4ubuntu21.28
+- libudev-dev=229-4ubuntu21.29
 - libunistring0=0.9.3-5.2ubuntu1
 - liburi-perl=1.71-1
 - libwww-perl=6.15-1
@@ -2145,8 +1776,8 @@ build-packages:
 - python-mako=1.0.3+ds1-1ubuntu1
 - python-markupsafe=0.23-2build2
 - python-minimal=2.7.12-1~16.04
-- python2.7-minimal=2.7.12-1ubuntu0~16.04.12
-- python2.7=2.7.12-1ubuntu0~16.04.12
+- python2.7-minimal=2.7.12-1ubuntu0~16.04.13
+- python2.7=2.7.12-1ubuntu0~16.04.13
 - python=2.7.12-1~16.04
 - sgml-base=1.26+nmu4ubuntu1
 - sgml-data=2.0.10
@@ -2156,7 +1787,7 @@ build-packages:
 - xsltproc=1.1.28-2.1ubuntu0.3
 - zlib1g-dev=1:1.2.8.dfsg-2ubuntu4.3
 build-snaps:
-- core=9804
+- core=10185
 primed-stage-packages:
 - inotify-tools=3.14-1ubuntu1
 - iputils-arping=3:20121221-5ubuntu2
