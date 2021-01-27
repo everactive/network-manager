@@ -111,7 +111,7 @@ parts:
     plugin: make
     source: https://git.launchpad.net/ubuntu/+source/dnsmasq
     source-type: git
-    source-branch: applied/ubuntu/focal
+    source-branch: applied/ubuntu/focal-updates
     build-packages:
       - build-essential
     make-parameters:
@@ -218,7 +218,7 @@ parts:
       - --disable-ovs
       - --without-nm-cloud-setup
       # Set explicitly CFLAGS until lp: #1791946 is solved
-      - CFLAGS=-O2
+      - CFLAGS="-O2 -g"
     # Generated netplan patch from https://github.com/slyon/NetworkManager/tree/netplan-on-1.22.10
     # git format-patch 1.22.10 --full-index --binary --stdout > ../0002-nm-netplan.patch -- !(.gitignore)
     override-build: |
