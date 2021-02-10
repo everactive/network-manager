@@ -66,6 +66,12 @@ apps:
             hardware-observe, network-setup-control, login-session-observe,
             network-observe]
 
+  dnsmasq-service:
+    command: dnsmasq_start $SNAP $SNAP_COMMON
+    daemon: simple
+    restart-condition: always
+    plugs: [network, network-bind]
+
 parts:
   networkmanager-common:
     plugin: dump
@@ -126,6 +132,12 @@ parts:
         - sbin/dnsmasq
     prime:
       - $binaries
+
+  everactive-scripts:
+    plugin: dump
+    source: scripts/
+    prime:
+      - dnsmasq_start
 
   networkmanager:
     after: [ stack-snaps-tools ]
@@ -366,3 +378,11 @@ parts:
       - $docs
       - $libs
       - $unwanted
+
+  everactive-conf:
+    after: [ networkmanager ]
+    plugin: dump
+    source: conf
+    organize:
+      00-everactive.conf: etc/dnsmasq.d/
+      EveractiveAccess.nmconnection: etc/NetworkManager/system-connections/EveractiveAccess.nmconnection

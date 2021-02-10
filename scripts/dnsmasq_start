@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SNAP_BASE_LOCATION=$1
+SNAP_COMMON=$2
+
+
+#$SNAP_BASE_LOCATION/usr/bin/nmcli con add con-name "EveractiveAccess" ifname eth1 type ethernet ip4 192.168.15.1/24 gw4 192.168.15.1
+#$SNAP_BASE_LOCATION/usr/bin/nmcli con mod "EveractiveAccess" connection.autoconnect true
+
+$SNAP_BASE_LOCATION/sbin/dnsmasq --conf-dir=$SNAP_BASE_LOCATION/etc/dnsmasq.d,*.conf --pid-file=$SNAP_COMMON/dnsmasq.pid --dhcp-leasefile=$SNAP_COMMON/dnsmasq.leases

@@ -18,6 +18,17 @@
 # 1. Set properties defaults on installation, so users can see them
 # 2. Re-start daemon if a property has changed
 
+### Everactive start
+SOURCE_CONNECTION_LOCATION="$SNAP/etc/NetworkManager/system-connections"
+CONNECTION_CFG="EveractiveAccess.nmconnection"
+DEST_CONNECTION_LOCATION="$SNAP_DATA/conf/system-connections"
+
+if [ ! -f $DEST_CONNECTION_LOCATION/$CONNECTION_CFG ]; then
+    cp $SOURCE_CONNECTION_LOCATION/$CONNECTION_CFG $DEST_CONNECTION_LOCATION/$CONNECTION_CFG
+fi
+
+### Everactive complete
+
 . "$SNAP"/bin/snap-prop.sh
 
 props_file="$SNAP_DATA"/current_snap_props
